@@ -16,7 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import org.jetbrains.codeviewer.ui.statusbar.StatusBar
+import ru.nsu_null.npide.ui.statusbar.StatusBar
 import ru.nsu_null.npide.ui.editor.EditorEmptyView
 import ru.nsu_null.npide.ui.editor.EditorTabsView
 import ru.nsu_null.npide.ui.editor.EditorView

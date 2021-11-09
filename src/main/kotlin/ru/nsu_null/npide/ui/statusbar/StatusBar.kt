@@ -1,4 +1,4 @@
-package org.jetbrains.codeviewer.ui.statusbar
+package ru.nsu_null.npide.ui.statusbar
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.*
 import ru.nsu_null.npide.ui.common.Settings
