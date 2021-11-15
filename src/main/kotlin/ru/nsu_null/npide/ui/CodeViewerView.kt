@@ -60,7 +60,7 @@ fun CodeViewerView(model: CodeViewer) {
                     Box(Modifier.weight(1f)) {
                         EditorView(model.editors.active!!, model.settings)
                     }
-                    StatusBar(model.settings)
+                    StatusBar(model.settings, model.editors)
                 }
             } else {
                 EditorEmptyView()

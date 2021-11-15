@@ -9,21 +9,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.*
 import ru.nsu_null.npide.ui.common.Settings
+import ru.nsu_null.npide.ui.editor.Editors
+import ru.nsu_null.npide.ui.statusbar.ButtonUsage
 
 private val MinFontSize = 6.sp
 private val MaxFontSize = 40.sp
 
 @Composable
-fun StatusBar(settings: Settings) = Box(
+fun StatusBar(settings: Settings, editors: Editors) = Box(
     Modifier
         .height(32.dp)
         .fillMaxWidth()
         .padding(4.dp)
 ) {
-
     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
 
-        Button(onClick = { }, contentPadding = PaddingValues(), modifier = Modifier.align(Alignment.CenterVertically)) {
+        Button(onClick = {var buttonUsage = ButtonUsage(editors)
+            buttonUsage.usage()}, contentPadding = PaddingValues(), modifier = Modifier.align(Alignment.CenterVertically)) {
             Text(
                 text = "Compile",
                 color = LocalContentColor.current.copy(alpha = 0.60f),

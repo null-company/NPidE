@@ -17,6 +17,8 @@ import java.nio.charset.StandardCharsets
 
 interface File {
     val name: String
+    val filepath: String
+    val parentpath: String
     val isDirectory: Boolean
     val children: List<File>
     val hasChildren: Boolean
@@ -28,6 +30,11 @@ val HomeFolder: File get() = java.io.File(System.getProperty("user.home")).toPro
 
 fun java.io.File.toProjectFile(): File = object : File {
     override val name: String get() = this@toProjectFile.name
+
+    override val filepath: String get() = this@toProjectFile.absolutePath
+
+    override val parentpath: String get() = this@toProjectFile.parent
+
 
     override val isDirectory: Boolean get() = this@toProjectFile.isDirectory
 
