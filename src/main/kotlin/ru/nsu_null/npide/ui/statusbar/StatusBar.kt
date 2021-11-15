@@ -24,8 +24,7 @@ fun StatusBar(settings: Settings, editors: Editors) = Box(
 ) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
 
-        Button(onClick = {var buttonUsage = ButtonUsage(editors)
-            buttonUsage.usage()}, contentPadding = PaddingValues(), modifier = Modifier.align(Alignment.CenterVertically)) {
+        Button(onClick = ButtonUsage(editors)::usage, contentPadding = PaddingValues(), modifier = Modifier.align(Alignment.CenterVertically)) {
             Text(
                 text = "Compile",
                 color = LocalContentColor.current.copy(alpha = 0.60f),
