@@ -2,6 +2,7 @@ package ru.nsu_null.npide.ui.editor
 
 import androidx.compose.runtime.mutableStateListOf
 import ru.nsu_null.npide.platform.File
+import ru.nsu_null.npide.ui.statusbar.ButtonUsage
 import ru.nsu_null.npide.util.SingleSelection
 
 class Editors {
@@ -12,8 +13,11 @@ class Editors {
 
     val active: Editor? get() = selection.selected as Editor?
 
+    lateinit var openedFile: File
+
     fun open(file: File) {
         val editor = Editor(file)
+        openedFile = file
         editor.selection = selection
         editor.close = {
             close(editor)
