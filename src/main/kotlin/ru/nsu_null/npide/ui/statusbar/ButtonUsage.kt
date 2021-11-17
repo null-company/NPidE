@@ -19,25 +19,29 @@ class ButtonUsage(private val editors: Editors) {
     }
 
     fun usage() {
-        if(fileExt(editors.openedFile.name) == "c") {
-            runCommand("gcc", editors.openedFile.filepath, "-o", editors.openedFile.parentpath + "/out.out")
-            try {
-                runCommand(editors.openedFile.parentpath + "/out.out")
-            } catch (e: IOException) {
-                // usually for the case of compilation failure
-                e.printStackTrace()
+        when(fileExt(editors.openedFile.name)) {
+            "c" -> {
+                runCommand("gcc", editors.openedFile.filepath, "-o", editors.openedFile.parentpath + "/out.out")
+                try {
+                    runCommand(editors.openedFile.parentpath + "/out.out")
+                } catch (e: IOException) {
+                    // usually for the case of compilation failure
+                    e.printStackTrace()
+                }
             }
-        }else if(fileExt(editors.openedFile.name) == "asm"){
-            val new_filename:String = editors.openedFile.filepath.substringBeforeLast('.') + ".obj"
-            runCommand("python",editors.openedFile.parentpath + "/cocas.py", editors.openedFile.filepath, "-l")
-            runCommand("mv", editors.openedFile.filepath, new_filename)
-            try{
-                runCommand("python",editors.openedFile.parentpath + "/cocol.py", new_filename, "-l")
-            }catch (e: IOException) {
-                e.printStackTrace()
+            "asm" -> {
+                val newFilename:String = editors.openedFile.filepath.substringBeforeLast('.') + ".obj"
+                runCommand("python", editors.openedFile.parentpath + "/cocas.py", editors.openedFile.filepath, "-l")
+                runCommand("mv", editors.openedFile.filepath, newFilename)
+                try {
+                    runCommand("python", editors.openedFile.parentpath + "/cocol.py", newFilename, "-l")
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
             }
-        }else {
-            println("It's not c or asm file")
+            else -> {
+                println("It's not c or asm file")
+            }
         }
     }
 }
