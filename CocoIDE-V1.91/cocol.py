@@ -15,6 +15,7 @@ except:
 TITLE = "Cocol Linker GUI V2.0"
 import argparse
 import sys
+"""
 try:
     # Python 3 tk
     import tkinter as tk
@@ -33,7 +34,7 @@ except:
     import tkMessageBox as messagebox
     import ScrolledText as sctx
     import tkFont as font
-
+"""
 
 
 
@@ -45,7 +46,7 @@ xtrns={}
 objfiles=[]
 errormsg=""
 term=False
-
+"""
 class CocoLink(tk.Tk):
     def __init__(self, master=None, name="cocol", exitroot=False, sym=True):
         self.master=master
@@ -142,7 +143,7 @@ class CocoLink(tk.Tk):
         self.mainWin.destroy()
         if __name__ == "__main__":
             self.master.destroy()
-
+"""
 
 
 #Functions
@@ -199,7 +200,6 @@ def deploy(name,addr):
                 IMG[k]=d
                 k+=1
         return
-
 
 
 def link(objectfiles=[] , termp=False):
@@ -534,12 +534,14 @@ if __name__ == "__main__":
     if args.objfile:
         link(args.objfile, termp=True)
     else:
+        raise ValueError('object file is missing')
+        """
         args.lst=True
         #args.sym=True
         root= tk.Tk()
         root.withdraw()
         cocolGUI = CocoLink(master=root, name="cocol", exitroot=True)
         root.mainloop()
-
+        """
 
 
