@@ -1,4 +1,4 @@
-package ru.nsu_null.npide.ru.nsu_null.npide.platform
+package ru.nsu_null.npide.platform
 
 import androidx.compose.desktop.DesktopMaterialTheme
 import androidx.compose.runtime.Composable

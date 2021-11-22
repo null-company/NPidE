@@ -1,4 +1,4 @@
-package ru.nsu_null.npide.ru.nsu_null.npide.platform
+package ru.nsu_null.npide.platform
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState

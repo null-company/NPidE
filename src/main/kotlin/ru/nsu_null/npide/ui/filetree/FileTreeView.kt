@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ru.nsu_null.npide.ru.nsu_null.npide.platform.VerticalScrollbar
+import ru.nsu_null.npide.platform.VerticalScrollbar
 import ru.nsu_null.npide.util.withoutWidthConstraints
 
 @Composable
