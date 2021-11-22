@@ -23,7 +23,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import ru.nsu_null.npide.ru.nsu_null.npide.platform.VerticalScrollbar
+import ru.nsu_null.npide.platform.VerticalScrollbar
 import ru.nsu_null.npide.ui.common.AppTheme
 import ru.nsu_null.npide.ui.common.Fonts
 import ru.nsu_null.npide.ui.common.Settings

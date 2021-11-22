@@ -4,7 +4,7 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import ru.nsu_null.npide.platform.HomeFolder
-import ru.nsu_null.npide.ru.nsu_null.npide.platform.PlatformTheme
+import ru.nsu_null.npide.platform.PlatformTheme
 import ru.nsu_null.npide.ui.CodeViewer
 import ru.nsu_null.npide.ui.CodeViewerView
 import ru.nsu_null.npide.ui.common.AppTheme
