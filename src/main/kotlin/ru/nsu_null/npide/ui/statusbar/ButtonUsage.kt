@@ -22,10 +22,10 @@ class ButtonUsage(private val editors: Editors) {
     fun usageCompile() {
         when(fileExt(editors.openedFile.name)) {
             "c" -> {
-                runCommand("gcc", editors.openedFile.filepath, "-o", editors.openedFile.parentpath + "/out.out")
+                runCommand("gcc", editors.openedFile.filepath, "-o", editors.openedFile.parentPath + "/out.out")
             }
             "asm" -> {
-                runCommand("python", editors.openedFile.parentpath + "/cocas.py", editors.openedFile.filepath, "-l")
+                runCommand("python", editors.openedFile.parentPath + "/cocas.py", editors.openedFile.filepath, "-l")
             }
             else -> {
             println("It's not c or asm file")
@@ -36,7 +36,7 @@ class ButtonUsage(private val editors: Editors) {
             "c" -> {
                 usageCompile()
                 try {
-                    runCommand(editors.openedFile.parentpath + "/out.out")
+                    runCommand(editors.openedFile.parentPath + "/out.out")
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
@@ -46,9 +46,9 @@ class ButtonUsage(private val editors: Editors) {
                 var new_filename: String = editors.openedFile.filepath.substringBeforeLast('.') + ".obj"
                 usageCompile()
                 try {
-                    runCommand("python", editors.openedFile.parentpath + "/cocol.py", new_filename)
+                    runCommand("python", editors.openedFile.parentPath + "/cocol.py", new_filename)
                     new_filename = editors.openedFile.filepath.substringBeforeLast('.') + ".img"
-                    runCommand("python", editors.openedFile.parentpath + "/cdm8_emu_main.py", new_filename)
+                    runCommand("python", editors.openedFile.parentPath + "/cdm8_emu_main.py", new_filename)
 
                 } catch (e: IOException) {
                     e.printStackTrace()

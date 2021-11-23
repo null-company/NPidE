@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets
 interface File {
     val name: String
     val filepath: String
-    val parentpath: String
+    val parentPath: String
     val isDirectory: Boolean
     val children: List<File>
     val hasChildren: Boolean
@@ -33,7 +33,7 @@ fun java.io.File.toProjectFile(): File = object : File {
 
     override val filepath: String get() = this@toProjectFile.absolutePath
 
-    override val parentpath: String get() = this@toProjectFile.parent
+    override val parentPath: String get() = this@toProjectFile.parent
 
 
     override val isDirectory: Boolean get() = this@toProjectFile.isDirectory
