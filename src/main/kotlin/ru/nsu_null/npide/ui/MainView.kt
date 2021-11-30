@@ -1,3 +1,4 @@
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -11,12 +12,13 @@ import ru.nsu_null.npide.ui.common.AppTheme
 import ru.nsu_null.npide.ui.common.Settings
 import ru.nsu_null.npide.ui.editor.Editors
 import ru.nsu_null.npide.ui.filetree.FileTree
+import ru.nsu_null.npide.ui.menubar.configureMenuBar
 
+@ExperimentalFoundationApi
 @Composable
 fun MainView() {
     val codeViewer = remember {
         val editors = Editors()
-
         CodeViewer(
             editors = editors,
             fileTree = FileTree(HomeFolder, editors),
