@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.*
+import kotlinx.coroutines.Dispatchers
 import ru.nsu_null.npide.ui.common.Settings
 import ru.nsu_null.npide.ui.editor.Editors
 import ru.nsu_null.npide.ui.statusbar.ButtonUsage
@@ -24,16 +25,31 @@ fun StatusBar(settings: Settings, editors: Editors) = Box(
 ) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
 
-        Button(onClick = ButtonUsage(editors)::usageCompile, contentPadding = PaddingValues(), modifier = Modifier.align(Alignment.CenterVertically)) {
+        Button(onClick = ButtonUsage(editors)::usageCompile,
+            contentPadding = PaddingValues(),
+            modifier = Modifier.align(Alignment.CenterVertically)) {
             Text(
                 text = "Compile",
                 color = LocalContentColor.current.copy(alpha = 0.60f),
                 fontSize = 12.sp
             )
         }
-        Button(onClick = ButtonUsage(editors)::usageRun, contentPadding = PaddingValues(), modifier = Modifier.align(Alignment.CenterVertically)) {
+
+        Button(onClick = ButtonUsage(editors)::usageRun,
+            contentPadding = PaddingValues(),
+            modifier = Modifier.align(Alignment.CenterVertically)) {
             Text(
                 text = "Run",
+                color = LocalContentColor.current.copy(alpha = 0.60f),
+                fontSize = 12.sp
+            )
+        }
+
+        Button(onClick = { editors.active!!.writeContents(editors.active!!.content) } ,
+            contentPadding = PaddingValues(),
+            modifier = Modifier.align(Alignment.CenterVertically)) {
+            Text(
+                text = "Save",
                 color = LocalContentColor.current.copy(alpha = 0.60f),
                 fontSize = 12.sp
             )
