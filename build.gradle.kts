@@ -19,6 +19,7 @@ repositories {
 dependencies {
     implementation(compose.desktop.currentOs)
     api(compose.materialIconsExtended)
+    implementation("com.fifesoft:rsyntaxtextarea:3.1.3")
 }
 
 tasks.withType<KotlinCompile>() {

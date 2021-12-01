@@ -6,29 +6,33 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants
+import org.fife.ui.rtextarea.RTextScrollPane
 import ru.nsu_null.npide.platform.VerticalScrollbar
 import ru.nsu_null.npide.ui.common.AppTheme
 import ru.nsu_null.npide.ui.common.Fonts
 import ru.nsu_null.npide.ui.common.Settings
 import ru.nsu_null.npide.util.loadableScoped
 import ru.nsu_null.npide.util.withoutWidthConstraints
+import java.awt.Color
+import javax.swing.BoxLayout
+import javax.swing.JPanel
 import kotlin.text.Regex.Companion.fromLiteral
 
 @Composable
@@ -39,11 +43,11 @@ fun EditorView(model: Editor, settings: Settings) = key(model) {
                 Modifier.fillMaxSize(),
                 color = AppTheme.colors.backgroundDark,
             ) {
-                val lines by loadableScoped(model.lines)
+                val fileContents by loadableScoped(model.fileContents)
 
-                if (lines != null) {
+                if (fileContents != null) {
                     Box {
-                        Lines(lines!!, settings)
+                        CodeEditor(fileContents!!, Modifier.fillMaxSize())
                         Box(
                             Modifier
                                 .offset(
@@ -65,85 +69,46 @@ fun EditorView(model: Editor, settings: Settings) = key(model) {
         }
     }
 }
+var rtCodeEditor: RTextScrollPane? = null
 
 @Composable
-private fun Lines(lines: Editor.Lines, settings: Settings) = with(LocalDensity.current) {
-    val maxNum = remember(lines.lineNumberDigitCount) {
-        (1..lines.lineNumberDigitCount).joinToString(separator = "") { "9" }
+fun CodeEditor(code: MutableState<String>, modifier: Modifier = Modifier) {
+    if (rtCodeEditor == null) {
+        // create the scrollpane only once. Otherwise when text area value is
+        // changed, the compose function is called from addCaretListener,
+        // and a new code editor is created, with invalid caret position.
+        val textArea = RSyntaxTextArea(20, 60)
+        textArea.syntaxEditingStyle = SyntaxConstants.SYNTAX_STYLE_JAVA
+        textArea.isCodeFoldingEnabled = true
+        textArea.antiAliasingEnabled = true
+        textArea.background = Color.DARK_GRAY
+        textArea.foreground = Color.WHITE
+        textArea.caretColor = Color.BLACK
+        textArea.selectionColor = Color.PINK
+        textArea.currentLineHighlightColor = Color.LIGHT_GRAY
+        val i = textArea.getParser(0)
+
+        val sp = RTextScrollPane(textArea)
+        sp.textArea.text = code.value
+        sp.textArea.addCaretListener { code.value = sp.textArea.text }
+
+        rtCodeEditor = sp
     }
 
-    Box(Modifier.fillMaxSize()) {
-        val scrollState = rememberLazyListState()
-        val lineHeight = settings.fontSize.toDp() * 1.6f
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = scrollState
-        ) {
-            items(lines.size) { index ->
-                Box(Modifier.height(lineHeight)) {
-                    Line(Modifier.align(Alignment.CenterStart), maxNum, lines[index], settings)
+    Box(modifier = modifier) {
+        SwingPanel(
+            background = androidx.compose.ui.graphics.Color.White,
+            factory = {
+                JPanel().apply {
+                    layout = BoxLayout(this, BoxLayout.Y_AXIS)
+                    add(rtCodeEditor)
                 }
             }
-        }
-
-        VerticalScrollbar(
-            Modifier.align(Alignment.CenterEnd),
-            scrollState,
-            lines.size,
-            lineHeight
         )
     }
 }
 
-// Поддержка русского языка
-// دعم اللغة العربية
-// 中文支持
-@Composable
-private fun Line(modifier: Modifier, maxNum: String, line: Editor.Line, settings: Settings) {
-    Row(modifier = modifier) {
-        DisableSelection {
-            Box {
-                LineNumber(maxNum, Modifier.alpha(0f), settings)
-                LineNumber(line.number.toString(), Modifier.align(Alignment.CenterEnd), settings)
-            }
-        }
-        LineContent(
-            line.content,
-            modifier = Modifier
-                .weight(1f)
-                .withoutWidthConstraints()
-                .padding(start = 28.dp, end = 12.dp),
-            settings = settings
-        )
-    }
-}
 
-@Composable
-private fun LineNumber(number: String, modifier: Modifier, settings: Settings) = Text(
-    text = number,
-    fontSize = settings.fontSize,
-    fontFamily = Fonts.jetbrainsMono(),
-    color = LocalContentColor.current.copy(alpha = 0.30f),
-    modifier = modifier.padding(start = 12.dp)
-)
-
-@Composable
-private fun LineContent(content: Editor.Content, modifier: Modifier, settings: Settings) = Text(
-    text = if (content.isCode) {
-        codeString(content.value.value)
-    } else {
-        buildAnnotatedString {
-            withStyle(AppTheme.code.simple) {
-                append(content.value.value)
-            }
-        }
-    },
-    fontSize = settings.fontSize,
-    fontFamily = Fonts.jetbrainsMono(),
-    modifier = modifier,
-    softWrap = false
-)
 
 private fun codeString(str: String) = buildAnnotatedString {
     withStyle(AppTheme.code.simple) {
