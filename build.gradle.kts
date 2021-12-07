@@ -21,6 +21,7 @@ dependencies {
     implementation("org.antlr:antlr4:4.9")
     api(compose.materialIconsExtended)
     implementation("com.google.code.gson:gson:2.8.9")
+    implementation("com.fifesoft:rsyntaxtextarea:3.1.3")
 }
 
 tasks.withType<KotlinCompile>() {

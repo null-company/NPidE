@@ -1,43 +1,78 @@
 package org.jetbrains.codeviewer.ui.statusbar
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.Slider
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.*
+import kotlinx.coroutines.Dispatchers
 import ru.nsu_null.npide.ui.common.Settings
+import ru.nsu_null.npide.ui.editor.Editors
+import ru.nsu_null.npide.ui.statusbar.ButtonUsage
 
 private val MinFontSize = 6.sp
 private val MaxFontSize = 40.sp
 
 @Composable
-fun StatusBar(settings: Settings) = Box(
+fun StatusBar(settings: Settings, editors: Editors) = Box(
     Modifier
         .height(32.dp)
         .fillMaxWidth()
         .padding(4.dp)
 ) {
-    Row(Modifier.fillMaxHeight().align(Alignment.CenterEnd)) {
-        Text(
-            text = "Text size",
-            modifier = Modifier.align(Alignment.CenterVertically),
-            color = LocalContentColor.current.copy(alpha = 0.60f),
-            fontSize = 12.sp
-        )
+    Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
 
-        Spacer(Modifier.width(8.dp))
-
-        CompositionLocalProvider(LocalDensity provides LocalDensity.current.scale(0.5f)) {
-            Slider(
-                (settings.fontSize - MinFontSize) / (MaxFontSize - MinFontSize),
-                onValueChange = { settings.fontSize = lerp(MinFontSize, MaxFontSize, it) },
-                modifier = Modifier.width(240.dp).align(Alignment.CenterVertically)
+        Button(onClick = ButtonUsage(editors)::usageCompile,
+            contentPadding = PaddingValues(),
+            modifier = Modifier.align(Alignment.CenterVertically)) {
+            Text(
+                text = "Compile",
+                color = LocalContentColor.current.copy(alpha = 0.60f),
+                fontSize = 12.sp
             )
+        }
+
+        Button(onClick = ButtonUsage(editors)::usageRun,
+            contentPadding = PaddingValues(),
+            modifier = Modifier.align(Alignment.CenterVertically)) {
+            Text(
+                text = "Run",
+                color = LocalContentColor.current.copy(alpha = 0.60f),
+                fontSize = 12.sp
+            )
+        }
+
+        Button(onClick = { editors.active!!.writeContents(editors.active!!.content) } ,
+            contentPadding = PaddingValues(),
+            modifier = Modifier.align(Alignment.CenterVertically)) {
+            Text(
+                text = "Save",
+                color = LocalContentColor.current.copy(alpha = 0.60f),
+                fontSize = 12.sp
+            )
+        }
+
+        Row {
+            Text(
+                text = "Text size",
+                modifier = Modifier.align(Alignment.CenterVertically),
+                color = LocalContentColor.current.copy(alpha = 0.60f),
+                fontSize = 12.sp
+            )
+
+            Spacer(Modifier.width(8.dp))
+
+
+            CompositionLocalProvider(LocalDensity provides LocalDensity.current.scale(0.5f)) {
+                Slider(
+                    (settings.fontSize - MinFontSize) / (MaxFontSize - MinFontSize),
+                    onValueChange = { settings.fontSize = lerp(MinFontSize, MaxFontSize, it) },
+                    modifier = Modifier.width(240.dp).align(Alignment.CenterVertically)
+                )
+            }
         }
     }
 }

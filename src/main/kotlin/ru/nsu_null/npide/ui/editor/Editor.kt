@@ -1,18 +1,40 @@
 package ru.nsu_null.npide.ui.editor
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants
+import org.fife.ui.rtextarea.RTextScrollPane
 import ru.nsu_null.npide.platform.File
-import ru.nsu_null.npide.util.EmptyTextLines
 import ru.nsu_null.npide.util.SingleSelection
+import java.awt.Color
 
 class Editor(
     val fileName: String,
-    val lines: (backgroundScope: CoroutineScope) -> Lines,
+    val readContents: (backgroundScope: CoroutineScope) -> String,
+    val writeContents: (content: String) -> Unit
 ) {
     var close: (() -> Unit)? = null
     lateinit var selection: SingleSelection
+    val rtEditor: RTextScrollPane
+
+    var content: String = ""
+
+    init {
+        val textArea = RSyntaxTextArea(20, 60)
+        textArea.isCodeFoldingEnabled = true
+        textArea.antiAliasingEnabled = true
+        textArea.background = Color.DARK_GRAY
+        textArea.foreground = Color.WHITE
+        textArea.caretColor = Color.BLACK
+        textArea.selectionColor = Color.PINK
+        textArea.currentLineHighlightColor = Color.LIGHT_GRAY
+
+        val sp = RTextScrollPane(textArea)
+        sp.textArea.addCaretListener { content = sp.textArea.text }
+
+        rtEditor = sp
+    }
 
     val isActive: Boolean
         get() = selection.selected === this
@@ -21,40 +43,23 @@ class Editor(
         selection.selected = this
     }
 
-    class Line(val number: Int, val content: Content)
-
-    interface Lines {
-        val lineNumberDigitCount: Int get() = size.toString().length
-        val size: Int
-        operator fun get(index: Int): Line
-    }
-
-    class Content(val value: State<String>, val isCode: Boolean)
+    val isCode = fileName.endsWith(".kt", ignoreCase = true)
 }
 
 fun Editor(file: File) = Editor(
     fileName = file.name
-) { backgroundScope ->
-    val textLines = try {
-        file.readLines(backgroundScope)
+, { backgroundScope ->
+    try {
+        file.readContents(backgroundScope)
     } catch (e: Throwable) {
         e.printStackTrace()
-        EmptyTextLines
+        ""
     }
-    val isCode = file.name.endsWith(".kt", ignoreCase = true)
-
-    fun content(index: Int): Editor.Content {
-        val text = textLines.get(index)
-        val state = mutableStateOf(text)
-        return Editor.Content(state, isCode)
+}, { content ->
+    try {
+        // todo FIX THIS MONSTROSITY
+        file.writeContents(MainScope(), content)
+    } catch (e: Throwable) {
+        e.printStackTrace()
     }
-
-    object : Editor.Lines {
-        override val size get() = textLines.size
-
-        override fun get(index: Int) = Editor.Line(
-            number = index + 1,
-            content = content(index)
-        )
-    }
-}
+})
