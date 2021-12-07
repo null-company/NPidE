@@ -3,7 +3,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-                            kotlin("jvm") version "1.5.21"
+    kotlin("jvm") version "1.5.21"
     id("org.jetbrains.compose") version "1.0.0-alpha3"
 }
 
@@ -18,7 +18,9 @@ repositories {
 
 dependencies {
     implementation(compose.desktop.currentOs)
+    implementation("org.antlr:antlr4:4.9")
     api(compose.materialIconsExtended)
+    implementation("com.google.code.gson:gson:2.8.9")
 }
 
 tasks.withType<KotlinCompile>() {
