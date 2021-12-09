@@ -38,6 +38,13 @@ fun StatusBar(settings: Settings, editors: Editors) = Box(
                 fontSize = 12.sp
             )
         }
+        Button(onClick = ButtonUsage(editors)::usageDebug, contentPadding = PaddingValues(), modifier = Modifier.align(Alignment.CenterVertically)) {
+            Text(
+                text = "Debug",
+                color = LocalContentColor.current.copy(alpha = 0.60f),
+                fontSize = 12.sp
+            )
+        }
 
         Row {
             Text(

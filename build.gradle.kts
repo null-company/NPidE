@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
                             kotlin("jvm") version "1.5.21"
     id("org.jetbrains.compose") version "1.0.0-alpha3"
+    kotlin("plugin.serialization") version "1.5.21"
 }
 
 group = "ru.nsu_null"
@@ -19,7 +20,7 @@ repositories {
 dependencies {
     implementation(compose.desktop.currentOs)
     api(compose.materialIconsExtended)
-}
+    implementation("com.charleskorn.kaml:kaml:0.37.0")}
 
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "11"
