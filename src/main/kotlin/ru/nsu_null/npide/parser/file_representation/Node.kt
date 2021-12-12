@@ -1,5 +1,6 @@
 package file_representation
 
+import me.tomassetti.kolasu.model.Node
 import java.awt.Color
 
 enum class NodeType {
@@ -8,11 +9,11 @@ enum class NodeType {
     OTHER
 }
 
-class Node<ValueT>(
+open class Node<ValueT>(
     var from: Int,
     var to: Int,
-    var value: ValueT,
-) {
+    var value: ValueT
+){
     var type: NodeType = NodeType.OTHER;
     var definitionPosition: Position = Position(-1, -1);
 }

@@ -22,6 +22,7 @@ dependencies {
     api(compose.materialIconsExtended)
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("com.fifesoft:rsyntaxtextarea:3.1.3")
+    implementation("me.tomassetti.kanvas:kanvas-core:0.2.1")
 }
 
 tasks.withType<KotlinCompile>() {

@@ -138,5 +138,5 @@ fragment HexadecimalDigit
         ;
 
 COMMENT
- : '#' ~[\r\n\f]* -> channel(2)
+ : '#' ~[\r\n\f]*
  ;
