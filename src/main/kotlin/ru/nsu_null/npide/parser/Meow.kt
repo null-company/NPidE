@@ -1,5 +1,9 @@
+import org.antlr.v4.runtime.Lexer
+import org.antlr.v4.runtime.Parser
 import org.antlr.v4.runtime.TokenStreamRewriter
+import ru.nsu_null.npide.parser.generator.generateLexerParserFiles
 import java.io.File
+import java.nio.file.Paths
 
 fun readFile(filename: String): String {
     return File(filename).inputStream().readBytes().toString(Charsets.UTF_8)
@@ -10,23 +14,7 @@ fun writeFile(filename: String, data: String) {
 }
 
 fun main() {
-    val highlightRulesString = readFile("colors.json")
-    val highlightRules = TokenHighlighter(highlightRulesString)
-
-    val textAnalyzer = TextAnalyzer()
-    textAnalyzer.updateText(readFile("ex.asm"))
-    writeFile(
-        "index.html", convertToHtml(
-            readFile("ex.asm").lines() as ArrayList<String>,
-            textAnalyzer
-        )
+    generateLexerParserFiles(
+        Paths.get("./src/main/kotlin/ru/nsu_null/npide/parser/CDM8.g4"),
     )
-}
-
-
-class LangParseTreeListener(
-    val parser: CDM8Parser,
-    val highlightRules: TokenHighlighter,
-) : CDM8BaseListener() {
-    var answer = TokenStreamRewriter(parser.tokenStream);
 }

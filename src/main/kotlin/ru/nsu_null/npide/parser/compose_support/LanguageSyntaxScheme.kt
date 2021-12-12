@@ -10,11 +10,10 @@ class LanguageSyntaxScheme(val tokenHighlighter: TokenHighlighter, val tokenNumT
     SyntaxScheme(false) {
 
     override fun getStyle(index: Int): Style {
-        val style: Style
-        var tokenName: String;
-        if(tokenNumToTokenName.getSymbolicName(index)== null){
+        val tokenName: String;
+        if (tokenNumToTokenName.getSymbolicName(index) == null) {
             tokenName = "ID"
-        }else{
+        } else {
             tokenName = tokenNumToTokenName.getSymbolicName(index);
         }
 
