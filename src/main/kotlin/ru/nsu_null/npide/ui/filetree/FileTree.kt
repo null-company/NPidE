@@ -56,7 +56,7 @@ class FileTree(root: File, private val editors: Editors) {
         @Composable
         fun createFile(state:MutableState<Boolean>) = when (type) {
             is ItemType.Folder -> OpenCreteFileDialog(state, file.file.filepath)
-            is ItemType.File -> OpenCreteFileDialog(state, file.file.parentpath)
+            is ItemType.File -> OpenCreteFileDialog(state, file.file.parentPath)
             }
 
 

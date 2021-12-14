@@ -24,13 +24,13 @@ class ButtonUsage(private val editors: Editors) {
     fun usageCompile() {
         when(fileExt(editors.openedFile.name)) {
             "c" -> {
-                runCommand("gcc" + editors.openedFile.filepath + "-o" + editors.openedFile.parentpath + "/out.out")
+                runCommand("gcc" + editors.openedFile.filepath + "-o" + editors.openedFile.parentPath + "/out.out")
             }
             "asm" -> {
                 for (i in 0 until parser.result.build.count()) {
                     val preCommand = listOfNotNull(parser.result.build[i].exec,
                         parser.result.build[i].beforeFiles,
-                        (editors.openedFile.parentpath + "/" + parser.changeExt(editors.openedFile.name,
+                        (editors.openedFile.parentPath + "/" + parser.changeExt(editors.openedFile.name,
                             parser.result.build[i].changeExt)),
                         parser.result.build[i].afterFiles)
                     val command = parser.addSpaces(preCommand)
@@ -58,12 +58,12 @@ class ButtonUsage(private val editors: Editors) {
                     for (i in 0 until parser.result.run.count()) {
                         val preCommand = listOfNotNull(parser.result.run[i].exec,
                             parser.result.run[i].beforeFiles,
-                            (editors.openedFile.parentpath + "/" + parser.changeExt(editors.openedFile.name,
+                            (editors.openedFile.parentPath + "/" + parser.changeExt(editors.openedFile.name,
                                 parser.result.run[i].changeExt)),
                             parser.result.run[i].afterFiles)
                         println(parser.result.run[i].exec+
                             parser.result.run[i].beforeFiles+
-                            (editors.openedFile.parentpath + "/" + parser.changeExt(editors.openedFile.name,
+                            (editors.openedFile.parentPath + "/" + parser.changeExt(editors.openedFile.name,
                                 parser.result.run[i].changeExt))+
                             parser.result.run[i].afterFiles)
                         val command = parser.addSpaces(preCommand)
@@ -87,7 +87,7 @@ class ButtonUsage(private val editors: Editors) {
                     for (i in 0 until parser.result.debug.count()) {
                         val preCommand = listOfNotNull(parser.result.debug[i].exec,
                             parser.result.debug[i].beforeFiles,
-                            (editors.openedFile.parentpath + "/" + parser.changeExt(editors.openedFile.name,
+                            (editors.openedFile.parentPath + "/" + parser.changeExt(editors.openedFile.name,
                                 parser.result.debug[i].changeExt)),
                             parser.result.debug[i].afterFiles)
                         val command = parser.addSpaces(preCommand)
