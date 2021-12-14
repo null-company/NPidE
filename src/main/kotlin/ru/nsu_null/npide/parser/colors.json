@@ -1,0 +1,68 @@
+{
+  "rules": [
+    {
+      "color": "#85C1E9",
+      "instructions": [
+        "RR_INSTR",
+        "R_INSTR",
+        "R_MACRO_INST",
+        "RC_INSTR"
+      ]
+    },
+    {
+      "color": "#1ABC9C",
+      "instructions": [
+        "INSTR",
+        "MACRO",
+        "C_MACRO_INST"
+      ]
+    },
+    {
+      "color": "#EC7063",
+      "instructions": [
+        "C_PSEUDO_INSTR",
+        "ID_PSEUDO_INSTR",
+        "REGISTER"
+      ]
+    },
+    {
+      "color": "#AF7AC5",
+      "instructions": [
+        "C_INSTR",
+        "CMP_KEYWORD",
+        "LOOP_KEYWORD"
+      ]
+    },
+    {
+      "color": "#873600",
+      "instructions": [
+        "PREDEFINED_MACRO_INSTRUCTIONS"
+      ]
+    },
+    {
+      "color": "#FF3212",
+      "instructions": [
+        "LABEL"
+      ]
+    },
+    {
+      "color": "#222DDC",
+      "instructions": [
+        "NUMBER"
+      ]
+    },
+    {
+      "color": "#F81223",
+      "instructions": [
+        "ID",
+        "COLON"
+      ]
+    },
+    {
+      "color": "#E0E0E0",
+      "instructions": [
+        "COMMENT"
+      ]
+    }
+  ]
+}

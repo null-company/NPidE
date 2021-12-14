@@ -1,0 +1,19 @@
+build:
+    - exec: "python"
+      beforeFiles: "CocoIDE-V1.91/cocas.py"
+      afterFiles: "-l"
+      changeExt: "asm"
+    - exec: "python"
+      beforeFiles: "CocoIDE-V1.91/cocol.py"
+      afterFiles: "-l"
+      changeExt: "obj"
+run:
+  - exec: "python"
+    beforeFiles: "CocoIDE-V1.91/cdm8_emu_main.py"
+    afterFiles: ""
+    changeExt: "img"
+debug:
+  - exec: "python"
+    beforeFiles: "CocoIDE-V1.91/cdm8_emu_debug.py -f"
+    afterFiles: ""
+    changeExt: "img"
