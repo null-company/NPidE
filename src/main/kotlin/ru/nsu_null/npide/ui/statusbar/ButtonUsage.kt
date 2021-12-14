@@ -47,7 +47,7 @@ class ButtonUsage(private val editors: Editors) {
             "c" -> {
                 usageCompile()
                 try {
-                    runCommand(editors.openedFile.parentpath + "/out.out")
+                    runCommand(editors.openedFile.parentPath + "/out.out")
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }

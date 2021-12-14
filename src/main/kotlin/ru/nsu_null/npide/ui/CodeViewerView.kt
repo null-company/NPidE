@@ -15,8 +15,13 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.SwingPanel
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants
+import org.fife.ui.rtextarea.RTextScrollPane
 import org.jetbrains.codeviewer.ui.statusbar.StatusBar
 import ru.nsu_null.npide.ui.editor.EditorEmptyView
 import ru.nsu_null.npide.ui.editor.EditorTabsView
@@ -25,6 +30,9 @@ import ru.nsu_null.npide.ui.filetree.FileTreeView
 import ru.nsu_null.npide.ui.filetree.FileTreeViewTabView
 import ru.nsu_null.npide.util.SplitterState
 import ru.nsu_null.npide.util.VerticalSplittable
+import java.awt.Color.*
+import javax.swing.BoxLayout
+import javax.swing.JPanel
 
 @ExperimentalFoundationApi
 @Composable
