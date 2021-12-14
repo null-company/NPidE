@@ -2,7 +2,6 @@ package ru.nsu_null.npide.ui.editor
 
 import androidx.compose.runtime.mutableStateListOf
 import ru.nsu_null.npide.platform.File
-import ru.nsu_null.npide.ui.statusbar.ButtonUsage
 import ru.nsu_null.npide.util.SingleSelection
 
 class Editors {

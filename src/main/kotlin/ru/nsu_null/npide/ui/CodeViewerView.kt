@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Spring.StiffnessLow
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
@@ -16,15 +17,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import ru.nsu_null.npide.ui.statusbar.StatusBar
 import ru.nsu_null.npide.ui.editor.EditorEmptyView
 import ru.nsu_null.npide.ui.editor.EditorTabsView
 import ru.nsu_null.npide.ui.editor.EditorView
 import ru.nsu_null.npide.ui.filetree.FileTreeView
 import ru.nsu_null.npide.ui.filetree.FileTreeViewTabView
+import ru.nsu_null.npide.ui.statusbar.StatusBar
 import ru.nsu_null.npide.util.SplitterState
 import ru.nsu_null.npide.util.VerticalSplittable
 
+@ExperimentalFoundationApi
 @Composable
 fun CodeViewerView(model: CodeViewer) {
     val panelState = remember { PanelState() }
