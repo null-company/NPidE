@@ -10,6 +10,7 @@ import ru.nsu_null.npide.ui.CodeViewer
 import ru.nsu_null.npide.ui.CodeViewerView
 import ru.nsu_null.npide.ui.common.AppTheme
 import ru.nsu_null.npide.ui.common.Settings
+import ru.nsu_null.npide.ui.console.Console
 import ru.nsu_null.npide.ui.editor.Editors
 import ru.nsu_null.npide.ui.filetree.FileTree
 
@@ -21,6 +22,7 @@ fun MainView() {
         CodeViewer(
             editors = editors,
             fileTree = FileTree(HomeFolder, editors),
+            console = Console(),
             settings = Settings()
         )
     }
