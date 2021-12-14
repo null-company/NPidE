@@ -44,7 +44,7 @@ class FileTree(root: File, private val editors: Editors) {
             get() = if (file.file.isDirectory) {
                 ItemType.Folder(isExpanded = file.children.isNotEmpty(), canExpand = file.canExpand)
             } else {
-                ItemType.File(ext = file.file.name.substringAfterLast(".").lowercase())
+                ItemType.File(ext = file.file.name.substringAfterLast(".").toLowerCase())
             }
 
         fun open() = when (type) {
