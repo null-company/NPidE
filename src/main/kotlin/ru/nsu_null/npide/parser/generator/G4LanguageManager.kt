@@ -18,7 +18,6 @@ class G4LanguageManager(
                 url
             ), Lexer::class.java.classLoader
         )
-        val clazz = urlClassLoader.loadClass("${languageName}Lexer")
-        return clazz
+        return urlClassLoader.loadClass("${languageName}Lexer")
     }
 }

@@ -1,4 +1,4 @@
-package file_representation
+package ru.nsu_null.npide.parser.file_representation
 
 class Position(
     var line: Int,
@@ -25,6 +25,5 @@ class Position(
     override fun toString(): String {
         return "Position(line=$line, lineOffset=$lineOffset)"
     }
-
 
 }
