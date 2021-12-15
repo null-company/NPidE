@@ -1,7 +1,4 @@
-package file_representation
-
-import me.tomassetti.kolasu.model.Node
-import java.awt.Color
+package ru.nsu_null.npide.parser.file_representation
 
 enum class NodeType {
     DECLARATION,
@@ -15,6 +12,6 @@ open class Node<ValueT>(
     var value: ValueT
 ){
     var type: NodeType = NodeType.OTHER;
-    var definitionPosition: Position = Position(-1, -1);
+    var definitionPosition: Position = Position(-1, -1)
 }
 

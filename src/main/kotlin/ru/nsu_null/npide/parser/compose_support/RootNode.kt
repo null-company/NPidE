@@ -1,6 +1,6 @@
 package ru.nsu_null.npide.parser.compose_support
 
-import file_representation.Node
+import ru.nsu_null.npide.parser.file_representation.Node
 import me.tomassetti.kolasu.model.Point
 import me.tomassetti.kolasu.model.Position
 

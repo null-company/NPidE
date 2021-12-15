@@ -1,5 +1,5 @@
-//import file_representation.FilePositionSplitter
-//import file_representation.Position
+//import ru.nsu_null.npide.parser.file_representation.FilePositionSplitter
+//import ru.nsu_null.npide.parser.file_representation.Position
 //import java.awt.Color
 //
 //fun colorToHex(color: Color): String {

@@ -1,6 +1,8 @@
+package ru.nsu_null.npide.parser
+
 import com.google.gson.*
-import file_representation.FilePositionSplitter
-import file_representation.Node
+import ru.nsu_null.npide.parser.file_representation.FilePositionSplitter
+import ru.nsu_null.npide.parser.file_representation.Node
 import java.util.*
 
 class TokenHighlighter(jsonHighlightRulesString: String, var defColor: String = "#000000") {

@@ -1,6 +1,6 @@
-//import file_representation.Node
-//import file_representation.FilePositionSplitter
-//import file_representation.Position
+//import ru.nsu_null.npide.parser.file_representation.Node
+//import ru.nsu_null.npide.parser.file_representation.FilePositionSplitter
+//import ru.nsu_null.npide.parser.file_representation.Position
 //import org.antlr.v4.runtime.CharStreams.fromString
 //import org.antlr.v4.runtime.CommonTokenStream
 //import org.antlr.v4.runtime.tree.ParseTreeWalker

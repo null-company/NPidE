@@ -24,6 +24,7 @@ import ru.nsu_null.npide.ui.editor.EditorTabsView
 import ru.nsu_null.npide.ui.editor.EditorView
 import ru.nsu_null.npide.ui.filetree.FileTreeView
 import ru.nsu_null.npide.ui.filetree.FileTreeViewTabView
+import ru.nsu_null.npide.ui.statusbar.StatusBar
 import ru.nsu_null.npide.util.SplitterState
 import ru.nsu_null.npide.util.VerticalSplittable
 
