@@ -17,6 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import ru.nsu_null.npide.ui.statusbar.ButtonsBar
+import ru.nsu_null.npide.ui.console.ConsoleView
 import ru.nsu_null.npide.ui.editor.EditorEmptyView
 import ru.nsu_null.npide.ui.editor.EditorTabsView
 import ru.nsu_null.npide.ui.editor.EditorView
@@ -62,7 +64,10 @@ fun CodeViewerView(model: CodeViewer) {
                     Box(Modifier.weight(1f)) {
                         EditorView(model.editors.active!!, model.settings)
                     }
-                    StatusBar(model.settings, model.editors)
+                    Box(Modifier.weight(0.4f)) {
+                        ConsoleView(model.settings, model.console)
+                    }
+                    ButtonsBar(model.settings, model.editors, model.console)
                 }
             } else {
                 EditorEmptyView()
