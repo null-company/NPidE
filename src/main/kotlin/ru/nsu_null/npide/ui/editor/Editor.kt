@@ -1,5 +1,6 @@
 package ru.nsu_null.npide.ui.editor
 
+import TextAnalyzer
 import TokenHighlighter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -15,7 +16,13 @@ import ru.nsu_null.npide.parser.generator.generateLexerParserFiles
 import ru.nsu_null.npide.platform.File
 import ru.nsu_null.npide.util.SingleSelection
 import java.awt.Color
+import java.awt.event.KeyEvent
+import java.awt.event.KeyListener
 import java.nio.file.Paths
+import javax.swing.JTextArea
+import javax.swing.text.BadLocationException
+import javax.swing.text.JTextComponent
+
 
 class Editor(
     val fileName: String,
@@ -38,14 +45,15 @@ class Editor(
 
         // This function loads this stuff and set color scheme
         val languageManager = G4LanguageManager("./src/main/java", "CDM8")
-        val lexerClass = languageManager.loadLexerClass()
-
+        val LexerClass = languageManager.loadLexerClass()
+        val ParserClass = languageManager.loadParserClass()
         val ls = CustomLanguageSupport(
             TokenHighlighter(readFile("src/main/kotlin/ru/nsu_null/npide/parser/colors.json")),
-            lexerClass.getField("VOCABULARY").get(null) as Vocabulary,
-            lexerClass
+            LexerClass.getField("VOCABULARY").get(null) as Vocabulary,
+            LexerClass
         )
 
+        val textAnalyzer = TextAnalyzer(languageManager)
         (textArea.document as RSyntaxDocument).setSyntaxStyle(AntlrTokenMaker(ls.antlrLexerFactory))
 
         val context = ls.contextCreator.create()
@@ -60,7 +68,28 @@ class Editor(
         textArea.currentLineHighlightColor = Color.LIGHT_GRAY
 
         val sp = RTextScrollPane(textArea)
-        sp.textArea.addCaretListener { content = sp.textArea.text }
+        var flag = false
+        sp.textArea.addKeyListener(object : KeyListener {
+            override fun keyTyped(arg0: KeyEvent?) {}
+            override fun keyReleased(arg0: KeyEvent?) {}
+            override fun keyPressed(event: KeyEvent?) {
+                if (event != null) {
+                    if (event.isControlDown && event.keyCode == KeyEvent.VK_B) {
+                        textAnalyzer.updateText(sp.textArea.text)
+                        val pos = textAnalyzer.goToDefinition(sp.textArea.caretPosition)
+                        if (pos == -1) {
+                            return
+                        }
+                        sp.textArea.caretPosition = pos
+
+                    }
+                }
+            }
+        })
+        sp.textArea.addCaretListener {
+            textAnalyzer.updateText(sp.textArea.text)
+            content = sp.textArea.text
+        }
 
         rtEditor = sp
     }

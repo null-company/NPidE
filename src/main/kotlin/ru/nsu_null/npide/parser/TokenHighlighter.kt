@@ -28,21 +28,4 @@ class TokenHighlighter(jsonHighlightRulesString: String, var defColor: String = 
         }
         return "#000000";
     }
-
-    fun highlightTokens(file: FilePositionSplitter<String>): FilePositionSplitter<String> {
-        val highlightedFile = FilePositionSplitter<String>();
-        for (lineNum in 0..highlightedFile.lines.size) {
-            val line = highlightedFile[lineNum]
-            for (node in line.nodes) {
-                highlightedFile[lineNum].nodes.add(
-                    Node(
-                        node.from,
-                        node.to,
-                        getColor(node.value)
-                    )
-                )
-            }
-        }
-        return highlightedFile;
-    }
 }

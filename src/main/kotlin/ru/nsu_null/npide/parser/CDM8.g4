@@ -84,7 +84,7 @@ WS
 :    [ \t\u00A0\uFEFF\u2003,] + -> channel(1)
 ;
 NEWLINE
-  : '\r'? '\n' ->channel(1);
+  : ('\r' ? '\n' | '\r') ->channel(1);
 
 NUMBER
    : '0' [xX] HEX+

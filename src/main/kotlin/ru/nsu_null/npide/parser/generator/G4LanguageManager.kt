@@ -10,7 +10,8 @@ class G4LanguageManager(
     val baseDir: String,
     val languageName: String
 ) {
-    fun loadLexerClass(): Class<*> {
+
+    private fun loadClass(className: String): Class<*> {
         val file = File(Paths.get(baseDir, languageName).toString())
         val url: URL = file.toURI().toURL()
         val urlClassLoader = URLClassLoader.newInstance(
@@ -18,7 +19,29 @@ class G4LanguageManager(
                 url
             ), Lexer::class.java.classLoader
         )
-        val clazz = urlClassLoader.loadClass("${languageName}Lexer")
+        val clazz = urlClassLoader.loadClass("${languageName}${className}")
         return clazz
+    }
+
+    fun loadLexerClass(): Class<*> {
+        return loadClass("Lexer")
+    }
+
+    fun loadParserClass(): Class<*> {
+        return loadClass("Parser")
+    }
+
+    fun loadListenerClass(): Class<*> {
+        return loadClass("Listener")
+    }
+
+    fun loadParserSubclass(subclassName: String): Class<*>? {
+        val ParserClass = loadParserClass()
+        for (clazz in ParserClass.declaredClasses) {
+            if (clazz.name == "${languageName}Parser$${subclassName}") {
+                return clazz
+            }
+        }
+        return null
     }
 }
