@@ -5,10 +5,10 @@ import java.io.FileInputStream
 import kotlinx.serialization.*
 import java.lang.StringBuilder
 class ConfigParser() {
-    private val des = ProjectFile.deserialize()
-    private val configStreamBuild = FileInputStream(ProjectFile.buildPath)
-    private val configStreamRun = FileInputStream(ProjectFile.runPath)
-    private val configStreamBDebug = FileInputStream(ProjectFile.debugPath)
+    private val des = ConfigManager.readConfig()
+    private val configStreamBuild = FileInputStream(ConfigManager.buildPath)
+    private val configStreamRun = FileInputStream(ConfigManager.runPath)
+    private val configStreamBDebug = FileInputStream(ConfigManager.debugPath)
 
     var resultBuild = Yaml.default.decodeFromStream(Config.serializer(), configStreamBuild)
     var resultRun = Yaml.default.decodeFromStream(Config.serializer(), configStreamRun)

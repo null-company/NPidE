@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
 import javax.swing.JFileChooser
-import ru.nsu_null.npide.ui.yaml.ProjectFile
+import ru.nsu_null.npide.ui.yaml.ConfigManager
 
 @Composable
 fun FrameWindowScope.configureMenuBar() = MenuBar {
@@ -12,6 +12,10 @@ fun FrameWindowScope.configureMenuBar() = MenuBar {
                 Item("Config Build", onClick = {fileChooser(0) })
                 Item("Config Run", onClick = {fileChooser(1) })
                 Item("Config Debug", onClick = {fileChooser(2) })
+                Item("add cockTrue", onClick = {ConfigManager.setFileBuilt("cock.txt", true)})
+                Item("add cockFalse", onClick = {ConfigManager.setFileBuilt("cock.txt", false)})
+                Item("Check", onClick = {ConfigManager.readFileBuilt("cock.txt")})
+
             }
 }
 
@@ -21,16 +25,16 @@ fun fileChooser(configButtonState :Int){
         if (selectedFile != null) {
             when (configButtonState) {
                 0 -> {
-                    ProjectFile.buildPath = selectedFile.toString()
-                    ProjectFile.serialize()
+                    ConfigManager.buildPath = selectedFile.toString()
+                    ConfigManager.storeConfig()
                 }
                 1 -> {
-                    ProjectFile.runPath = selectedFile.toString()
-                    ProjectFile.serialize()
+                    ConfigManager.runPath = selectedFile.toString()
+                    ConfigManager.storeConfig()
                 }
                 2 -> {
-                    ProjectFile.debugPath = selectedFile.toString()
-                    ProjectFile.serialize()
+                    ConfigManager.debugPath = selectedFile.toString()
+                    ConfigManager.storeConfig()
                 }
             }
         }

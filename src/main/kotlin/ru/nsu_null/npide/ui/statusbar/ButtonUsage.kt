@@ -3,11 +3,12 @@ package ru.nsu_null.npide.ui.statusbar
 import ru.nsu_null.npide.ui.yaml.ConfigParser
 import ru.nsu_null.npide.ui.console.Console
 import ru.nsu_null.npide.ui.editor.Editors
+import ru.nsu_null.npide.ui.yaml.ConfigManager
 import java.io.IOException
 
 private var parser = ConfigParser()
 
-private fun runCommand(arguments : String, console: Console){
+private fun runCommand(arguments : String, console: Console): Boolean {
     val process = Runtime.getRuntime().exec(arguments)
     process.inputStream.reader(Charsets.UTF_8).use {
         console.add(it.readText())
@@ -15,31 +16,44 @@ private fun runCommand(arguments : String, console: Console){
     process.errorStream.reader(Charsets.UTF_8).use {
         console.add(it.readText())
     }
+    if (process.exitValue() == 0)
+        return true
+    else
+        return false
 }
-fun usageButton(editors: Editors, console: Console, config: ConfigParser.Config) {
+fun usageButton(editors: Editors, console: Console, config: List<ConfigParser.ConfigInternal>): Boolean {
     try {
-        for (i in 0 until config.build.count()) {
-            val preCommand = listOfNotNull(config.build[i].exec,
-                config.build[i].beforeFiles,
-                (editors.openedFile.parentPath + "/" + parser.changeExt(editors.openedFile.name,
-                    config.build[i].changeExt)),
-                config.build[i].afterFiles)
+        for (i in 0 until config.count()) {
+            val preCommand = listOfNotNull(
+                config[i].exec,
+                config[i].beforeFiles,
+                (editors.openedFile.parentPath + "/" + parser.changeExt(
+                    editors.openedFile.name,
+                    config[i].changeExt
+                )),
+                config[i].afterFiles
+            )
             val command = parser.addSpaces(preCommand)
-            runCommand(command, console)
+            return runCommand(command, console)
         }
-    }catch(e: IOException){
+    } catch (e: IOException) {
         e.printStackTrace()
     }
+    return false
 }
 
 fun usageCompile(editors: Editors, console: Console) {
-    usageButton(editors, console, parser.resultBuild)
+    val flagBuilt = ConfigManager.readFileBuilt(editors.openedFile.filepath)
+    if (!flagBuilt!!) {
+        ConfigManager.setFileBuilt(editors.openedFile.filepath, usageButton(editors, console, parser.resultBuild.build))
+    }
 }
 
 fun usageRun(editors: Editors, console: Console) {
-    usageButton(editors, console, parser.resultRun)
+    usageCompile(editors, console)
+    usageButton(editors, console, parser.resultRun.run)
 }
 
 fun usageDebug(editors: Editors, console: Console) {
-    usageButton(editors, console, parser.resultDebug)
+    usageButton(editors, console, parser.resultDebug.debug)
 }
