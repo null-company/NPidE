@@ -1,12 +1,18 @@
-package ru.nsu_null.npide.ui
+package ru.nsu_null.npide.ui.yaml
 
 import com.charleskorn.kaml.Yaml
 import java.io.FileInputStream
 import kotlinx.serialization.*
 import java.lang.StringBuilder
-class Parser(pathToConfigFile: String) {
-    private val configStream = FileInputStream(pathToConfigFile)
-    var result = Yaml.default.decodeFromStream(Config.serializer(), configStream)
+class ConfigParser() {
+    private val des = ProjectFile.deserialize()
+    private val configStreamBuild = FileInputStream(ProjectFile.buildPath)
+    private val configStreamRun = FileInputStream(ProjectFile.runPath)
+    private val configStreamBDebug = FileInputStream(ProjectFile.debugPath)
+
+    var resultBuild = Yaml.default.decodeFromStream(Config.serializer(), configStreamBuild)
+    var resultRun = Yaml.default.decodeFromStream(Config.serializer(), configStreamRun)
+    var resultDebug = Yaml.default.decodeFromStream(Config.serializer(), configStreamBDebug)
 
     fun changeExt(filename: String, newExt: String?): String {
         if (newExt != null && newExt != "") {

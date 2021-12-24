@@ -1,11 +1,11 @@
 package ru.nsu_null.npide.ui.statusbar
 
-import ru.nsu_null.npide.ui.Parser
+import ru.nsu_null.npide.ui.yaml.ConfigParser
 import ru.nsu_null.npide.ui.console.Console
 import ru.nsu_null.npide.ui.editor.Editors
 import java.io.IOException
 
-private var parser = Parser("CocoIDE-V1.91/config.yml")
+private var parser = ConfigParser()
 private fun fileExt(filename: String): String {
     return filename.substringAfterLast('.')
 }
@@ -28,12 +28,12 @@ fun usageCompile(editors: Editors, console: Console) {
                 console)
         }
         "asm" -> {
-            for (i in 0 until parser.result.build.count()) {
-                val preCommand = listOfNotNull(parser.result.build[i].exec,
-                    parser.result.build[i].beforeFiles,
+            for (i in 0 until parser.resultBuild.build.count()) {
+                val preCommand = listOfNotNull(parser.resultBuild.build[i].exec,
+                    parser.resultBuild.build[i].beforeFiles,
                     (editors.openedFile.parentPath + "/" + parser.changeExt(editors.openedFile.name,
-                        parser.result.build[i].changeExt)),
-                    parser.result.build[i].afterFiles)
+                        parser.resultBuild.build[i].changeExt)),
+                    parser.resultBuild.build[i].afterFiles)
                 val command = parser.addSpaces(preCommand)
                 runCommand(command, console)
             }
@@ -57,17 +57,17 @@ fun usageRun(editors: Editors, console: Console) {
 
         "asm" -> {
             try {
-                for (i in 0 until parser.result.run.count()) {
-                    val preCommand = listOfNotNull(parser.result.run[i].exec,
-                        parser.result.run[i].beforeFiles,
+                for (i in 0 until parser.resultRun.run.count()) {
+                    val preCommand = listOfNotNull(parser.resultRun.run[i].exec,
+                        parser.resultRun.run[i].beforeFiles,
                         (editors.openedFile.parentPath + "/" + parser.changeExt(editors.openedFile.name,
-                            parser.result.run[i].changeExt)),
-                        parser.result.run[i].afterFiles)
-                    println(parser.result.run[i].exec+
-                            parser.result.run[i].beforeFiles+
+                            parser.resultRun.run[i].changeExt)),
+                        parser.resultRun.run[i].afterFiles)
+                    println(parser.resultRun.run[i].exec+
+                            parser.resultRun.run[i].beforeFiles+
                             (editors.openedFile.parentPath + "/" + parser.changeExt(editors.openedFile.name,
-                                parser.result.run[i].changeExt))+
-                            parser.result.run[i].afterFiles)
+                                parser.resultRun.run[i].changeExt))+
+                            parser.resultRun.run[i].afterFiles)
                     val command = parser.addSpaces(preCommand)
                     runCommand(command, console)
                 }
@@ -86,12 +86,12 @@ fun usageDebug(editors: Editors, console: Console) {
     when(fileExt(editors.openedFile.name)) {
         "asm" -> {
             try {
-                for (i in 0 until parser.result.debug.count()) {
-                    val preCommand = listOfNotNull(parser.result.debug[i].exec,
-                        parser.result.debug[i].beforeFiles,
+                for (i in 0 until parser.resultDebug.debug.count()) {
+                    val preCommand = listOfNotNull(parser.resultDebug.debug[i].exec,
+                        parser.resultDebug.debug[i].beforeFiles,
                         (editors.openedFile.parentPath + "/" + parser.changeExt(editors.openedFile.name,
-                            parser.result.debug[i].changeExt)),
-                        parser.result.debug[i].afterFiles)
+                            parser.resultDebug.debug[i].changeExt)),
+                        parser.resultDebug.debug[i].afterFiles)
                     val command = parser.addSpaces(preCommand)
                     runCommand(command, console)
                 }
