@@ -9,28 +9,30 @@ import ru.nsu_null.npide.ui.yaml.ProjectFile
 @Composable
 fun FrameWindowScope.configureMenuBar() = MenuBar {
             Menu("Configurations", mnemonic = 'C') {
-                Item("Config Build", onClick = {FileChooser(0) })
-                Item("Config Run", onClick = {FileChooser(1) })
-                Item("Config Debug", onClick = {FileChooser(2) })
+                Item("Config Build", onClick = {fileChooser(0) })
+                Item("Config Run", onClick = {fileChooser(1) })
+                Item("Config Debug", onClick = {fileChooser(2) })
             }
 }
 
-fun FileChooser(configButtonState :Int){
+fun fileChooser(configButtonState :Int){
     JFileChooser(System.getProperty("user.home")).apply {
         showOpenDialog(null)
-        when(configButtonState){
-            0 -> {
-                ProjectFile.buildPath = selectedFile.toString()
-                ProjectFile.serialize()
+        if (selectedFile != null) {
+            when (configButtonState) {
+                0 -> {
+                    ProjectFile.buildPath = selectedFile.toString()
+                    ProjectFile.serialize()
+                }
+                1 -> {
+                    ProjectFile.runPath = selectedFile.toString()
+                    ProjectFile.serialize()
+                }
+                2 -> {
+                    ProjectFile.debugPath = selectedFile.toString()
+                    ProjectFile.serialize()
+                }
             }
-            1 -> {
-                ProjectFile.runPath = selectedFile.toString()
-                ProjectFile.serialize()
-            }
-            2 ->{
-                ProjectFile.debugPath = selectedFile.toString()
-                ProjectFile.serialize()
-            }
-         }
+        }
     }
 }
