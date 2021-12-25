@@ -4,12 +4,15 @@ import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.*
 import java.io.File
 import java.io.FileInputStream
+import javax.swing.text.Highlighter
 
 object ConfigManager{
     const val projectFilePath:String = "config.yaml"
     var buildPath:String = ""
     var runPath:String = ""
     var debugPath:String = ""
+    var grammarPath: String = ""
+    var syntaxHighlighterPath = ""
     private var fileInformation: HashMap<String?, Boolean?>?  = hashMapOf()
 
     @Serializable
@@ -17,6 +20,8 @@ object ConfigManager{
         val build: String,
         val run: String,
         val debug: String,
+        val grammar: String,
+        val syntaxHighlighter:String,
         val editFileInformation: HashMap<String?, Boolean?>?
         )
 
@@ -26,6 +31,8 @@ object ConfigManager{
                 buildPath,
                 runPath,
                 debugPath,
+                grammarPath,
+                syntaxHighlighterPath,
                 fileInformation
             )
         )
@@ -42,6 +49,8 @@ object ConfigManager{
         buildPath = result.build
         runPath = result.run
         debugPath = result.debug
+        grammarPath = result.grammar
+        syntaxHighlighterPath = result.syntaxHighlighter
         fileInformation = result.editFileInformation!!
     }
 
@@ -52,6 +61,8 @@ object ConfigManager{
                 buildPath,
                 runPath,
                 debugPath,
+                grammarPath,
+                syntaxHighlighterPath,
                 fileInformation
             )
         )
@@ -64,7 +75,5 @@ object ConfigManager{
         if(fileInformation!![file] == null)
             return false
         return fileInformation!![file]
-
     }
-
 }

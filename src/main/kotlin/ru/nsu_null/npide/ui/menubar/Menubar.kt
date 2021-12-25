@@ -12,8 +12,8 @@ fun FrameWindowScope.configureMenuBar() = MenuBar {
                 Item("Config Build", onClick = {fileChooser(0) })
                 Item("Config Run", onClick = {fileChooser(1) })
                 Item("Config Debug", onClick = {fileChooser(2) })
-                Item("add cockTrue", onClick = {ConfigManager.setFileBuilt("cock.txt", true)})
-                Item("add cockFalse", onClick = {ConfigManager.setFileBuilt("cock.txt", false)})
+                Item("Config Grammar", onClick = {fileChooser(3) })
+                Item("Config Syntax Highlighter", onClick = {fileChooser(4) })
                 Item("Check", onClick = {ConfigManager.readFileBuilt("cock.txt")})
 
             }
@@ -34,6 +34,14 @@ fun fileChooser(configButtonState :Int){
                 }
                 2 -> {
                     ConfigManager.debugPath = selectedFile.toString()
+                    ConfigManager.storeConfig()
+                }
+                3 ->{
+                    ConfigManager.grammarPath = selectedFile.toString()
+                    ConfigManager.storeConfig()
+                }
+                4 -> {
+                    ConfigManager.syntaxHighlighterPath = selectedFile.toString()
                     ConfigManager.storeConfig()
                 }
             }
