@@ -1,16 +1,8 @@
 import com.google.gson.*
-import file_representation.FilePositionSplitter
-import file_representation.Node
 import java.util.*
 
 class TokenHighlighter(jsonHighlightRulesString: String, var defColor: String = "#000000") {
     var hashMap = HashMap<String, String>()
-    var openScopeRules: Vector<String> = Vector();
-    var closeScopeRules: Vector<String> = Vector();
-
-    // This variables describes which rules are for defining and usage variable
-    var definitionRules: Vector<String> = Vector();
-    var usageRules: Vector<String> = Vector();
 
     init {
         val json = JsonParser.parseString(jsonHighlightRulesString)
@@ -22,9 +14,9 @@ class TokenHighlighter(jsonHighlightRulesString: String, var defColor: String = 
         }
     }
 
-    fun getColor(rule: String): String {
-        if (hashMap.contains(rule)) {
-            return hashMap.get(rule)!!;
+    fun getColor(tokenValue: String): String {
+        if (hashMap.contains(tokenValue)) {
+            return hashMap.get(tokenValue)!!;
         }
         return "#000000";
     }

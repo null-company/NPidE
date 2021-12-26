@@ -7,11 +7,17 @@ import java.net.URLClassLoader
 import java.nio.file.Paths
 
 class G4LanguageManager(
-    val baseDir: String,
     val languageName: String
 ) {
+    companion object {
+        var baseDir = "";
+    }
 
+    val classNameToClass = HashMap<String, Class<*>>()
     private fun loadClass(className: String): Class<*> {
+        if (classNameToClass.containsKey(className)) {
+            return classNameToClass[className]!!
+        }
         val file = File(Paths.get(baseDir, languageName).toString())
         val url: URL = file.toURI().toURL()
         val urlClassLoader = URLClassLoader.newInstance(
@@ -20,6 +26,7 @@ class G4LanguageManager(
             ), Lexer::class.java.classLoader
         )
         val clazz = urlClassLoader.loadClass("${languageName}${className}")
+        classNameToClass[className] = clazz
         return clazz
     }
 

@@ -27,6 +27,18 @@ public class CDM8BaseListener implements CDM8Listener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterGlobal_def(CDM8Parser.Global_defContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGlobal_def(CDM8Parser.Global_defContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterDef(CDM8Parser.DefContext ctx) { }
 	/**
 	 * {@inheritDoc}

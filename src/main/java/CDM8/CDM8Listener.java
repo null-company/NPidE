@@ -17,6 +17,18 @@ public interface CDM8Listener extends ParseTreeListener {
 	 */
 	void exitS(CDM8Parser.SContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code global_def}
+	 * labeled alternative in {@link CDM8Parser#inst}.
+	 * @param ctx the parse tree
+	 */
+	void enterGlobal_def(CDM8Parser.Global_defContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code global_def}
+	 * labeled alternative in {@link CDM8Parser#inst}.
+	 * @param ctx the parse tree
+	 */
+	void exitGlobal_def(CDM8Parser.Global_defContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code def}
 	 * labeled alternative in {@link CDM8Parser#inst}.
 	 * @param ctx the parse tree

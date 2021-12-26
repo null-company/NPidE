@@ -5,9 +5,9 @@ s:
 ;
 
 inst
-     :
-      ID COLON #def
-     |ID #usage
+     : ID '>' #global_def
+     | ID COLON #def
+     | ID #usage
      |.+? #nomatters
 ;
 

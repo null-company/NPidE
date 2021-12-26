@@ -16,10 +16,11 @@ public class CDM8Parser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		COLON=1, REGISTER=2, R1=3, R2=4, R3=5, R0=6, RR_INSTR=7, R_INSTR=8, RC_INSTR=9, 
-		C_INSTR=10, INSTR=11, C_PSEUDO_INSTR=12, ID_PSEUDO_INSTR=13, CMP_KEYWORD=14, 
-		LOOP_KEYWORD=15, MACRO=16, C_MACRO_INST=17, R_MACRO_INST=18, PREDEFINED_MACRO_INSTRUCTIONS=19, 
-		WS=20, NEWLINE=21, NUMBER=22, ID=23, COMMENT=24;
+		T__0=1, COLON=2, REGISTER=3, R1=4, R2=5, R3=6, R0=7, RR_INSTR=8, R_INSTR=9, 
+		RC_INSTR=10, C_INSTR=11, INSTR=12, C_PSEUDO_INSTR=13, ID_PSEUDO_INSTR=14, 
+		CMP_KEYWORD=15, LOOP_KEYWORD=16, MACRO=17, C_MACRO_INST=18, R_MACRO_INST=19, 
+		PREDEFINED_MACRO_INSTRUCTIONS=20, WS=21, NEWLINE=22, NUMBER=23, ID=24, 
+		COMMENT=25;
 	public static final int
 		RULE_s = 0, RULE_inst = 1;
 	private static String[] makeRuleNames() {
@@ -31,15 +32,15 @@ public class CDM8Parser extends Parser {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "':'", null, "'r1'", "'r2'", "'r3'", "'r0'", null, null, null, 
-			null, null, null, null, null, null, "'macro'", null, "'save'"
+			null, "'>'", "':'", null, "'r1'", "'r2'", "'r3'", "'r0'", null, null, 
+			null, null, null, null, null, null, null, "'macro'", null, "'save'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, "COLON", "REGISTER", "R1", "R2", "R3", "R0", "RR_INSTR", "R_INSTR", 
-			"RC_INSTR", "C_INSTR", "INSTR", "C_PSEUDO_INSTR", "ID_PSEUDO_INSTR", 
+			null, null, "COLON", "REGISTER", "R1", "R2", "R3", "R0", "RR_INSTR", 
+			"R_INSTR", "RC_INSTR", "C_INSTR", "INSTR", "C_PSEUDO_INSTR", "ID_PSEUDO_INSTR", 
 			"CMP_KEYWORD", "LOOP_KEYWORD", "MACRO", "C_MACRO_INST", "R_MACRO_INST", 
 			"PREDEFINED_MACRO_INSTRUCTIONS", "WS", "NEWLINE", "NUMBER", "ID", "COMMENT"
 		};
@@ -199,38 +200,60 @@ public class CDM8Parser extends Parser {
 			if ( listener instanceof CDM8Listener ) ((CDM8Listener)listener).exitUsage(this);
 		}
 	}
+	public static class Global_defContext extends InstContext {
+		public TerminalNode ID() { return getToken(CDM8Parser.ID, 0); }
+		public Global_defContext(InstContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof CDM8Listener ) ((CDM8Listener)listener).enterGlobal_def(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof CDM8Listener ) ((CDM8Listener)listener).exitGlobal_def(this);
+		}
+	}
 
 	public final InstContext inst() throws RecognitionException {
 		InstContext _localctx = new InstContext(_ctx, getState());
 		enterRule(_localctx, 2, RULE_inst);
 		try {
 			int _alt;
-			setState(18);
+			setState(20);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,2,_ctx) ) {
 			case 1:
-				_localctx = new DefContext(_localctx);
+				_localctx = new Global_defContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(10);
 				match(ID);
 				setState(11);
-				match(COLON);
+				match(T__0);
 				}
 				break;
 			case 2:
-				_localctx = new UsageContext(_localctx);
+				_localctx = new DefContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(12);
 				match(ID);
+				setState(13);
+				match(COLON);
 				}
 				break;
 			case 3:
-				_localctx = new NomattersContext(_localctx);
+				_localctx = new UsageContext(_localctx);
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(14); 
+				setState(14);
+				match(ID);
+				}
+				break;
+			case 4:
+				_localctx = new NomattersContext(_localctx);
+				enterOuterAlt(_localctx, 4);
+				{
+				setState(16); 
 				_errHandler.sync(this);
 				_alt = 1+1;
 				do {
@@ -238,7 +261,7 @@ public class CDM8Parser extends Parser {
 					case 1+1:
 						{
 						{
-						setState(13);
+						setState(15);
 						matchWildcard();
 						}
 						}
@@ -246,7 +269,7 @@ public class CDM8Parser extends Parser {
 					default:
 						throw new NoViableAltException(this);
 					}
-					setState(16); 
+					setState(18); 
 					_errHandler.sync(this);
 					_alt = getInterpreter().adaptivePredict(_input,1,_ctx);
 				} while ( _alt!=1 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );
@@ -266,13 +289,14 @@ public class CDM8Parser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\32\27\4\2\t\2\4\3"+
-		"\t\3\3\2\7\2\b\n\2\f\2\16\2\13\13\2\3\3\3\3\3\3\3\3\6\3\21\n\3\r\3\16"+
-		"\3\22\5\3\25\n\3\3\3\4\t\22\2\4\2\4\2\2\2\30\2\t\3\2\2\2\4\24\3\2\2\2"+
-		"\6\b\5\4\3\2\7\6\3\2\2\2\b\13\3\2\2\2\t\n\3\2\2\2\t\7\3\2\2\2\n\3\3\2"+
-		"\2\2\13\t\3\2\2\2\f\r\7\31\2\2\r\25\7\3\2\2\16\25\7\31\2\2\17\21\13\2"+
-		"\2\2\20\17\3\2\2\2\21\22\3\2\2\2\22\23\3\2\2\2\22\20\3\2\2\2\23\25\3\2"+
-		"\2\2\24\f\3\2\2\2\24\16\3\2\2\2\24\20\3\2\2\2\25\5\3\2\2\2\5\t\22\24";
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\33\31\4\2\t\2\4\3"+
+		"\t\3\3\2\7\2\b\n\2\f\2\16\2\13\13\2\3\3\3\3\3\3\3\3\3\3\3\3\6\3\23\n\3"+
+		"\r\3\16\3\24\5\3\27\n\3\3\3\4\t\24\2\4\2\4\2\2\2\33\2\t\3\2\2\2\4\26\3"+
+		"\2\2\2\6\b\5\4\3\2\7\6\3\2\2\2\b\13\3\2\2\2\t\n\3\2\2\2\t\7\3\2\2\2\n"+
+		"\3\3\2\2\2\13\t\3\2\2\2\f\r\7\32\2\2\r\27\7\3\2\2\16\17\7\32\2\2\17\27"+
+		"\7\4\2\2\20\27\7\32\2\2\21\23\13\2\2\2\22\21\3\2\2\2\23\24\3\2\2\2\24"+
+		"\25\3\2\2\2\24\22\3\2\2\2\25\27\3\2\2\2\26\f\3\2\2\2\26\16\3\2\2\2\26"+
+		"\20\3\2\2\2\26\22\3\2\2\2\27\5\3\2\2\2\5\t\24\26";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

@@ -12,7 +12,7 @@ import org.fife.ui.rsyntaxtextarea.SyntaxScheme
 class CustomLanguageSupport(
     val tokenHighlighter: TokenHighlighter,
     val tokenNumToTokenName: Vocabulary,
-    val entityClass: Class<*>
+    val LexerClass: Class<*>
 ) :
     BaseLanguageSupport<RootNode<String>>() {
     override val syntaxScheme: SyntaxScheme
@@ -20,7 +20,7 @@ class CustomLanguageSupport(
     override val antlrLexerFactory: AntlrLexerFactory
         get() = object : AntlrLexerFactory {
             override fun create(code: String): Lexer {
-                val inst = entityClass.getConstructor(CharStream::class.java).newInstance(fromString(code)) as Lexer
+                val inst = LexerClass.getConstructor(CharStream::class.java).newInstance(fromString(code)) as Lexer
                 return inst;
             }
 
