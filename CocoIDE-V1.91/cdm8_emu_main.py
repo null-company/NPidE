@@ -1,6 +1,6 @@
 from cdm8_emu import CDM8Emu
 import argparse as ap
-
+import functools
 
 def main():
     main_parser = ap.ArgumentParser(description='CDM8 emulator')
@@ -20,11 +20,13 @@ def main():
         cdm8.memory[0][0][i] = bytelist[i]
     while not cdm8.HALT:
         cdm8.step()
-    print('Registers: ', cdm8.regs)
+    print('Registers: ', [hex(i) for i in cdm8.regs])
     print('Memory:')
     for i in range(16):
-        print(cdm8.memory[0][0][i * 16: (i + 1) * 16])
+        print(functools.reduce(lambda x, y: x + ' ' + y, ["{:02x}".format(i) for i in cdm8.memory[0][0][i * 16: (i + 1) * 16]]))
 
 
 if __name__ == "__main__":
     main()
+
+

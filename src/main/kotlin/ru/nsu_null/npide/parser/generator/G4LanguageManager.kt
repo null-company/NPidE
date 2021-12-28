@@ -10,7 +10,7 @@ class G4LanguageManager(
     val languageName: String
 ) {
     companion object {
-        var baseDir = "";
+        var baseDir = "./src/main/java"
     }
 
     val classNameToClass = HashMap<String, Class<*>>()

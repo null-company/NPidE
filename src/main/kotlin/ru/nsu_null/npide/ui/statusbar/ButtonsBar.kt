@@ -1,23 +1,25 @@
-package org.jetbrains.codeviewer.ui.statusbar
+package ru.nsu_null.npide.ui.statusbar
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.Slider
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.*
-import kotlinx.coroutines.Dispatchers
 import ru.nsu_null.npide.ui.common.Settings
+import ru.nsu_null.npide.ui.console.Console
 import ru.nsu_null.npide.ui.editor.Editors
-import ru.nsu_null.npide.ui.statusbar.ButtonUsage
 
 private val MinFontSize = 6.sp
 private val MaxFontSize = 40.sp
 
 @Composable
-fun StatusBar(settings: Settings, editors: Editors) = Box(
+fun ButtonsBar(settings: Settings, editors: Editors, console: Console) = Box(
     Modifier
         .height(32.dp)
         .fillMaxWidth()
@@ -25,35 +27,13 @@ fun StatusBar(settings: Settings, editors: Editors) = Box(
 ) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
 
-        Button(onClick = ButtonUsage(editors)::usageCompile,
-            contentPadding = PaddingValues(),
-            modifier = Modifier.align(Alignment.CenterVertically)) {
-            Text(
-                text = "Compile",
-                color = LocalContentColor.current.copy(alpha = 0.60f),
-                fontSize = 12.sp
-            )
-        }
+        ButtonsBarButton("Compile") { usageCompile(editors, console) }
 
-        Button(onClick = ButtonUsage(editors)::usageRun,
-            contentPadding = PaddingValues(),
-            modifier = Modifier.align(Alignment.CenterVertically)) {
-            Text(
-                text = "Run",
-                color = LocalContentColor.current.copy(alpha = 0.60f),
-                fontSize = 12.sp
-            )
-        }
+        ButtonsBarButton("Run") { usageRun(editors, console) }
 
-        Button(onClick = { editors.active!!.writeContents(editors.active!!.content) } ,
-            contentPadding = PaddingValues(),
-            modifier = Modifier.align(Alignment.CenterVertically)) {
-            Text(
-                text = "Save",
-                color = LocalContentColor.current.copy(alpha = 0.60f),
-                fontSize = 12.sp
-            )
-        }
+        ButtonsBarButton("Debug") { usageDebug(editors, console) }
+
+        ButtonsBarButton("Save file") { editors.active!!.writeContents(editors.active!!.content) }
 
         Row {
             Text(
@@ -74,6 +54,19 @@ fun StatusBar(settings: Settings, editors: Editors) = Box(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun RowScope.ButtonsBarButton(name: String, onClick: () -> Unit) {
+    Button(onClick = onClick,
+        contentPadding = PaddingValues(),
+        modifier = Modifier.align(Alignment.CenterVertically)) {
+        Text(
+            text = name,
+            color = LocalContentColor.current.copy(alpha = 0.60f),
+            fontSize = 12.sp
+        )
     }
 }
 

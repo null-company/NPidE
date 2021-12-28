@@ -8,7 +8,6 @@ import ru.nsu_null.npide.util.SingleSelection
 import java.lang.Thread.sleep
 import java.util.concurrent.CompletableFuture
 
-
 class Editors {
     private val selection = SingleSelection()
     private val fileTypeToProjectSymbolManager = HashMap<String, ProjectSymbolManager>()
@@ -20,20 +19,23 @@ class Editors {
     lateinit var openedFile: File
 
     fun open(file: File) {
-        for (e in editors) {
-            if (e.fileName == file.name) {
-                e.activate()
-                return
-            }
-        }
+
+        try {
+            val alreadyOpenedEditor = editors.first { it.filePath == file.filepath }
+            alreadyOpenedEditor.activate()
+            return
+        } catch (ignored: NoSuchElementException) { }
+
         val ext = java.io.File(file.name).extension
         if (!fileTypeToProjectSymbolManager.containsKey(ext)) {
-            val languageManager = G4LanguageManager("CDM8");
-            fileTypeToG4LanguageManager.set(ext, languageManager)
-            fileTypeToProjectSymbolManager.set(ext, ProjectSymbolManager(languageManager))
+            val languageManager = G4LanguageManager("CDM8")
+            fileTypeToG4LanguageManager[ext] = languageManager
+            fileTypeToProjectSymbolManager[ext] = ProjectSymbolManager(languageManager)
         }
-        val projectSymbolManager = fileTypeToProjectSymbolManager.get(ext)!!
-        val languageManager = fileTypeToG4LanguageManager.get(ext)!!
+        val projectSymbolManager = fileTypeToProjectSymbolManager[ext]!!
+        val languageManager = fileTypeToG4LanguageManager[ext]!!
+
+
         val editor = Editor(file, languageManager)
         openedFile = file
         editor.selection = selection
@@ -52,16 +54,16 @@ class Editors {
             val gotoFilename = pair.first
             val position = pair.second
             if (position != -1) {
-                for (e in editors) {
-                    if (e.fileName == gotoFilename) {
-                        e.activate()
-                        // TODO:  аоаоаыыаыаоыаоооаыаыаооаыа
+                try {
+                    editors.first { it.filePath == gotoFilename }.also {
+                        // TODO:  аоаоаыы💀⚰☠⚱аыаоыаоооаыаыаооаыа
+                        it.activate()
                         CompletableFuture.runAsync {
                             sleep(100)
-                            e.setPosition(position + 1)
+                            it.setPosition(position + 1)
                         }
                     }
-                }
+                } catch (ignored: NoSuchElementException) { }
             }
         }
         editor.close = {

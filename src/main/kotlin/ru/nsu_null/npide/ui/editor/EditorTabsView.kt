@@ -47,7 +47,7 @@ fun EditorTabView(model: Editor) = Surface(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            model.fileName,
+            model.filePath,
             color = LocalContentColor.current,
             fontSize = 12.sp,
             modifier = Modifier.padding(horizontal = 4.dp)

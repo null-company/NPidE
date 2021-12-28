@@ -1,6 +1,3 @@
-import org.antlr.v4.runtime.Lexer
-import org.antlr.v4.runtime.Parser
-import org.antlr.v4.runtime.TokenStreamRewriter
 import ru.nsu_null.npide.parser.generator.generateLexerParserFiles
 import java.io.File
 import java.nio.file.Paths

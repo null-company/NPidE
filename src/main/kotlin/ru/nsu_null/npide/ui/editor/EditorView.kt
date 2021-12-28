@@ -77,8 +77,6 @@ fun CodeEditor(rtCodeEditor: RTextScrollPane, code: String, modifier: Modifier =
     }
 }
 
-
-
 private fun codeString(str: String) = buildAnnotatedString {
     withStyle(AppTheme.code.simple) {
         val strFormatted = str.replace("\t", "    ")

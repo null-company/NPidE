@@ -1,5 +1,5 @@
-package file_representation
+package ru.nsu_null.npide.parser.file_representation
 
-class FilePositionSplitter<T>() {
+class FilePositionSplitter<T> {
     var nodes: ArrayList<Node<T>> = ArrayList()
 }

@@ -1,8 +1,9 @@
 package ru.nsu_null.npide.ui.filetree
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import OpenCreteFileDialog
+import OpenDeleteDialog
+import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import ru.nsu_null.npide.platform.File
 import ru.nsu_null.npide.ui.editor.Editors
 
@@ -43,14 +44,30 @@ class FileTree(root: File, private val editors: Editors) {
             get() = if (file.file.isDirectory) {
                 ItemType.Folder(isExpanded = file.children.isNotEmpty(), canExpand = file.canExpand)
             } else {
-                ItemType.File(ext = file.file.name.substringAfterLast(".").lowercase())
+                ItemType.File(ext = file.file.name.substringAfterLast(".").toLowerCase())
             }
 
         fun open() = when (type) {
             is ItemType.Folder -> file.toggleExpanded()
             is ItemType.File -> editors.open(file.file)
         }
-    }
+
+        @OptIn(ExperimentalComposeUiApi::class)
+        @Composable
+        fun createFile(state:MutableState<Boolean>) = when (type) {
+            is ItemType.Folder -> OpenCreteFileDialog(state, file.file.filepath)
+            is ItemType.File -> OpenCreteFileDialog(state, file.file.parentPath)
+            }
+
+
+        @OptIn(ExperimentalComposeUiApi::class)
+        @Composable
+        fun removeFile(state: MutableState<Boolean>) = when (type) {
+            is ItemType.Folder -> OpenDeleteDialog(state, file.file.filepath)
+            is ItemType.File -> OpenDeleteDialog(state, file.file.filepath)
+            }
+        }
+
 
     sealed class ItemType {
         class Folder(val isExpanded: Boolean, val canExpand: Boolean) : ItemType()

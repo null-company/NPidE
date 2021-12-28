@@ -1,62 +1,60 @@
 package ru.nsu_null.npide.ui.statusbar
 
+import ru.nsu_null.npide.ui.console.Console
 import ru.nsu_null.npide.ui.editor.Editors
+import ru.nsu_null.npide.ui.config.ConfigManager
+import ru.nsu_null.npide.ui.config.ConfigParser
 import java.io.IOException
 
-class ButtonUsage(private val editors: Editors) {
-    private fun fileExt(filename: String): String {
-        return filename.substringAfterLast('.')
+private var parser = ConfigParser()
+
+private fun runCommand(arguments : String, console: Console): Boolean {
+    val process = Runtime.getRuntime().exec(arguments)
+    process.inputStream.reader(Charsets.UTF_8).use {
+        console.add(it.readText())
     }
-
-    private fun runCommand(vararg arguments : String?){
-        val process = ProcessBuilder(*arguments).start()
-        process.inputStream.reader(Charsets.UTF_8).use {
-            println(it.readText())
-        }
-        process.errorStream.reader(Charsets.UTF_8).use {
-            println(it.readText())
-        }
+    process.errorStream.reader(Charsets.UTF_8).use {
+        console.add(it.readText())
     }
-
-
-    fun usageCompile() {
-        when(fileExt(editors.openedFile.name)) {
-            "c" -> {
-                runCommand("gcc", editors.openedFile.filepath, "-o", editors.openedFile.parentPath + "/out.out")
-            }
-            "asm" -> {
-                runCommand("python", editors.openedFile.parentPath + "/cocas.py", editors.openedFile.filepath, "-l")
-            }
-            else -> {
-            println("It's not c or asm file")
+    if (process.exitValue() == 0)
+        return true
+    else
+        return false
+}
+fun usageButton(editors: Editors, console: Console, config: List<ConfigParser.ConfigInternal>): Boolean {
+    try {
+        for (i in 0 until config.count()) {
+            val preCommand = listOfNotNull(
+                config[i].exec,
+                config[i].beforeFiles,
+                (editors.openedFile.parentPath + "/" + parser.changeExt(
+                    editors.openedFile.name,
+                    config[i].changeExt
+                )),
+                config[i].afterFiles
+            )
+            val command = parser.addSpaces(preCommand)
+            return runCommand(command, console)
         }
+    } catch (e: IOException) {
+        e.printStackTrace()
     }
-}   fun usageRun() {
-        when(fileExt(editors.openedFile.name)) {
-            "c" -> {
-                usageCompile()
-                try {
-                    runCommand(editors.openedFile.parentPath + "/out.out")
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-            }
+    return false
+}
 
-            "asm" -> {
-                var new_filename: String = editors.openedFile.filepath.substringBeforeLast('.') + ".obj"
-                usageCompile()
-                try {
-                    runCommand("python", editors.openedFile.parentPath + "/cocol.py", new_filename)
-                    new_filename = editors.openedFile.filepath.substringBeforeLast('.') + ".img"
-                    runCommand("python", editors.openedFile.parentPath + "/cdm8_emu_main.py", new_filename)
-
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-            }
-            else -> {
-                println("It's not c or asm file")
-            }
-        }
+fun usageCompile(editors: Editors, console: Console) {
+    val flagBuilt = ConfigManager.readFileBuilt(editors.openedFile.filepath)
+    if (!flagBuilt!!) {
+        ConfigManager.setFileDirtiness(editors.openedFile.filepath,
+            !usageButton(editors, console, parser.resultBuild.build))
     }
+}
+
+fun usageRun(editors: Editors, console: Console) {
+    usageCompile(editors, console)
+    usageButton(editors, console, parser.resultRun.run)
+}
+
+fun usageDebug(editors: Editors, console: Console) {
+    usageButton(editors, console, parser.resultDebug.debug)
 }
