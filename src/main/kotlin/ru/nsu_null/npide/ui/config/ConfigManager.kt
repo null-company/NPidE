@@ -9,7 +9,7 @@ object ConfigManager {
     private const val projectFilePath: String = "config.yaml"
     var currentProjectConfig: AutoUpdatedProjectConfig =
         AutoUpdatedProjectConfig(
-            ProjectConfig("", "", "", "", "", hashMapOf(), listOf())
+            ProjectConfig("", "", "", hashMapOf(), listOf(), listOf())
         )
         set(value) {
             field = value
@@ -24,10 +24,9 @@ object ConfigManager {
         projectConfig.build,
         projectConfig.run,
         projectConfig.debug,
-        projectConfig.grammar,
-        projectConfig.syntaxHighlighter,
         projectConfig.filePathToDirtyFlag,
-        projectConfig.projectFilePaths
+        projectConfig.projectFilePaths,
+        projectConfig.grammarConfigs
     ) {
 
         override var build: String = super.build
@@ -45,22 +44,17 @@ object ConfigManager {
                 field = value
                 storeConfig()
             }
-        override var grammar: String = super.grammar
-            set(value) {
-                field = value
-                storeConfig()
-            }
-        override var syntaxHighlighter: String = super.syntaxHighlighter
-            set(value) {
-                field = value
-                storeConfig()
-            }
         override var filePathToDirtyFlag: HashMap<String, Boolean> = super.filePathToDirtyFlag
             set(value) {
                 field = value
                 storeConfig()
             }
         override var projectFilePaths: List<String> = super.projectFilePaths
+            set(value) {
+                field = value
+                storeConfig()
+            }
+        override var grammarConfigs: List<GrammarConfig> = super.grammarConfigs
             set(value) {
                 field = value
                 storeConfig()
@@ -72,20 +66,37 @@ object ConfigManager {
         open var build: String,
         open var run: String,
         open var debug: String,
-        open var grammar: String,
-        open var syntaxHighlighter: String,
         open var filePathToDirtyFlag: HashMap<String, Boolean>,
-        open var projectFilePaths: List<String>
+        open var projectFilePaths: List<String>,
+        open var grammarConfigs: List<GrammarConfig>
     )
 
-    private fun storeConfig() {
+    fun ProjectConfig(other: ProjectConfig): ProjectConfig {
+        return ProjectConfig(
+            other.build,
+            other.run,
+            other.debug,
+            other.filePathToDirtyFlag,
+            other.projectFilePaths,
+            other.grammarConfigs
+        )
+    }
+
+    @Serializable
+    data class GrammarConfig(
+        val ext:String,
+        val grammar: String,
+        val syntaxHighlighter:String,
+    )
+
+    fun storeConfig() {
         val result = Yaml.default.encodeToString(
             ProjectConfig.serializer(), currentProjectConfig
         )
         File(projectFilePath).writeText(result)
     }
 
-    private fun readConfig() {
+    fun readConfig() {
         val fileExists: Boolean = File(projectFilePath).createNewFile()
         if(fileExists) {
             storeConfig()
@@ -105,4 +116,9 @@ object ConfigManager {
     }
 
     fun isProjectFile(filePath: String): Boolean = filePath in currentProjectConfig.projectFilePaths
+
+    fun addGrammar(ext: String, grammarPath: String, syntaxHighlighter: String){
+        val newItem = GrammarConfig(ext, grammarPath, syntaxHighlighter)
+        currentProjectConfig.grammarConfigs += newItem
+    }
 }

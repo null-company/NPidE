@@ -5,9 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
-import ru.nsu_null.npide.ui.menubar.ConfigureProjectAction.*
-import ru.nsu_null.npide.ui.config.ConfigManager
-import javax.swing.JFileChooser
 
 @Composable
 fun FrameWindowScope.configureMenuBar() = MenuBar {
