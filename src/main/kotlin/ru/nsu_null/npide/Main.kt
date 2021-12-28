@@ -1,16 +1,17 @@
 package ru.nsu_null.npide
 
+import MainView
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
-import MainView
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.ui.window.*
+import androidx.compose.ui.window.application
+import ru.nsu_null.npide.ui.config.ConfigManager
 import ru.nsu_null.npide.ui.menubar.configureMenuBar
-import ru.nsu_null.npide.ui.yaml.ConfigManager
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalComposeUiApi::class)
@@ -21,7 +22,6 @@ fun main() = application {
         state = WindowState(width = 1280.dp, height = 768.dp),
         icon = BitmapPainter(useResource("ic_launcher.png", ::loadImageBitmap)),
     ) {
-        ConfigManager.readConfig()
         MainView()
         configureMenuBar()
     }

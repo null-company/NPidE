@@ -1,6 +1,8 @@
 package ru.nsu_null.npide.parser.compose_support
 
-import me.tomassetti.kanvas.*
+import me.tomassetti.kanvas.AntlrLexerFactory
+import me.tomassetti.kanvas.BaseLanguageSupport
+import me.tomassetti.kanvas.ParserData
 import me.tomassetti.kolasu.parsing.Parser
 import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CharStreams.fromString

@@ -5,9 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
-import javax.swing.JFileChooser
-import ru.nsu_null.npide.ui.yaml.ConfigManager
-
 
 @Composable
 fun FrameWindowScope.configureMenuBar() = MenuBar {
@@ -20,4 +17,3 @@ fun FrameWindowScope.configureMenuBar() = MenuBar {
                 Item("Config", onClick = { state.value = true})
             }
 }
-

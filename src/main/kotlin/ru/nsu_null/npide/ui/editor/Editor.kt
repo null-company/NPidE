@@ -13,15 +13,25 @@ import ru.nsu_null.npide.parser.compose_support.CustomLanguageSupport
 import ru.nsu_null.npide.parser.generator.G4LanguageManager
 import ru.nsu_null.npide.parser.generator.generateLexerParserFiles
 import ru.nsu_null.npide.platform.File
+import ru.nsu_null.npide.ui.config.ConfigManager
 import ru.nsu_null.npide.util.SingleSelection
 import java.awt.Color
 import java.nio.file.Paths
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
 
 class Editor(
-    val fileName: String,
-    val readContents: (backgroundScope: CoroutineScope) -> String,
+    val filePath: String,
+    readContents: (backgroundScope: CoroutineScope) -> String,
     val writeContents: (content: String) -> Unit
 ) {
+    private val isProjectFile: Boolean = ConfigManager.isProjectFile(filePath)
+    private lateinit var doneLoadingCallback: () -> Unit
+    val readContents: (backgroundScope: CoroutineScope) -> String = { backgroundScope ->
+        val res = readContents(backgroundScope)
+        doneLoadingCallback()
+        res
+    }
     var close: (() -> Unit)? = null
     lateinit var selection: SingleSelection
     val rtEditor: RTextScrollPane
@@ -59,9 +69,38 @@ class Editor(
 
 
         val scrollPane = RTextScrollPane(textArea)
-        scrollPane.textArea.addCaretListener { content = scrollPane.textArea.text }
-
         rtEditor = scrollPane
+
+        doneLoadingCallback = {
+            rtEditor.textArea.document.addDocumentListener(
+                SingleCallbackDocumentListener {
+                    content = scrollPane.textArea.text
+                    if (isProjectFile) {
+                        ConfigManager.setFileDirtiness(filePath, true)
+                    }
+                }
+            )
+        }
+    }
+
+    private class SingleCallbackDocumentListener(val callback: () -> Unit) : DocumentListener {
+        var hasText: Boolean = false
+        private fun callbackIfEdit() {
+            synchronized(this) {
+                if (hasText) {
+                    callback()
+                } else {
+                    hasText = true
+                }
+            }
+        }
+        override fun insertUpdate(e: DocumentEvent?) {
+            callbackIfEdit()
+        }
+        override fun removeUpdate(e: DocumentEvent?) {
+            callbackIfEdit()
+        }
+        override fun changedUpdate(e: DocumentEvent?) { }
     }
 
     val isActive: Boolean
@@ -71,13 +110,14 @@ class Editor(
         selection.selected = this
     }
 
-    val isCode = fileName.endsWith(".kt", ignoreCase = true)
+    val isCode = filePath.endsWith(".kt", ignoreCase = true)
 }
 
 fun Editor(file: File) = Editor(
-    fileName = file.name, { backgroundScope ->
+    filePath = file.filepath, { backgroundScope ->
         try {
-            file.readContents(backgroundScope)
+            val res = file.readContents(backgroundScope)
+            res
         } catch (e: Throwable) {
             e.printStackTrace()
             ""
