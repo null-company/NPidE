@@ -1,12 +1,8 @@
 build:
     - exec: "python"
-      beforeFiles: "CocoIDE-V1.91/cocas.py"
-      afterFiles: "-l"
+      beforeFiles: "CocoIDE-V1.91/cdm8_asm_build.py"
+      afterFiles: "-o CocoIDE-V1.91/debug.cdm8dbg.yaml"
       changeExt: "asm"
-    - exec: "python"
-      beforeFiles: "CocoIDE-V1.91/cocol.py"
-      afterFiles: "-l"
-      changeExt: "obj"
 run:
   - exec: "python"
     beforeFiles: "CocoIDE-V1.91/cdm8_emu_main.py"
@@ -14,6 +10,6 @@ run:
     changeExt: "img"
 debug:
   - exec: "python"
-    beforeFiles: "CocoIDE-V1.91/cdm8_emu_debug.py -f"
+    beforeFiles: "CocoIDE-V1.91/cdm8_emu_debug.py"
     afterFiles: ""
     changeExt: "img"

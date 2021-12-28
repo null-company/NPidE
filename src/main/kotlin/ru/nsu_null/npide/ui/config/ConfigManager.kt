@@ -112,7 +112,7 @@ object ConfigManager {
     }
 
     fun readFileBuilt(file: String): Boolean {
-        return currentProjectConfig.filePathToDirtyFlag[file] ?: throw NoSuchElementException()
+        return currentProjectConfig.filePathToDirtyFlag[file] ?: false//throw NoSuchElementException()
     }
 
     fun isProjectFile(filePath: String): Boolean = filePath in currentProjectConfig.projectFilePaths

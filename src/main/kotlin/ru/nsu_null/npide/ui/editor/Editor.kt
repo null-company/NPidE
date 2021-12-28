@@ -8,6 +8,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxDocument
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea
 import org.fife.ui.rtextarea.RTextScrollPane
 import readFile
+import ru.nsu_null.npide.breakpoints.BreakpointStorage
 import ru.nsu_null.npide.parser.TokenHighlighter
 import ru.nsu_null.npide.parser.compose_support.CustomLanguageSupport
 import ru.nsu_null.npide.parser.generator.G4LanguageManager
@@ -16,7 +17,10 @@ import ru.nsu_null.npide.platform.File
 import ru.nsu_null.npide.ui.config.ConfigManager
 import ru.nsu_null.npide.util.SingleSelection
 import java.awt.Color
+import java.awt.event.ActionEvent
 import java.nio.file.Paths
+import javax.swing.AbstractAction
+import javax.swing.KeyStroke
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
@@ -37,6 +41,7 @@ class Editor(
     val rtEditor: RTextScrollPane
 
     var content: String = ""
+    val breakpointHighlightColor  = Color(0xC5, 0x53, 0x50, 200)
 
     init {
         val textArea = RSyntaxTextArea(20, 60)
@@ -68,7 +73,31 @@ class Editor(
         textArea.currentLineHighlightColor = Color.LIGHT_GRAY
 
 
+        BreakpointStorage.loadBreakpoints()
+
         val scrollPane = RTextScrollPane(textArea)
+        scrollPane.textArea.addCaretListener { content = scrollPane.textArea.text }
+
+        class BreakpointAction : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent?) {
+                if (BreakpointStorage.map[filePath]?.contains(scrollPane.textArea.caretLineNumber) == true) {
+                    BreakpointStorage.removeBreakpoint(filePath, scrollPane.textArea.caretLineNumber)
+                    scrollPane.textArea.removeLineHighlight(scrollPane.textArea.caretLineNumber)
+                    scrollPane.textArea.removeAllLineHighlights()
+                    for (line in BreakpointStorage.map[filePath]!!) {
+                        scrollPane.textArea.addLineHighlight(line, breakpointHighlightColor)
+                    }
+                } else {
+                    scrollPane.textArea.addLineHighlight(scrollPane.textArea.caretLineNumber, breakpointHighlightColor)
+                    BreakpointStorage.addBreakpoint(filePath, scrollPane.textArea.caretLineNumber)
+                }
+                BreakpointStorage.storeBreakpoints()
+            }
+        }
+
+        scrollPane.textArea.actionMap.put("breakpointAction", BreakpointAction())
+        scrollPane.textArea.inputMap.put(KeyStroke.getKeyStroke("F6"), "breakpointAction")
+
         rtEditor = scrollPane
 
         doneLoadingCallback = {

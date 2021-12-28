@@ -1586,6 +1586,7 @@ if __name__ == "__main__":
             mlibfile.close()
 
     result = asm()
+    print(result)
     genoc(result)
 
     if args.lstx:
