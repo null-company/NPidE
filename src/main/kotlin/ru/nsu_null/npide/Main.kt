@@ -11,7 +11,6 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import ru.nsu_null.npide.ui.menubar.configureMenuBar
-import ru.nsu_null.npide.ui.yaml.ConfigManager
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalComposeUiApi::class)
@@ -22,7 +21,6 @@ fun main() = application {
         state = WindowState(width = 1280.dp, height = 768.dp),
         icon = BitmapPainter(useResource("ic_launcher.png", ::loadImageBitmap)),
     ) {
-        ConfigManager.readConfig()
         MainView()
         configureMenuBar()
     }

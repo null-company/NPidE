@@ -2,8 +2,8 @@ package ru.nsu_null.npide.ui.statusbar
 
 import ru.nsu_null.npide.ui.console.Console
 import ru.nsu_null.npide.ui.editor.Editors
-import ru.nsu_null.npide.ui.yaml.ConfigManager
-import ru.nsu_null.npide.ui.yaml.ConfigParser
+import ru.nsu_null.npide.ui.config.ConfigManager
+import ru.nsu_null.npide.ui.config.ConfigParser
 import java.io.IOException
 
 private var parser = ConfigParser()
@@ -45,7 +45,8 @@ fun usageButton(editors: Editors, console: Console, config: List<ConfigParser.Co
 fun usageCompile(editors: Editors, console: Console) {
     val flagBuilt = ConfigManager.readFileBuilt(editors.openedFile.filepath)
     if (!flagBuilt!!) {
-        ConfigManager.setFileBuilt(editors.openedFile.filepath, usageButton(editors, console, parser.resultBuild.build))
+        ConfigManager.setFileDirtiness(editors.openedFile.filepath,
+            !usageButton(editors, console, parser.resultBuild.build))
     }
 }
 
