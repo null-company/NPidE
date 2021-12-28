@@ -28,7 +28,7 @@ fun FrameWindowScope.configureMenuBar() = MenuBar {
 }
 
 private fun fileChooser(action: ConfigureProjectAction){
-    JFileChooser("C:\\B111\\Repos\\NPidE").apply {
+    JFileChooser(System.getProperty("user.home")).apply {
         showOpenDialog(null)
         if (selectedFile != null) {
             when (action) {
