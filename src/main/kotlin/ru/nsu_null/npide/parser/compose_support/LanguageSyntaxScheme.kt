@@ -1,6 +1,5 @@
 package ru.nsu_null.npide.parser.compose_support
 
-import TokenHighlighter
 import org.antlr.v4.runtime.Vocabulary
 import org.fife.ui.rsyntaxtextarea.Style
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme

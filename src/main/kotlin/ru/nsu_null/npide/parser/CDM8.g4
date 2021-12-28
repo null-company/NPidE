@@ -11,6 +11,8 @@ inst
      |.+? #nomatters
 ;
 
+
+
 COLON:':';
 
 REGISTER:
@@ -58,6 +60,13 @@ CMP_KEYWORD
 : 'gt'| 'lt'| 'le'| 'ge'| 'mi'| 'pl'| 'eq'| 'ne'| 'z'| 'nz'| 'cs'| 'cc'| 'vs'| 'vc' | 'hi' | 'lo' | 'hs'| 'ls'
 ;
 
+PREDEFINED_MACRO_INSTRUCTIONS
+    : 'jmp'| 'jsrr'| 'shl'| 'banything'| 'bngt'| 'bnge'| 'bneq'|
+                          'bnne'| 'bnlt'| 'bnle'| 'bnhi'| 'bnhs'| 'bncs'| 'bnlo'|
+                          'bnls'| 'bncc'| 'bnmi'| 'bnpl'| 'bnfalse'| 'bntrue'|
+                          'bnvs'| 'bnvc'| 'define'| 'ldv'| 'stv'
+;
+
 LOOP_KEYWORD
     :'continue'
     | 'break'
@@ -74,12 +83,7 @@ R_MACRO_INST
     : 'save'
 ;
 
-PREDEFINED_MACRO_INSTRUCTIONS
-    : 'jmp'| 'jsrr'| 'shl'| 'banything'| 'bngt'| 'bnge'| 'bneq'|
-                          'bnne'| 'bnlt'| 'bnle'| 'bnhi'| 'bnhs'| 'bncs'| 'bnlo'|
-                          'bnls'| 'bncc'| 'bnmi'| 'bnpl'| 'bnfalse'| 'bntrue'|
-                          'bnvs'| 'bnvc'| 'define'| 'ldv'| 'stv'
-;
+
 WS
 :    [ \t\u00A0\uFEFF\u2003,] + -> channel(1)
 ;

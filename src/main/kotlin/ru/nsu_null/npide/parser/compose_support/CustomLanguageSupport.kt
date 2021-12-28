@@ -1,6 +1,5 @@
 package ru.nsu_null.npide.parser.compose_support
 
-import TokenHighlighter
 import me.tomassetti.kanvas.*
 import me.tomassetti.kolasu.parsing.Parser
 import org.antlr.v4.runtime.CharStream

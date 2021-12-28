@@ -1,3 +1,5 @@
+package ru.nsu_null.npide.parser.compose_support
+
 import com.google.gson.*
 import java.util.*
 

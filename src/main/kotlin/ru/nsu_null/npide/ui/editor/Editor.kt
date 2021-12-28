@@ -1,11 +1,10 @@
 package ru.nsu_null.npide.ui.editor
 
 
-import TokenHighlighter
+import ru.nsu_null.npide.parser.compose_support.TokenHighlighter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import me.tomassetti.kanvas.AntlrTokenMaker
-import me.tomassetti.kolasu.model.pos
 import org.antlr.v4.runtime.Vocabulary
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea
@@ -13,19 +12,12 @@ import org.fife.ui.rtextarea.RTextScrollPane
 import readFile
 import ru.nsu_null.npide.parser.compose_support.CustomLanguageSupport
 import ru.nsu_null.npide.parser.generator.G4LanguageManager
-import ru.nsu_null.npide.parser.generator.generateLexerParserFiles
-import ru.nsu_null.npide.parser.translation.ProjectSymbolManager
-import ru.nsu_null.npide.parser.translation.SymbolTable
 import ru.nsu_null.npide.parser.translation.TranslationUnit
 import ru.nsu_null.npide.platform.File
 import ru.nsu_null.npide.util.SingleSelection
 import java.awt.Color
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
-import java.nio.file.Paths
-import javax.swing.JTextArea
-import javax.swing.text.BadLocationException
-import javax.swing.text.JTextComponent
 
 
 class Editor(
