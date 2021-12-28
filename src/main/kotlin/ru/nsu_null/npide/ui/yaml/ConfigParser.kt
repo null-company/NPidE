@@ -1,9 +1,9 @@
 package ru.nsu_null.npide.ui.yaml
 
 import com.charleskorn.kaml.Yaml
+import kotlinx.serialization.Serializable
 import java.io.FileInputStream
-import kotlinx.serialization.*
-import java.lang.StringBuilder
+
 class ConfigParser() {
     private val des = ConfigManager.readConfig()
     private val configStreamBuild = FileInputStream(ConfigManager.buildPath)

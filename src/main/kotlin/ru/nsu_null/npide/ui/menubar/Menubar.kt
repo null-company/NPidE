@@ -3,8 +3,8 @@ package ru.nsu_null.npide.ui.menubar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
-import javax.swing.JFileChooser
 import ru.nsu_null.npide.ui.yaml.ConfigManager
+import javax.swing.JFileChooser
 
 @Composable
 fun FrameWindowScope.configureMenuBar() = MenuBar {

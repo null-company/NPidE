@@ -1,6 +1,6 @@
 package ru.nsu_null.npide.parser
 
-import com.google.gson.*
+import com.google.gson.JsonParser
 import ru.nsu_null.npide.parser.file_representation.FilePositionSplitter
 import ru.nsu_null.npide.parser.file_representation.Node
 import java.util.*

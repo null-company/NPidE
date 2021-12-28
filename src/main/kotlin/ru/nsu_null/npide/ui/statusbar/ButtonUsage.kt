@@ -1,9 +1,9 @@
 package ru.nsu_null.npide.ui.statusbar
 
-import ru.nsu_null.npide.ui.yaml.ConfigParser
 import ru.nsu_null.npide.ui.console.Console
 import ru.nsu_null.npide.ui.editor.Editors
 import ru.nsu_null.npide.ui.yaml.ConfigManager
+import ru.nsu_null.npide.ui.yaml.ConfigParser
 import java.io.IOException
 
 private var parser = ConfigParser()

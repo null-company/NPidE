@@ -1,10 +1,9 @@
 package ru.nsu_null.npide.ui.yaml
 
 import com.charleskorn.kaml.Yaml
-import kotlinx.serialization.*
+import kotlinx.serialization.Serializable
 import java.io.File
 import java.io.FileInputStream
-import javax.swing.text.Highlighter
 
 object ConfigManager{
     const val projectFilePath:String = "config.yaml"
