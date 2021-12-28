@@ -12,6 +12,7 @@ object ConfigManager{
     var runPath:String = ""
     var debugPath:String = ""
     var grammarPath: String = ""
+    var grammarConfig: MutableList<GrammarConfig> = mutableListOf()
     var syntaxHighlighterPath = ""
     private var fileInformation: HashMap<String?, Boolean?>?  = hashMapOf()
 
@@ -20,10 +21,16 @@ object ConfigManager{
         val build: String,
         val run: String,
         val debug: String,
-        val grammar: String,
-        val syntaxHighlighter:String,
+        val grammarConfig: List<GrammarConfig>,
         val editFileInformation: HashMap<String?, Boolean?>?
         )
+
+    @Serializable
+    data class GrammarConfig(
+        val ext:String,
+        val grammar: String,
+        val syntaxHighlighter:String,
+    )
 
     fun storeConfig(){
         val result = Yaml.default.encodeToString(
@@ -31,8 +38,7 @@ object ConfigManager{
                 buildPath,
                 runPath,
                 debugPath,
-                grammarPath,
-                syntaxHighlighterPath,
+                grammarConfig,
                 fileInformation
             )
         )
@@ -49,8 +55,7 @@ object ConfigManager{
         buildPath = result.build
         runPath = result.run
         debugPath = result.debug
-        grammarPath = result.grammar
-        syntaxHighlighterPath = result.syntaxHighlighter
+        grammarConfig = result.grammarConfig as MutableList<GrammarConfig>
         fileInformation = result.editFileInformation!!
     }
 
@@ -61,8 +66,21 @@ object ConfigManager{
                 buildPath,
                 runPath,
                 debugPath,
-                grammarPath,
-                syntaxHighlighterPath,
+                grammarConfig,
+                fileInformation
+            )
+        )
+        File(projectFilePath).writeText(result)
+    }
+    fun setGrammar(ext:String, grammarPath:String, syntaxHighlighter: String){
+        val newItem = GrammarConfig(ext, grammarPath, syntaxHighlighter)
+        grammarConfig.add(newItem)
+        val result = Yaml.default.encodeToString(
+            ProjectFileConfigFile.serializer(), ProjectFileConfigFile(
+                buildPath,
+                runPath,
+                debugPath,
+                grammarConfig,
                 fileInformation
             )
         )
@@ -75,5 +93,26 @@ object ConfigManager{
         if(fileInformation!![file] == null)
             return false
         return fileInformation!![file]
+    }
+    fun applyToAll(ref: Int) {
+        when (ref) {
+
+            0 -> {
+                debugPath = buildPath
+                runPath = buildPath
+                storeConfig()
+            }
+            1 -> {
+                buildPath = runPath
+                debugPath = runPath
+                storeConfig()
+            }
+            2 -> {
+                buildPath = debugPath
+                runPath = debugPath
+                storeConfig()
+
+            }
+        }
     }
 }
