@@ -1,4 +1,4 @@
-grammar CDM8;
+grammar asm;
 
 s:
     (inst)*?

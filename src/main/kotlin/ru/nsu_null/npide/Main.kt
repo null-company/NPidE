@@ -9,6 +9,7 @@ import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.singleWindowApplication
+import ru.nsu_null.npide.ui.config.ConfigManager
 import ru.nsu_null.npide.ui.menubar.configureMenuBar
 
 @ExperimentalFoundationApi

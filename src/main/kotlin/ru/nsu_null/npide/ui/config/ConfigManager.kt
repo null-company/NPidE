@@ -3,6 +3,8 @@ package ru.nsu_null.npide.ui.config
 import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.Serializable
 import ru.nsu_null.npide.parser.generator.generateLexerParserFiles
+import ru.nsu_null.npide.parser.translation.ProjectSymbolManager
+import ru.nsu_null.npide.ui.config.ProjectSymbolProvider.languageManagerToProjectSymbolManager
 import java.io.File
 import java.io.FileInputStream
 import java.nio.file.Paths
@@ -15,18 +17,43 @@ object ConfigManager {
         )
         set(value) {
             field = value
-            storeConfig()
+            sync()
         }
 
     init {
         readConfig()
-        initLanguageSystem()
+        updateLanguageSystem()
     }
 
-    private fun initLanguageSystem() {
-        generateLexerParserFiles(
-            Paths.get("./src/main/kotlin/ru/nsu_null/npide/parser/CDM8.g4"),
-        )
+    private fun sync() {
+        storeConfig()
+        updateLanguageSystem()
+    }
+
+    private fun ProjectSymbolManager.addFileIfNotWatched(filePath: String) {
+        if (!hasFile(filePath)) {
+            addFile(filePath)
+        }
+    }
+
+    private fun updateLanguageSystem() {
+        for (extension in currentProjectConfig.grammarConfigs.map { it.ext }) {
+            val languageManager = LanguageManagerProvider.getLanguageManager(extension)
+            ProjectSymbolProvider.getProjectSymbolManager(languageManager)
+        }
+
+        for (projectSymbolManager in languageManagerToProjectSymbolManager.values) {
+            for (projectFilePath in currentProjectConfig.projectFilePaths) {
+                projectSymbolManager.addFileIfNotWatched(projectFilePath)
+            }
+        }
+
+        for (lexerPath in currentProjectConfig.grammarConfigs.map { it.grammar }) {
+            generateLexerParserFiles(
+                Paths.get(lexerPath)
+            )
+        }
+
     }
 
     class AutoUpdatedProjectConfig(projectConfig: ProjectConfig) : ProjectConfig(
@@ -41,32 +68,32 @@ object ConfigManager {
         override var build: String = super.build
             set(value) {
                 field = value
-                storeConfig()
+                sync()
             }
         override var run: String = super.run
             set(value) {
                 field = value
-                storeConfig()
+                sync()
             }
         override var debug: String = super.debug
             set(value) {
                 field = value
-                storeConfig()
+                sync()
             }
         override var filePathToDirtyFlag: HashMap<String, Boolean> = super.filePathToDirtyFlag
             set(value) {
                 field = value
-                storeConfig()
+                sync()
             }
         override var projectFilePaths: List<String> = super.projectFilePaths
             set(value) {
                 field = value
-                storeConfig()
+                sync()
             }
         override var grammarConfigs: List<GrammarConfig> = super.grammarConfigs
             set(value) {
                 field = value
-                storeConfig()
+                sync()
             }
     }
 
@@ -120,7 +147,7 @@ object ConfigManager {
         storeConfig()
     }
 
-    fun readFileBuilt(file: String): Boolean {
+    fun readFileDirtiness(file: String): Boolean {
         return currentProjectConfig.filePathToDirtyFlag[file] ?: throw NoSuchElementException()
     }
 
@@ -129,5 +156,9 @@ object ConfigManager {
     fun addGrammar(ext: String, grammarPath: String, syntaxHighlighter: String){
         val newItem = GrammarConfig(ext, grammarPath, syntaxHighlighter)
         currentProjectConfig.grammarConfigs += newItem
+    }
+
+    fun findGrammarConfigByExtension(extension: String): GrammarConfig {
+        return currentProjectConfig.grammarConfigs.firstOrNull { it.ext == extension } ?: throw NoSuchElementException()
     }
 }

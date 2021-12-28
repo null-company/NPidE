@@ -26,9 +26,9 @@ class Editor(
     val filePath: String,
     readContents: (backgroundScope: CoroutineScope) -> String,
     val writeContents: (content: String) -> Unit,
-    languageManager: G4LanguageManager,
+    languageManager: G4LanguageManager?,
 ) {
-    val extension = java.io.File(filePath).extension
+    val fileExtension = java.io.File(filePath).extension
     lateinit var gotoHandler: (String, Int) -> Unit
     private val isProjectFile: Boolean = ConfigManager.isProjectFile(filePath)
     private lateinit var doneLoadingCallback: () -> Unit
@@ -41,22 +41,35 @@ class Editor(
     lateinit var selection: SingleSelection
     val rtEditor: RTextScrollPane
     var content = ""
-    lateinit var translationUnit: TranslationUnit
+    var translationUnit: TranslationUnit? = null
 
     init {
         val textArea = RSyntaxTextArea(20, 60)
 
-        val lexerClass = languageManager.loadLexerClass()
 
-        val languageSupport = CustomLanguageSupport(
-            TokenHighlighter(readFile("src/main/kotlin/ru/nsu_null/npide/parser/colors.json")),
-            lexerClass.getField("VOCABULARY").get(null) as Vocabulary,
-            lexerClass
-        )
+        try {
+            val lexerClass = languageManager!!.loadLexerClass()
 
-        (textArea.document as RSyntaxDocument).setSyntaxStyle(AntlrTokenMaker(languageSupport.antlrLexerFactory))
+            if (!ConfigManager.isProjectFile(filePath)) {
+                throw NoSuchElementException()
+            }
 
-        textArea.syntaxScheme = languageSupport.syntaxScheme
+            val grammarConfig = ConfigManager.findGrammarConfigByExtension(fileExtension)
+
+            val languageSupport = CustomLanguageSupport(
+                TokenHighlighter(readFile(grammarConfig.syntaxHighlighter)),
+                lexerClass.getField("VOCABULARY").get(null) as Vocabulary,
+                lexerClass
+            )
+            (textArea.document as RSyntaxDocument).setSyntaxStyle(AntlrTokenMaker(languageSupport.antlrLexerFactory))
+            textArea.syntaxScheme = languageSupport.syntaxScheme
+        } catch (ignored: NoSuchElementException) {
+
+        }
+        catch (ignored: NullPointerException) {
+
+        }
+
         textArea.isCodeFoldingEnabled = true
         textArea.antiAliasingEnabled = true
         textArea.background = Color.DARK_GRAY
@@ -91,7 +104,7 @@ class Editor(
             )
             rtEditor.textArea.document.addDocumentListener(
                 SingleCallbackDocumentListener {
-                    translationUnit.updateText(rtEditor.textArea.text)
+                    translationUnit?.updateText(rtEditor.textArea.text)
                 }
             )
         }
@@ -145,7 +158,7 @@ class Editor(
 
 fun Editor(
     file: File,
-    languageManager: G4LanguageManager
+    languageManager: G4LanguageManager?
 ) = Editor(
     filePath = file.filepath, { backgroundScope ->
         try {

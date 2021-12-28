@@ -43,7 +43,7 @@ fun usageButton(editors: Editors, console: Console, config: List<ConfigParser.Co
 }
 
 fun usageCompile(editors: Editors, console: Console) {
-    val flagBuilt = ConfigManager.readFileBuilt(editors.openedFile.filepath)
+    val flagBuilt = ConfigManager.readFileDirtiness(editors.openedFile.filepath)
     if (!flagBuilt!!) {
         ConfigManager.setFileDirtiness(editors.openedFile.filepath,
             !usageButton(editors, console, parser.resultBuild.build))
