@@ -10,8 +10,8 @@ open class Node<ValueT>(
     var from: Int,
     var to: Int,
     var value: ValueT
-){
-    var type: NodeType = NodeType.OTHER;
-    var definitionPosition: Position = Position(-1, -1)
+) {
+    var type: NodeType = NodeType.OTHER
+    var definitionPosition = -1
 }
 

@@ -9,12 +9,11 @@ import org.antlr.v4.runtime.CharStreams.fromString
 import org.antlr.v4.runtime.Lexer
 import org.antlr.v4.runtime.Vocabulary
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme
-import ru.nsu_null.npide.parser.TokenHighlighter
 
 class CustomLanguageSupport(
-    val tokenHighlighter: TokenHighlighter,
-    val tokenNumToTokenName: Vocabulary,
-    val entityClass: Class<*>
+    private val tokenHighlighter: TokenHighlighter,
+    private val tokenNumToTokenName: Vocabulary,
+    val LexerClass: Class<*>
 ) :
     BaseLanguageSupport<RootNode<String>>() {
     override val syntaxScheme: SyntaxScheme
@@ -22,7 +21,7 @@ class CustomLanguageSupport(
     override val antlrLexerFactory: AntlrLexerFactory
         get() = object : AntlrLexerFactory {
             override fun create(code: String): Lexer {
-                return entityClass.getConstructor(CharStream::class.java).newInstance(fromString(code)) as Lexer
+                return LexerClass.getConstructor(CharStream::class.java).newInstance(fromString(code)) as Lexer
             }
 
         }
