@@ -12,12 +12,14 @@ import org.fife.ui.rtextarea.RTextScrollPane
 import readFile
 import ru.nsu_null.npide.parser.compose_support.CustomLanguageSupport
 import ru.nsu_null.npide.parser.generator.G4LanguageManager
+import ru.nsu_null.npide.parser.generator.generateLexerParserFiles
 import ru.nsu_null.npide.parser.translation.TranslationUnit
 import ru.nsu_null.npide.platform.File
 import ru.nsu_null.npide.util.SingleSelection
 import java.awt.Color
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
+import java.nio.file.Paths
 
 
 class Editor(
@@ -38,7 +40,7 @@ class Editor(
 
         // This function generates files from grammar
 
-
+        generateLexerParserFiles(Paths.get("./src/main/kotlin/ru/nsu_null/npide/parser/CDM8.g4"))
         // This function loads this stuff and set color scheme
 
         val LexerClass = languageManager.loadLexerClass()

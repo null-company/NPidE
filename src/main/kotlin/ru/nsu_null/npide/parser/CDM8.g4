@@ -76,7 +76,7 @@ MACRO
 ;
 
 C_MACRO_INST
-    : 'mpop' | 'mpush' 
+    : 'mpop' | 'mpush'
 ;
 
 R_MACRO_INST
@@ -141,7 +141,9 @@ fragment HexadecimalDigit
         :   [0-9a-fA-F]
         ;
 
-UN: .;
+
+
 COMMENT
  : '#' ~[\r\n\f]*
  ;
+UN: [\u0000-\uFFFF];

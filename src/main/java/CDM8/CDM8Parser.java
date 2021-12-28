@@ -18,9 +18,9 @@ public class CDM8Parser extends Parser {
 	public static final int
 		T__0=1, COLON=2, REGISTER=3, R1=4, R2=5, R3=6, R0=7, RR_INSTR=8, R_INSTR=9, 
 		RC_INSTR=10, C_INSTR=11, INSTR=12, C_PSEUDO_INSTR=13, ID_PSEUDO_INSTR=14, 
-		CMP_KEYWORD=15, LOOP_KEYWORD=16, MACRO=17, C_MACRO_INST=18, R_MACRO_INST=19, 
-		PREDEFINED_MACRO_INSTRUCTIONS=20, WS=21, NEWLINE=22, NUMBER=23, ID=24, 
-		COMMENT=25;
+		CMP_KEYWORD=15, PREDEFINED_MACRO_INSTRUCTIONS=16, LOOP_KEYWORD=17, MACRO=18, 
+		C_MACRO_INST=19, R_MACRO_INST=20, WS=21, NEWLINE=22, NUMBER=23, ID=24, 
+		COMMENT=25, UN=26;
 	public static final int
 		RULE_s = 0, RULE_inst = 1;
 	private static String[] makeRuleNames() {
@@ -33,7 +33,7 @@ public class CDM8Parser extends Parser {
 	private static String[] makeLiteralNames() {
 		return new String[] {
 			null, "'>'", "':'", null, "'r1'", "'r2'", "'r3'", "'r0'", null, null, 
-			null, null, null, null, null, null, null, "'macro'", null, "'save'"
+			null, null, null, null, null, null, null, null, "'macro'", null, "'save'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -41,8 +41,9 @@ public class CDM8Parser extends Parser {
 		return new String[] {
 			null, null, "COLON", "REGISTER", "R1", "R2", "R3", "R0", "RR_INSTR", 
 			"R_INSTR", "RC_INSTR", "C_INSTR", "INSTR", "C_PSEUDO_INSTR", "ID_PSEUDO_INSTR", 
-			"CMP_KEYWORD", "LOOP_KEYWORD", "MACRO", "C_MACRO_INST", "R_MACRO_INST", 
-			"PREDEFINED_MACRO_INSTRUCTIONS", "WS", "NEWLINE", "NUMBER", "ID", "COMMENT"
+			"CMP_KEYWORD", "PREDEFINED_MACRO_INSTRUCTIONS", "LOOP_KEYWORD", "MACRO", 
+			"C_MACRO_INST", "R_MACRO_INST", "WS", "NEWLINE", "NUMBER", "ID", "COMMENT", 
+			"UN"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -289,7 +290,7 @@ public class CDM8Parser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\33\31\4\2\t\2\4\3"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\34\31\4\2\t\2\4\3"+
 		"\t\3\3\2\7\2\b\n\2\f\2\16\2\13\13\2\3\3\3\3\3\3\3\3\3\3\3\3\6\3\23\n\3"+
 		"\r\3\16\3\24\5\3\27\n\3\3\3\4\t\24\2\4\2\4\2\2\2\33\2\t\3\2\2\2\4\26\3"+
 		"\2\2\2\6\b\5\4\3\2\7\6\3\2\2\2\b\13\3\2\2\2\t\n\3\2\2\2\t\7\3\2\2\2\n"+
