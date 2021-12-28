@@ -1,16 +1,16 @@
 package ru.nsu_null.npide.parser.translation
 
-import file_representation.FilePositionSplitter
-import file_representation.Node
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.tree.*
+import ru.nsu_null.npide.parser.file_representation.FilePositionSplitter
+import ru.nsu_null.npide.parser.file_representation.Node
 import ru.nsu_null.npide.parser.generator.G4LanguageManager
 
-class TranslationUnit(val g4LanguageManager: G4LanguageManager) {
+class TranslationUnit(private val g4LanguageManager: G4LanguageManager) {
     var innerSymbolTable = SymbolTable()
     var outerSymbolTable = SymbolTable()
-    val LexerClass = g4LanguageManager.loadLexerClass()
-    val ParserClass = g4LanguageManager.loadParserClass()
+    private val LexerClass = g4LanguageManager.loadLexerClass()
+    private val ParserClass = g4LanguageManager.loadParserClass()
 
 
     var text = ""
@@ -22,15 +22,12 @@ class TranslationUnit(val g4LanguageManager: G4LanguageManager) {
     }
 
     private var tokenizedFile: FilePositionSplitter<String> = FilePositionSplitter()
-        get() {
-            return field
-        }
 
     fun parseSymbolTable() {
         val lexer = LexerConstructor()
         val tokens = CommonTokenStream(lexer)
         val parser = ParserConstructor(tokens)
-        val tree = ParserClass.getMethod("s").invoke(parser) as ParseTree;
+        val tree = ParserClass.getMethod("s").invoke(parser) as ParseTree
         val walker = ParseTreeWalker()
 
         val defPhaseListener = DefPhase(g4LanguageManager)
@@ -49,7 +46,7 @@ class TranslationUnit(val g4LanguageManager: G4LanguageManager) {
             }
             var name = token.text
             if (name == null) {
-                name = "UNSPECIFIED";
+                name = "UNSPECIFIED"
             }
             tokenizedFile.nodes.add(
                 Node(
@@ -62,8 +59,7 @@ class TranslationUnit(val g4LanguageManager: G4LanguageManager) {
     }
 
     private fun LexerConstructor(): Lexer {
-        val lexer = LexerClass.getConstructor(CharStream::class.java).newInstance(CharStreams.fromString(text)) as Lexer
-        return lexer
+        return LexerClass.getConstructor(CharStream::class.java).newInstance(CharStreams.fromString(text)) as Lexer
     }
 
     private fun ParserConstructor(tokens: TokenStream): Parser {
@@ -80,12 +76,12 @@ class TranslationUnit(val g4LanguageManager: G4LanguageManager) {
                 break
             }
         }
-        return symbolName;
+        return symbolName
     }
 
 }
 
-class DefPhase(val loader: G4LanguageManager) : ParseTreeListener {
+class DefPhase(private val loader: G4LanguageManager) : ParseTreeListener {
     var innerSymbolTable = SymbolTable()
     var outerSymbolTable = SymbolTable()
     override fun visitTerminal(node: TerminalNode?) {

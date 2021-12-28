@@ -13,7 +13,7 @@ class G4LanguageManager(
         var baseDir = "./src/main/java"
     }
 
-    val classNameToClass = HashMap<String, Class<*>>()
+    private val classNameToClass = HashMap<String, Class<*>>()
     private fun loadClass(className: String): Class<*> {
         if (classNameToClass.containsKey(className)) {
             return classNameToClass[className]!!

@@ -2,8 +2,10 @@ package ru.nsu_null.npide.ui.config
 
 import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.Serializable
+import ru.nsu_null.npide.parser.generator.generateLexerParserFiles
 import java.io.File
 import java.io.FileInputStream
+import java.nio.file.Paths
 
 object ConfigManager {
     private const val projectFilePath: String = "config.yaml"
@@ -18,6 +20,13 @@ object ConfigManager {
 
     init {
         readConfig()
+        initLanguageSystem()
+    }
+
+    private fun initLanguageSystem() {
+        generateLexerParserFiles(
+            Paths.get("./src/main/kotlin/ru/nsu_null/npide/parser/CDM8.g4"),
+        )
     }
 
     class AutoUpdatedProjectConfig(projectConfig: ProjectConfig) : ProjectConfig(
@@ -84,19 +93,19 @@ object ConfigManager {
 
     @Serializable
     data class GrammarConfig(
-        val ext:String,
+        val ext: String,
         val grammar: String,
-        val syntaxHighlighter:String,
+        val syntaxHighlighter: String,
     )
 
-    fun storeConfig() {
+    private fun storeConfig() {
         val result = Yaml.default.encodeToString(
             ProjectConfig.serializer(), currentProjectConfig
         )
         File(projectFilePath).writeText(result)
     }
 
-    fun readConfig() {
+    private fun readConfig() {
         val fileExists: Boolean = File(projectFilePath).createNewFile()
         if(fileExists) {
             storeConfig()

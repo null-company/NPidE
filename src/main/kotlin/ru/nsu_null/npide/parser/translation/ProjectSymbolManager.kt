@@ -1,17 +1,9 @@
 package ru.nsu_null.npide.parser.translation
 
-import file_representation.Node
-import file_representation.FilePositionSplitter
-import org.antlr.v4.runtime.CharStreams.fromString
-
-import org.antlr.v4.runtime.*
-import org.antlr.v4.runtime.tree.*
 import ru.nsu_null.npide.parser.generator.G4LanguageManager
-import java.lang.IllegalArgumentException
-import kotlin.collections.HashMap
 
 // Главный класс который будет заниматься анализировать исходной файла
-class ProjectSymbolManager(val g4LanguageManager: G4LanguageManager) {
+class ProjectSymbolManager(private val g4LanguageManager: G4LanguageManager) {
     private val LexerClass = g4LanguageManager.loadLexerClass()
     private val ParserClass = g4LanguageManager.loadParserClass()
 
@@ -26,6 +18,9 @@ class ProjectSymbolManager(val g4LanguageManager: G4LanguageManager) {
 
     // TODO Изменить представление файла в соответствии с архитектурой RSyntaxTextArea
     fun goToDefinition(filename: String, caretPosition: Int): Pair<String, Int> {
+        for(path in pathToTranslationUnit.keys){
+            pathToTranslationUnit[path]!!.updateText(readFile(path));
+        }
         if (!pathToTranslationUnit.containsKey(filename)) {
             return Pair("", -1)
         }
@@ -37,8 +32,8 @@ class ProjectSymbolManager(val g4LanguageManager: G4LanguageManager) {
             return Pair(filename, pathToTranslationUnit[filename]!!.innerSymbolTable.getSymbolPos(symbolName))
         }
         for (k in pathToTranslationUnit.keys) {
-            if (pathToTranslationUnit.get(k)!!.outerSymbolTable.contains(symbolName)) {
-                val pos = pathToTranslationUnit.get(k)!!.outerSymbolTable.getSymbolPos(symbolName)
+            if (pathToTranslationUnit[k]!!.outerSymbolTable.contains(symbolName)) {
+                val pos = pathToTranslationUnit[k]!!.outerSymbolTable.getSymbolPos(symbolName)
                 return Pair(k, pos)
             }
         }
@@ -70,4 +65,7 @@ class ProjectSymbolManager(val g4LanguageManager: G4LanguageManager) {
         }
         return pathToTranslationUnit[filename]!!
     }
+}
+fun readFile(filename: String): String {
+    return java.io.File(filename).inputStream().readBytes().toString(Charsets.UTF_8)
 }
