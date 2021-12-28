@@ -18,7 +18,7 @@ interface File {
     fun writeContents(scope: CoroutineScope, content: String)
 }
 
-val HomeFolder: File get() = java.io.File("C:\\B111\\Repos\\NPidE").toProjectFile()
+val HomeFolder: File get() = java.io.File(System.getProperty("user.home")).toProjectFile()
 
 fun java.io.File.toProjectFile(): File = object : File {
     override val name: String get() = this@toProjectFile.name
