@@ -17,10 +17,11 @@ class Editors {
 
     fun open(file: File) {
 
-        val openedFilesPaths = editors.map { it.filePath }
-        if (file.filepath in openedFilesPaths) {
+        try {
+            val alreadyOpenedEditor = editors.first { it.filePath == file.filepath }
+            alreadyOpenedEditor.activate()
             return
-        }
+        } catch (ignored: NoSuchElementException) { }
 
         val editor = Editor(file)
         openedFile = file
