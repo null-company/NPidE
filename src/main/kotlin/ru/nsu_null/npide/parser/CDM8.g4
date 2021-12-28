@@ -141,6 +141,7 @@ fragment HexadecimalDigit
         :   [0-9a-fA-F]
         ;
 
+UN: .;
 COMMENT
  : '#' ~[\r\n\f]*
  ;
