@@ -1,4 +1,4 @@
-package ru.nsu_null.npide.ui.menubar
+package ru.nsu_null.npide.ui.menubar.configdialog
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -8,7 +8,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -21,7 +20,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowSize
 import androidx.compose.ui.window.rememberDialogState
 import ru.nsu_null.npide.ui.config.ConfigManager
-import ru.nsu_null.npide.ui.menubar.ConfigureProjectAction.*
+import ru.nsu_null.npide.ui.menubar.configdialog.ConfigureProjectAction.*
 import javax.swing.JFileChooser
 
 private fun applyConfig(config: ConfigManager.ProjectConfig) {
@@ -32,59 +31,6 @@ private fun applyCommonPath(configDialogState: ConfigDialogState, path: String) 
     configDialogState.projectConfig.buildPath.value = path
     configDialogState.projectConfig.runPath.value = path
     configDialogState.projectConfig.debugPath.value = path
-}
-
-private data class CurrentSelectionsState(
-    val highlighterPath: MutableState<String>,
-    val grammarPath: MutableState<String>,
-    val grammarExtension: MutableState<String>
-)
-
-private data class ProjectConfigState(
-    val runPath: MutableState<String>,
-    val buildPath: MutableState<String>,
-    val debugPath: MutableState<String>,
-    val grammarConfigs: MutableState<List<ConfigManager.GrammarConfig>>
-)
-
-private data class ConfigDialogState(
-    val projectConfig: ProjectConfigState,
-    val selectionState: CurrentSelectionsState
-)
-
-private fun getStateByConfig(): ConfigDialogState {
-
-    val currentProjectConfig = ConfigManager.currentProjectConfig
-
-    val runPath = currentProjectConfig.run
-    val buildPath = currentProjectConfig.build
-    val debugPath = currentProjectConfig.debug
-    val grammarConfigs = currentProjectConfig.grammarConfigs
-
-    return ConfigDialogState(
-        ProjectConfigState(
-            mutableStateOf(runPath),
-            mutableStateOf(buildPath),
-            mutableStateOf(debugPath),
-            mutableStateOf(grammarConfigs)
-        ),
-        CurrentSelectionsState(
-            mutableStateOf(""),
-            mutableStateOf(""),
-            mutableStateOf(""),
-        ),
-    )
-}
-
-private fun projectConfigByState(configDialogState: ConfigDialogState): ConfigManager.ProjectConfig {
-    return ConfigManager.ProjectConfig(
-        configDialogState.projectConfig.buildPath.value,
-        configDialogState.projectConfig.runPath.value,
-        configDialogState.projectConfig.debugPath.value,
-        ConfigManager.currentProjectConfig.filePathToDirtyFlag,
-        ConfigManager.currentProjectConfig.projectFilePaths,
-        configDialogState.projectConfig.grammarConfigs.value
-    )
 }
 
 @ExperimentalComposeUiApi

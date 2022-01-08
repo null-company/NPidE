@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
+import ru.nsu_null.npide.ui.menubar.configdialog.ConfigDialog
 
 @ExperimentalComposeUiApi
 @Composable
