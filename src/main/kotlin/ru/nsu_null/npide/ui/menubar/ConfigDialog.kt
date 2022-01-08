@@ -29,45 +29,61 @@ private fun applyConfig(config: ConfigManager.ProjectConfig) {
 }
 
 private fun applyCommonPath(configDialogState: ConfigDialogState, path: String) {
-    configDialogState.buildPath.value = path
-    configDialogState.runPath.value = path
-    configDialogState.debugPath.value = path
+    configDialogState.projectConfig.buildPath.value = path
+    configDialogState.projectConfig.runPath.value = path
+    configDialogState.projectConfig.debugPath.value = path
 }
 
-private data class ConfigDialogState(
-    val currentlySelectedHighlighterPath: MutableState<String>,
-    val currentlySelectedGrammarPath: MutableState<String>,
-    val currentlySelectedGrammarExtension: MutableState<String>,
+private data class CurrentSelectionsState(
+    val highlighterPath: MutableState<String>,
+    val grammarPath: MutableState<String>,
+    val grammarExtension: MutableState<String>
+)
+
+private data class ProjectConfigState(
     val runPath: MutableState<String>,
     val buildPath: MutableState<String>,
     val debugPath: MutableState<String>,
     val grammarConfigs: MutableState<List<ConfigManager.GrammarConfig>>
 )
 
+private data class ConfigDialogState(
+    val projectConfig: ProjectConfigState,
+    val selectionState: CurrentSelectionsState
+)
+
 private fun getStateByConfig(): ConfigDialogState {
-    val runPath = ConfigManager.currentProjectConfig.run
-    val buildPath = ConfigManager.currentProjectConfig.build
-    val debugPath = ConfigManager.currentProjectConfig.debug
-    val grammarConfigs = ConfigManager.currentProjectConfig.grammarConfigs
+
+    val currentProjectConfig = ConfigManager.currentProjectConfig
+
+    val runPath = currentProjectConfig.run
+    val buildPath = currentProjectConfig.build
+    val debugPath = currentProjectConfig.debug
+    val grammarConfigs = currentProjectConfig.grammarConfigs
+
     return ConfigDialogState(
-        mutableStateOf(""),
-        mutableStateOf(""),
-        mutableStateOf(""),
-        mutableStateOf(runPath),
-        mutableStateOf(buildPath),
-        mutableStateOf(debugPath),
-        mutableStateOf(grammarConfigs)
+        ProjectConfigState(
+            mutableStateOf(runPath),
+            mutableStateOf(buildPath),
+            mutableStateOf(debugPath),
+            mutableStateOf(grammarConfigs)
+        ),
+        CurrentSelectionsState(
+            mutableStateOf(""),
+            mutableStateOf(""),
+            mutableStateOf(""),
+        ),
     )
 }
 
 private fun projectConfigByState(configDialogState: ConfigDialogState): ConfigManager.ProjectConfig {
     return ConfigManager.ProjectConfig(
-        configDialogState.buildPath.value,
-        configDialogState.runPath.value,
-        configDialogState.debugPath.value,
+        configDialogState.projectConfig.buildPath.value,
+        configDialogState.projectConfig.runPath.value,
+        configDialogState.projectConfig.debugPath.value,
         ConfigManager.currentProjectConfig.filePathToDirtyFlag,
         ConfigManager.currentProjectConfig.projectFilePaths,
-        configDialogState.grammarConfigs.value
+        configDialogState.projectConfig.grammarConfigs.value
     )
 }
 
@@ -103,7 +119,7 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
                 }
                 Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("Configuration of Build:")
-                    SimpleOutlinedTextFieldSample("Build Path", configurationState.buildPath)
+                    SimpleOutlinedTextFieldSample("Build Path", configurationState.projectConfig.buildPath)
                     Button(
                         onClick = { chooseFile(ChooseBuild, configurationState) },
                         modifier = Modifier.padding(20.dp)
@@ -111,7 +127,7 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
                         Text("...")
                     }
                     Button(
-                        onClick = { applyCommonPath(configurationState, configurationState.buildPath.value) },
+                        onClick = { applyCommonPath(configurationState, configurationState.projectConfig.buildPath.value) },
                         modifier = Modifier.padding(20.dp)
                     ) {
                         Text("Apply to all")
@@ -120,7 +136,7 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
                 }
                 Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("Configuration of Run:")
-                    SimpleOutlinedTextFieldSample("Run Path", configurationState.runPath)
+                    SimpleOutlinedTextFieldSample("Run Path", configurationState.projectConfig.runPath)
                     Button(
                         onClick = { chooseFile(ChooseRun, configurationState) },
                         modifier = Modifier.padding(20.dp)
@@ -128,7 +144,7 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
                         Text("...")
                     }
                     Button(
-                        onClick = { applyCommonPath(configurationState, configurationState.runPath.value) },
+                        onClick = { applyCommonPath(configurationState, configurationState.projectConfig.runPath.value) },
                         modifier = Modifier.padding(20.dp)
                     ) {
                         Text("Apply to all")
@@ -137,7 +153,7 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
                 }
                 Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("Configuration of Debug:")
-                    SimpleOutlinedTextFieldSample("Debug Path", configurationState.debugPath)
+                    SimpleOutlinedTextFieldSample("Debug Path", configurationState.projectConfig.debugPath)
                     Button(
                         onClick = { chooseFile(ChooseDebug, configurationState) },
                         modifier = Modifier.padding(20.dp)
@@ -145,7 +161,7 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
                         Text("...")
                     }
                     Button(
-                        onClick = { applyCommonPath(configurationState, configurationState.debugPath.value) },
+                        onClick = { applyCommonPath(configurationState, configurationState.projectConfig.debugPath.value) },
                         modifier = Modifier.padding(20.dp)
                     ) {
                         Text("Apply to all")
@@ -164,11 +180,11 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
 
                     Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         SimpleOutlinedTextFieldSample("Extension of grammar",
-                            configurationState.currentlySelectedGrammarExtension)
+                            configurationState.selectionState.grammarExtension)
                         Column(modifier = Modifier.padding(40.dp)) {
                             Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
                                 SimpleOutlinedTextFieldSample("Grammar Path",
-                                    configurationState.currentlySelectedGrammarPath)
+                                    configurationState.selectionState.grammarPath)
                                 Button(
                                     onClick = { chooseFile(ChooseGrammar, configurationState) },
                                     modifier = Modifier.padding(20.dp)
@@ -178,7 +194,7 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
                             }
                             Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
                                 SimpleOutlinedTextFieldSample("Syntax Highlighter Path",
-                                    configurationState.currentlySelectedHighlighterPath)
+                                    configurationState.selectionState.highlighterPath)
                                 Button(
                                     onClick = { chooseFile(ChooseSyntaxHighlighter, configurationState) },
                                     modifier = Modifier.padding(20.dp)
@@ -189,14 +205,14 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
                             }
                             Button(
                                 onClick = {
-                                    if (configurationState.currentlySelectedGrammarExtension.value.isNotBlank()
-                                        && configurationState.currentlySelectedGrammarPath.value.isNotBlank()
-                                        && configurationState.currentlySelectedHighlighterPath.value.isNotBlank()) {
-                                        configurationState.grammarConfigs.value +=
+                                    if (configurationState.selectionState.grammarExtension.value.isNotBlank()
+                                        && configurationState.selectionState.grammarPath.value.isNotBlank()
+                                        && configurationState.selectionState.highlighterPath.value.isNotBlank()) {
+                                        configurationState.projectConfig.grammarConfigs.value +=
                                             ConfigManager.GrammarConfig(configurationState
-                                                .currentlySelectedGrammarExtension.value,
-                                                configurationState.currentlySelectedGrammarPath.value,
-                                                configurationState.currentlySelectedHighlighterPath.value)
+                                                .selectionState.grammarExtension.value,
+                                                configurationState.selectionState.grammarPath.value,
+                                                configurationState.selectionState.highlighterPath.value)
                                     }
                                 },
                                 modifier = Modifier.padding(20.dp)
@@ -206,11 +222,11 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
                         }
                     }
                 }
-                for (value in configurationState.grammarConfigs.value) {
+                for (value in configurationState.projectConfig.grammarConfigs.value) {
                     Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         TextBox("$value")
                         Button(
-                            onClick = { configurationState.grammarConfigs.value -= value }
+                            onClick = { configurationState.projectConfig.grammarConfigs.value -= value }
                         ) {
                             Text("Delete")
                         }
@@ -270,19 +286,19 @@ private fun chooseFile(configButtonState: ConfigureProjectAction, dialogState: C
         if (selectedFile != null) {
             when (configButtonState) {
                 ChooseBuild -> {
-                    dialogState.buildPath.value = selectedFile.toString()
+                    dialogState.projectConfig.buildPath.value = selectedFile.toString()
                 }
                 ChooseRun -> {
-                    dialogState.runPath.value = selectedFile.toString()
+                    dialogState.projectConfig.runPath.value = selectedFile.toString()
                 }
                 ChooseDebug -> {
-                    dialogState.debugPath.value = selectedFile.toString()
+                    dialogState.projectConfig.debugPath.value = selectedFile.toString()
                 }
                 ChooseGrammar -> {
-                    dialogState.currentlySelectedGrammarPath.value = selectedFile.toString()
+                    dialogState.selectionState.grammarPath.value = selectedFile.toString()
                 }
                 ChooseSyntaxHighlighter -> {
-                    dialogState.currentlySelectedHighlighterPath.value = selectedFile.toString()
+                    dialogState.selectionState.highlighterPath.value = selectedFile.toString()
                 }
             }
         }
