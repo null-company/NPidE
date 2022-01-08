@@ -23,7 +23,6 @@ import ru.nsu_null.npide.ui.config.ConfigManager
 import ru.nsu_null.npide.ui.menubar.configdialog.ConfigureProjectAction.*
 import ru.nsu_null.npide.ui.menubar.configdialog.ConfigureProjectAction.Companion.actionToConfigParamAsString
 import javax.swing.JFileChooser
-import kotlin.reflect.KProperty
 
 private fun applyConfig(config: ConfigManager.ProjectConfig) {
     ConfigManager.currentProjectConfig = ConfigManager.AutoUpdatedProjectConfig(config)
@@ -58,13 +57,13 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
                 ApplyConfigButton(isOpen, configurationState)
 
                 ConfigItem(configurationState,
-                    configurationState.projectConfig::buildPath.getter,
+                    configurationState.projectConfig.buildPath,
                     ChooseBuild)
                 ConfigItem(configurationState,
-                    configurationState.projectConfig::runPath.getter,
+                    configurationState.projectConfig.runPath,
                     ChooseRun)
                 ConfigItem(configurationState,
-                    configurationState.projectConfig::debugPath.getter,
+                    configurationState.projectConfig.debugPath,
                     ChooseDebug)
 
                 GrammarConfigurationForm(configurationState)
@@ -82,12 +81,12 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
 @ExperimentalComposeUiApi
 @Composable
 private fun ConfigItem(configurationState: ConfigDialogState,
-                       configFieldGetter: KProperty.Getter<MutableState<String>>,
+                       configField: MutableState<String>,
                        action: ConfigureProjectAction) {
     Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
         val configPropertyName = actionToConfigParamAsString[action]!!
         Text("Configuration of $configPropertyName:")
-        SimpleOutlinedTextFieldSample("$configPropertyName Path", configFieldGetter.call())
+        SimpleOutlinedTextFieldSample("$configPropertyName Path", configField)
         Button(
             onClick = { chooseFile(action, configurationState) },
             modifier = Modifier.padding(20.dp)
@@ -95,7 +94,7 @@ private fun ConfigItem(configurationState: ConfigDialogState,
             Text("...")
         }
         Button(
-            onClick = { applyCommonPath(configurationState, configFieldGetter.call().value) },
+            onClick = { applyCommonPath(configurationState, configField.value) },
             modifier = Modifier.padding(20.dp)
         ) {
             Text("Apply to all")
