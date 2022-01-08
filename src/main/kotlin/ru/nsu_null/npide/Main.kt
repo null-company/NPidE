@@ -12,8 +12,8 @@ import androidx.compose.ui.window.singleWindowApplication
 import ru.nsu_null.npide.ui.config.ConfigManager
 import ru.nsu_null.npide.ui.menubar.configureMenuBar
 
+@ExperimentalComposeUiApi
 @ExperimentalFoundationApi
-@OptIn(ExperimentalComposeUiApi::class)
 fun main() = singleWindowApplication(
     //TODO Where
     title = "Code Viewer",

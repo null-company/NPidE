@@ -87,10 +87,11 @@ private fun projectConfigByState(configDialogState: ConfigDialogState): ConfigMa
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@ExperimentalComposeUiApi
 @Composable
 fun ConfigDialog(isOpen: MutableState<Boolean>){
     val stateVertical = rememberScrollState(0)
+
     Dialog(onCloseRequest = { isOpen.value = false },
         title = "Configuration of project",
         resizable = false,
@@ -106,139 +107,172 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
                 .padding(end = 12.dp, bottom = 12.dp)
         ) {
             Column {
-                Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Button(
-                        onClick = {
-                            applyConfig(projectConfigByState(configurationState))
-                            isOpen.value = false
-                        },
-                        modifier = Modifier.padding(20.dp)
-                    ) {
-                        Text("Apply config")
-                    }
-                }
-                Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("Configuration of Build:")
-                    SimpleOutlinedTextFieldSample("Build Path", configurationState.projectConfig.buildPath)
-                    Button(
-                        onClick = { chooseFile(ChooseBuild, configurationState) },
-                        modifier = Modifier.padding(20.dp)
-                    ) {
-                        Text("...")
-                    }
-                    Button(
-                        onClick = { applyCommonPath(configurationState, configurationState.projectConfig.buildPath.value) },
-                        modifier = Modifier.padding(20.dp)
-                    ) {
-                        Text("Apply to all")
-                    }
+                ApplyConfigButton(isOpen, configurationState)
 
-                }
-                Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("Configuration of Run:")
-                    SimpleOutlinedTextFieldSample("Run Path", configurationState.projectConfig.runPath)
-                    Button(
-                        onClick = { chooseFile(ChooseRun, configurationState) },
-                        modifier = Modifier.padding(20.dp)
-                    ) {
-                        Text("...")
-                    }
-                    Button(
-                        onClick = { applyCommonPath(configurationState, configurationState.projectConfig.runPath.value) },
-                        modifier = Modifier.padding(20.dp)
-                    ) {
-                        Text("Apply to all")
-                    }
+                BuildConfigItem(configurationState)
+                RunConfigItem(configurationState)
+                DebugConfigItem(configurationState)
 
-                }
-                Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("Configuration of Debug:")
-                    SimpleOutlinedTextFieldSample("Debug Path", configurationState.projectConfig.debugPath)
-                    Button(
-                        onClick = { chooseFile(ChooseDebug, configurationState) },
-                        modifier = Modifier.padding(20.dp)
-                    ) {
-                        Text("...")
-                    }
-                    Button(
-                        onClick = { applyCommonPath(configurationState, configurationState.projectConfig.debugPath.value) },
-                        modifier = Modifier.padding(20.dp)
-                    ) {
-                        Text("Apply to all")
-                    }
-
-                }
-                Box(
-                    modifier = Modifier
-                        .padding(end = 12.dp, bottom = 12.dp)
-                        .background(color = Color(0, 0, 0, 20))
-
-                ) {
-                    Text("Configuration of Grammar:",
-                        modifier = Modifier.padding(10.dp),
-                        fontWeight = FontWeight.Bold)
-
-                    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        SimpleOutlinedTextFieldSample("Extension of grammar",
-                            configurationState.selectionState.grammarExtension)
-                        Column(modifier = Modifier.padding(40.dp)) {
-                            Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                SimpleOutlinedTextFieldSample("Grammar Path",
-                                    configurationState.selectionState.grammarPath)
-                                Button(
-                                    onClick = { chooseFile(ChooseGrammar, configurationState) },
-                                    modifier = Modifier.padding(20.dp)
-                                ) {
-                                    Text("...")
-                                }
-                            }
-                            Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                SimpleOutlinedTextFieldSample("Syntax Highlighter Path",
-                                    configurationState.selectionState.highlighterPath)
-                                Button(
-                                    onClick = { chooseFile(ChooseSyntaxHighlighter, configurationState) },
-                                    modifier = Modifier.padding(20.dp)
-
-                                ) {
-                                    Text("...")
-                                }
-                            }
-                            Button(
-                                onClick = {
-                                    if (configurationState.selectionState.grammarExtension.value.isNotBlank()
-                                        && configurationState.selectionState.grammarPath.value.isNotBlank()
-                                        && configurationState.selectionState.highlighterPath.value.isNotBlank()) {
-                                        configurationState.projectConfig.grammarConfigs.value +=
-                                            ConfigManager.GrammarConfig(configurationState
-                                                .selectionState.grammarExtension.value,
-                                                configurationState.selectionState.grammarPath.value,
-                                                configurationState.selectionState.highlighterPath.value)
-                                    }
-                                },
-                                modifier = Modifier.padding(20.dp)
-                            ) {
-                                Text("Add grammar config")
-                            }
-                        }
-                    }
-                }
-                for (value in configurationState.projectConfig.grammarConfigs.value) {
-                    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        TextBox("$value")
-                        Button(
-                            onClick = { configurationState.projectConfig.grammarConfigs.value -= value }
-                        ) {
-                            Text("Delete")
-                        }
-                        Spacer(modifier = Modifier.height(5.dp))
-                    }
-                }
+                GrammarConfigurationForm(configurationState)
+                CurrentlySelectedGrammarsList(configurationState)
             }
         }
 
         VerticalScrollbar(
             adapter = rememberScrollbarAdapter(stateVertical)
         )
+    }
+}
+
+@ExperimentalComposeUiApi
+@Composable
+private fun DebugConfigItem(configurationState: ConfigDialogState) {
+    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text("Configuration of Debug:")
+        SimpleOutlinedTextFieldSample("Debug Path", configurationState.projectConfig.debugPath)
+        Button(
+            onClick = { chooseFile(ChooseDebug, configurationState) },
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Text("...")
+        }
+        Button(
+            onClick = { applyCommonPath(configurationState, configurationState.projectConfig.debugPath.value) },
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Text("Apply to all")
+        }
+    }
+}
+
+@ExperimentalComposeUiApi
+@Composable
+private fun RunConfigItem(configurationState: ConfigDialogState) {
+    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text("Configuration of Run:")
+        SimpleOutlinedTextFieldSample("Run Path", configurationState.projectConfig.runPath)
+        Button(
+            onClick = { chooseFile(ChooseRun, configurationState) },
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Text("...")
+        }
+        Button(
+            onClick = { applyCommonPath(configurationState, configurationState.projectConfig.runPath.value) },
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Text("Apply to all")
+        }
+    }
+}
+
+@ExperimentalComposeUiApi
+@Composable
+private fun BuildConfigItem(configurationState: ConfigDialogState) {
+    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text("Configuration of Build:")
+        SimpleOutlinedTextFieldSample("Build Path", configurationState.projectConfig.buildPath)
+        Button(
+            onClick = { chooseFile(ChooseBuild, configurationState) },
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Text("...")
+        }
+        Button(
+            onClick = { applyCommonPath(configurationState, configurationState.projectConfig.buildPath.value) },
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Text("Apply to all")
+        }
+    }
+}
+
+@Composable
+private fun ApplyConfigButton(isOpen: MutableState<Boolean>, configurationState: ConfigDialogState) {
+    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Button(
+            onClick = {
+                applyConfig(projectConfigByState(configurationState))
+                isOpen.value = false
+            },
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Text("Apply config")
+        }
+    }
+}
+
+@Composable
+private fun CurrentlySelectedGrammarsList(configurationState: ConfigDialogState) {
+    for (value in configurationState.projectConfig.grammarConfigs.value) {
+        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            TextBox("$value")
+            Button(
+                onClick = { configurationState.projectConfig.grammarConfigs.value -= value }
+            ) {
+                Text("Delete")
+            }
+            Spacer(modifier = Modifier.height(5.dp))
+        }
+    }
+}
+
+@ExperimentalComposeUiApi
+@Composable
+private fun GrammarConfigurationForm(configurationState: ConfigDialogState) {
+    Box(
+        modifier = Modifier
+            .padding(end = 12.dp, bottom = 12.dp)
+            .background(color = Color(0, 0, 0, 20))
+
+    ) {
+        Text("Configuration of Grammar:",
+            modifier = Modifier.padding(10.dp),
+            fontWeight = FontWeight.Bold)
+
+        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            SimpleOutlinedTextFieldSample("Extension of grammar",
+                configurationState.selectionState.grammarExtension)
+            Column(modifier = Modifier.padding(40.dp)) {
+                Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    SimpleOutlinedTextFieldSample("Grammar Path",
+                        configurationState.selectionState.grammarPath)
+                    Button(
+                        onClick = { chooseFile(ChooseGrammar, configurationState) },
+                        modifier = Modifier.padding(20.dp)
+                    ) {
+                        Text("...")
+                    }
+                }
+                Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    SimpleOutlinedTextFieldSample("Syntax Highlighter Path",
+                        configurationState.selectionState.highlighterPath)
+                    Button(
+                        onClick = { chooseFile(ChooseSyntaxHighlighter, configurationState) },
+                        modifier = Modifier.padding(20.dp)
+
+                    ) {
+                        Text("...")
+                    }
+                }
+                Button(
+                    onClick = {
+                        if (configurationState.selectionState.grammarExtension.value.isNotBlank()
+                            && configurationState.selectionState.grammarPath.value.isNotBlank()
+                            && configurationState.selectionState.highlighterPath.value.isNotBlank()) {
+                            configurationState.projectConfig.grammarConfigs.value +=
+                                ConfigManager.GrammarConfig(configurationState
+                                    .selectionState.grammarExtension.value,
+                                    configurationState.selectionState.grammarPath.value,
+                                    configurationState.selectionState.highlighterPath.value)
+                        }
+                    },
+                    modifier = Modifier.padding(20.dp)
+                ) {
+                    Text("Add grammar config")
+                }
+            }
+        }
     }
 }
 
