@@ -8,12 +8,11 @@ import androidx.compose.ui.window.MenuBar
 
 @Composable
 fun FrameWindowScope.configureMenuBar() = MenuBar {
-    val state = remember { mutableStateOf(false) }
-    if (state.value){
-        val c = ConfigDialog()
-        c.run(state)
+    val configDialogIsOpen = remember { mutableStateOf(false) }
+    if (configDialogIsOpen.value){
+        ConfigDialog(configDialogIsOpen)
     }
     Menu("Configurations", mnemonic = 'C') {
-                Item("Config", onClick = { state.value = true})
-            }
+        Item("Config", onClick = { configDialogIsOpen.value = true })
+    }
 }
