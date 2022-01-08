@@ -56,3 +56,11 @@ internal fun projectConfigByState(configDialogState: ConfigDialogState): ConfigM
         configDialogState.projectConfig.grammarConfigs.value
     )
 }
+
+internal fun GrammarConfig(configurationState: ConfigDialogState): ConfigManager.GrammarConfig {
+    return ConfigManager.GrammarConfig(
+        configurationState.selectionState.grammarExtension.value,
+        configurationState.selectionState.grammarPath.value,
+        configurationState.selectionState.highlighterPath.value
+    )
+}

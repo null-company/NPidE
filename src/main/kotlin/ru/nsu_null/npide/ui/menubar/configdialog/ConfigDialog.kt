@@ -56,13 +56,13 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
             Column {
                 ApplyConfigButton(isOpen, configurationState)
 
-                ConfigItem(configurationState,
+                AddAllConfigItem(configurationState,
                     configurationState.projectConfig.buildPath,
                     ChooseBuild)
-                ConfigItem(configurationState,
+                AddAllConfigItem(configurationState,
                     configurationState.projectConfig.runPath,
                     ChooseRun)
-                ConfigItem(configurationState,
+                AddAllConfigItem(configurationState,
                     configurationState.projectConfig.debugPath,
                     ChooseDebug)
 
@@ -80,9 +80,25 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
 
 @ExperimentalComposeUiApi
 @Composable
-private fun ConfigItem(configurationState: ConfigDialogState,
-                       configField: MutableState<String>,
-                       action: ConfigureProjectAction) {
+private fun AddAllConfigItem(configurationState: ConfigDialogState,
+                             configField: MutableState<String>,
+                             action: ConfigureProjectAction) {
+    SimpleConfigItem(configurationState, configField, action) {
+        Button(
+            onClick = { applyCommonPath(configurationState, configField.value) },
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Text("Apply to all")
+        }
+    }
+}
+
+@ExperimentalComposeUiApi
+@Composable
+private fun SimpleConfigItem(configurationState: ConfigDialogState,
+                             configField: MutableState<String>,
+                             action: ConfigureProjectAction,
+                             afterChooseFileButton: (@Composable @ExtensionFunctionType RowScope.() -> Unit)? = null) {
     Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
         val configPropertyName = actionToConfigParamAsString[action]!!
         Text("Configuration of $configPropertyName:")
@@ -93,12 +109,7 @@ private fun ConfigItem(configurationState: ConfigDialogState,
         ) {
             Text("...")
         }
-        Button(
-            onClick = { applyCommonPath(configurationState, configField.value) },
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Text("Apply to all")
-        }
+        afterChooseFileButton?.invoke(this)
     }
 }
 
@@ -147,50 +158,42 @@ private fun GrammarConfigurationForm(configurationState: ConfigDialogState) {
             SimpleOutlinedTextFieldSample("Extension of grammar",
                 configurationState.selectionState.grammarExtension)
             Column(modifier = Modifier.padding(40.dp)) {
-                Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    SimpleOutlinedTextFieldSample("Grammar Path",
-                        configurationState.selectionState.grammarPath)
-                    Button(
-                        onClick = { chooseFile(ChooseGrammar, configurationState) },
-                        modifier = Modifier.padding(20.dp)
-                    ) {
-                        Text("...")
-                    }
-                }
-                Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    SimpleOutlinedTextFieldSample("Syntax Highlighter Path",
-                        configurationState.selectionState.highlighterPath)
-                    Button(
-                        onClick = { chooseFile(ChooseSyntaxHighlighter, configurationState) },
-                        modifier = Modifier.padding(20.dp)
-
-                    ) {
-                        Text("...")
-                    }
-                }
-                Button(
-                    onClick = {
-                        if (configurationState.selectionState.grammarExtension.value.isNotBlank()
-                            && configurationState.selectionState.grammarPath.value.isNotBlank()
-                            && configurationState.selectionState.highlighterPath.value.isNotBlank()) {
-                            configurationState.projectConfig.grammarConfigs.value +=
-                                ConfigManager.GrammarConfig(configurationState
-                                    .selectionState.grammarExtension.value,
-                                    configurationState.selectionState.grammarPath.value,
-                                    configurationState.selectionState.highlighterPath.value)
-                        }
-                    },
-                    modifier = Modifier.padding(20.dp)
-                ) {
-                    Text("Add grammar config")
-                }
+                SimpleConfigItem(configurationState,
+                    configurationState.selectionState.grammarPath,
+                    ChooseGrammar)
+                SimpleConfigItem(configurationState,
+                    configurationState.selectionState.highlighterPath,
+                    ChooseSyntaxHighlighter)
+                AddGrammarConfigButton(configurationState)
             }
         }
     }
 }
 
 @Composable
-fun TextBox(text: String = "Item") {
+private fun AddGrammarConfigButton(configurationState: ConfigDialogState) {
+
+    fun selectionIsReady(): Boolean {
+        return (configurationState.selectionState.grammarExtension.value.isNotBlank() &&
+                configurationState.selectionState.grammarPath.value.isNotBlank() &&
+                configurationState.selectionState.highlighterPath.value.isNotBlank())
+    }
+
+    Button(
+        onClick = {
+            if (selectionIsReady()) {
+                configurationState.projectConfig.grammarConfigs.value +=
+                    GrammarConfig(configurationState)
+            }
+        },
+        modifier = Modifier.padding(20.dp)
+    ) {
+        Text("Add grammar config")
+    }
+}
+
+@Composable
+private fun TextBox(text: String = "Item") {
     Box(
         modifier = Modifier.height(52.dp)
             .width((text.length * 6).dp + 40.dp)
@@ -204,7 +207,7 @@ fun TextBox(text: String = "Item") {
 
 @ExperimentalComposeUiApi
 @Composable
-fun SimpleOutlinedTextFieldSample(labelText: String, valueText: MutableState<String>) {
+private fun SimpleOutlinedTextFieldSample(labelText: String, valueText: MutableState<String>) {
     OutlinedTextField(
         value = valueText.value,
         onValueChange = { valueText.value = it },
