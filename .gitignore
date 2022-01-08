@@ -1,6 +1,7 @@
 CocoIDE-V1.91\__pycache__\*
 ./ex.*
-src/main/java/CDM8/*
+src/main/java/asm/*
+config.yaml
 
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
