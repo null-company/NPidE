@@ -3,24 +3,60 @@ package ru.nsu_null.npide.ui.config
 import ru.nsu_null.npide.parser.generator.G4LanguageManager
 import ru.nsu_null.npide.parser.translation.ProjectSymbolManager
 
-object LanguageManagerProvider {
-    internal val extensionToLanguageManager = HashMap<String, G4LanguageManager>()
+internal interface ConfigDependent {
+    fun syncToConfig()
+}
+
+object LanguageManagerProvider : ConfigDependent {
+    internal lateinit var extensionToLanguageManager: Map<String, G4LanguageManager>
+
+    init {
+        syncToConfig()
+    }
+
+    override fun syncToConfig() {
+        extensionToLanguageManager = ConfigManager.currentProjectConfig
+            .grammarConfigs.map { it.ext to G4LanguageManager(it.ext) }.toMap()
+    }
+
     fun getLanguageManager(extension: String): G4LanguageManager {
-        ConfigManager.currentProjectConfig // a workaround to make static initialization work :(
         synchronized(this) {
-            return extensionToLanguageManager.getOrPut(extension) {
-                ConfigManager.findGrammarConfigByExtension(extension) // throws if not found
-                G4LanguageManager(extension)
+            return extensionToLanguageManager.getOrElse(extension) {
+                throw NoSuchElementException("SuchExtension is not registered by config")
             }
         }
     }
 }
 
-object ProjectSymbolProvider {
-    internal val languageManagerToProjectSymbolManager = HashMap<G4LanguageManager, ProjectSymbolManager>()
-    fun getProjectSymbolManager(languageManager: G4LanguageManager): ProjectSymbolManager {
-        synchronized(this) {
-            return languageManagerToProjectSymbolManager.getOrPut(languageManager) { ProjectSymbolManager(languageManager) }
+object ProjectSymbolProvider : ConfigDependent {
+    internal lateinit var languageManagerToProjectSymbolManager: Map<G4LanguageManager, ProjectSymbolManager>
+
+    private fun ProjectSymbolManager.addFileIfNotWatched(filePath: String) {
+        if (!hasFile(filePath)) {
+            addFile(filePath)
         }
     }
+
+    init {
+        syncToConfig()
+        for (projectSymbolManager in languageManagerToProjectSymbolManager.values) {
+            for (projectFilePath in ConfigManager.currentProjectConfig.projectFilePaths) {
+                projectSymbolManager.addFileIfNotWatched(projectFilePath)
+            }
+        }
+    }
+
+    override fun syncToConfig() {
+        languageManagerToProjectSymbolManager = LanguageManagerProvider.extensionToLanguageManager
+            .values.map { it to ProjectSymbolManager(it) }.toMap()
+    }
+
+    fun getProjectSymbolManager(languageManager: G4LanguageManager): ProjectSymbolManager {
+        synchronized(this) {
+            return languageManagerToProjectSymbolManager.getOrElse(languageManager) {
+                throw NoSuchElementException("No such language manager is registered")
+            }
+        }
+    }
+
 }
