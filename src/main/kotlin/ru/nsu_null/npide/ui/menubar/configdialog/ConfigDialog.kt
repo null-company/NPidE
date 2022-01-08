@@ -21,7 +21,9 @@ import androidx.compose.ui.window.WindowSize
 import androidx.compose.ui.window.rememberDialogState
 import ru.nsu_null.npide.ui.config.ConfigManager
 import ru.nsu_null.npide.ui.menubar.configdialog.ConfigureProjectAction.*
+import ru.nsu_null.npide.ui.menubar.configdialog.ConfigureProjectAction.Companion.actionToConfigParamAsString
 import javax.swing.JFileChooser
+import kotlin.reflect.KProperty
 
 private fun applyConfig(config: ConfigManager.ProjectConfig) {
     ConfigManager.currentProjectConfig = ConfigManager.AutoUpdatedProjectConfig(config)
@@ -55,9 +57,15 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
             Column {
                 ApplyConfigButton(isOpen, configurationState)
 
-                BuildConfigItem(configurationState)
-                RunConfigItem(configurationState)
-                DebugConfigItem(configurationState)
+                ConfigItem(configurationState,
+                    configurationState.projectConfig::buildPath.getter,
+                    ChooseBuild)
+                ConfigItem(configurationState,
+                    configurationState.projectConfig::runPath.getter,
+                    ChooseRun)
+                ConfigItem(configurationState,
+                    configurationState.projectConfig::debugPath.getter,
+                    ChooseDebug)
 
                 GrammarConfigurationForm(configurationState)
                 CurrentlySelectedGrammarsList(configurationState)
@@ -70,62 +78,24 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
     }
 }
 
-@ExperimentalComposeUiApi
-@Composable
-private fun DebugConfigItem(configurationState: ConfigDialogState) {
-    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text("Configuration of Debug:")
-        SimpleOutlinedTextFieldSample("Debug Path", configurationState.projectConfig.debugPath)
-        Button(
-            onClick = { chooseFile(ChooseDebug, configurationState) },
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Text("...")
-        }
-        Button(
-            onClick = { applyCommonPath(configurationState, configurationState.projectConfig.debugPath.value) },
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Text("Apply to all")
-        }
-    }
-}
 
 @ExperimentalComposeUiApi
 @Composable
-private fun RunConfigItem(configurationState: ConfigDialogState) {
+private fun ConfigItem(configurationState: ConfigDialogState,
+                       configFieldGetter: KProperty.Getter<MutableState<String>>,
+                       action: ConfigureProjectAction) {
     Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text("Configuration of Run:")
-        SimpleOutlinedTextFieldSample("Run Path", configurationState.projectConfig.runPath)
+        val configPropertyName = actionToConfigParamAsString[action]!!
+        Text("Configuration of $configPropertyName:")
+        SimpleOutlinedTextFieldSample("$configPropertyName Path", configFieldGetter.call())
         Button(
-            onClick = { chooseFile(ChooseRun, configurationState) },
+            onClick = { chooseFile(action, configurationState) },
             modifier = Modifier.padding(20.dp)
         ) {
             Text("...")
         }
         Button(
-            onClick = { applyCommonPath(configurationState, configurationState.projectConfig.runPath.value) },
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Text("Apply to all")
-        }
-    }
-}
-
-@ExperimentalComposeUiApi
-@Composable
-private fun BuildConfigItem(configurationState: ConfigDialogState) {
-    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text("Configuration of Build:")
-        SimpleOutlinedTextFieldSample("Build Path", configurationState.projectConfig.buildPath)
-        Button(
-            onClick = { chooseFile(ChooseBuild, configurationState) },
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Text("...")
-        }
-        Button(
-            onClick = { applyCommonPath(configurationState, configurationState.projectConfig.buildPath.value) },
+            onClick = { applyCommonPath(configurationState, configFieldGetter.call().value) },
             modifier = Modifier.padding(20.dp)
         ) {
             Text("Apply to all")
@@ -135,16 +105,14 @@ private fun BuildConfigItem(configurationState: ConfigDialogState) {
 
 @Composable
 private fun ApplyConfigButton(isOpen: MutableState<Boolean>, configurationState: ConfigDialogState) {
-    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Button(
-            onClick = {
-                applyConfig(projectConfigByState(configurationState))
-                isOpen.value = false
-            },
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Text("Apply config")
-        }
+    Button(
+        onClick = {
+            applyConfig(projectConfigByState(configurationState))
+            isOpen.value = false
+        },
+        modifier = Modifier.padding(20.dp)
+    ) {
+        Text("Apply config")
     }
 }
 
@@ -256,7 +224,17 @@ private enum class ConfigureProjectAction {
     ChooseRun,
     ChooseDebug,
     ChooseGrammar,
-    ChooseSyntaxHighlighter,
+    ChooseSyntaxHighlighter;
+
+    companion object {
+        val actionToConfigParamAsString = mapOf(
+            ChooseBuild to "Build",
+            ChooseRun to "Run",
+            ChooseDebug to "Debug",
+            ChooseGrammar to "Grammar",
+            ChooseSyntaxHighlighter to "Syntax Highlighter"
+        )
+    }
 }
 
 //TODO: FileChooser with updating text in field
