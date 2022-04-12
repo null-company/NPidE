@@ -113,7 +113,7 @@ object ConfigManager {
 
     private fun readConfig() {
         val fileExists: Boolean = File(projectFilePath).createNewFile()
-        if(fileExists) {
+        if (fileExists) {
             storeConfig()
         }
         val configStream = FileInputStream(projectFilePath)
@@ -121,7 +121,7 @@ object ConfigManager {
         currentProjectConfig = AutoUpdatedProjectConfig(result)
     }
 
-    fun setFileDirtiness(file: String, isDirty: Boolean){
+    fun setFileDirtiness(file: String, isDirty: Boolean) {
         currentProjectConfig.filePathToDirtyFlag[file] = isDirty
         storeConfig()
     }
@@ -132,7 +132,7 @@ object ConfigManager {
 
     fun isProjectFile(filePath: String): Boolean = filePath in currentProjectConfig.projectFilePaths
 
-    fun addGrammar(ext: String, grammarPath: String, syntaxHighlighter: String){
+    fun addGrammar(ext: String, grammarPath: String, syntaxHighlighter: String) {
         val newItem = GrammarConfig(ext, grammarPath, syntaxHighlighter)
         currentProjectConfig.grammarConfigs += newItem
     }

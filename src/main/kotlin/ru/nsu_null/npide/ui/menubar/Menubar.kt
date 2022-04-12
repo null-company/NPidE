@@ -12,7 +12,7 @@ import ru.nsu_null.npide.ui.menubar.configdialog.ConfigDialog
 @Composable
 fun FrameWindowScope.configureMenuBar() = MenuBar {
     val configDialogIsOpen = remember { mutableStateOf(false) }
-    if (configDialogIsOpen.value){
+    if (configDialogIsOpen.value) {
         ConfigDialog(configDialogIsOpen)
     }
     Menu("Configurations", mnemonic = 'C') {

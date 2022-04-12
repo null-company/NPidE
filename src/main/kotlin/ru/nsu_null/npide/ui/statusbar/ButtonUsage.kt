@@ -11,26 +11,27 @@ import java.lang.Thread.sleep
 import java.util.concurrent.atomic.AtomicBoolean
 
 private var parser = ConfigParser()
+
 object DebugRunnableStepFlag : AtomicBoolean(true)
 
 class DebugRunnable(
     val console: Console,
     private val command: String,
-    ) : Runnable {
+) : Runnable {
     override fun run() {
         val process = Runtime.getRuntime().exec(command, arrayOf(), File(System.getProperty("user.dir")))
         var acc = ""
         val inputStreamReader = process.inputStream.reader(Charsets.UTF_8)
         val errorStreamReader = process.errorStream.reader(Charsets.UTF_8)
         val writer = process.outputStream.writer(Charsets.UTF_8)
-        while(process.isAlive) {
+        while (process.isAlive) {
             sleep(100)
-            while(inputStreamReader.ready()) {
+            while (inputStreamReader.ready()) {
                 val newChar = inputStreamReader.read()
                 acc += Char(newChar)
             }
 
-            while(errorStreamReader.ready()) {
+            while (errorStreamReader.ready()) {
                 val newChar = inputStreamReader.read()
                 acc += Char(newChar)
             }
@@ -43,7 +44,7 @@ class DebugRunnable(
                 writer.flush()
             }
         }
-        while(inputStreamReader.ready()) {
+        while (inputStreamReader.ready()) {
             val newChar = inputStreamReader.read()
             acc += Char(newChar)
         }
@@ -51,9 +52,9 @@ class DebugRunnable(
     }
 }
 
-var DebugThread : Thread = Thread()
+var DebugThread: Thread = Thread()
 
-private fun runCommand(arguments : String, console: Console): Boolean {
+private fun runCommand(arguments: String, console: Console): Boolean {
     val process = Runtime.getRuntime().exec(arguments, arrayOf(), File(System.getProperty("user.dir")))
     process.inputStream.reader(Charsets.UTF_8).use {
         console.add(it.readText())
@@ -63,16 +64,19 @@ private fun runCommand(arguments : String, console: Console): Boolean {
     }
     return process.exitValue() == 0
 }
+
 fun usageButton(editors: Editors, console: Console, config: List<ConfigParser.ConfigInternal>): Boolean {
     try {
         for (i in 0 until config.count()) {
             val preCommand = listOfNotNull(
                 config[i].exec,
                 config[i].beforeFiles,
-                ("\"" + File(editors.openedFile.parentPath + "/" + parser.changeExt(
-                    editors.openedFile.name,
-                    config[i].changeExt
-                )).absoluteFile + "\""),
+                ("\"" + File(
+                    editors.openedFile.parentPath + "/" + parser.changeExt(
+                        editors.openedFile.name,
+                        config[i].changeExt
+                    )
+                ).absoluteFile + "\""),
                 config[i].afterFiles
             )
             val command = parser.addSpaces(preCommand)
@@ -121,14 +125,16 @@ fun usageButtonCompile(editors: Editors, console: Console, config: List<ConfigPa
             }
             bpStr = bpStr.subSequence(0, bpStr.length - 2).toString()
             val preCommand = listOfNotNull(
-                    config[i].exec,
-                    config[i].beforeFiles,
-                    ("\"" + File(editors.openedFile.parentPath + "/" + parser.changeExt(
-                            editors.openedFile.name,
-                            config[i].changeExt
-                    )).absoluteFile + "\""),
-                    config[i].afterFiles,
-                    "-b \"$bpStr\""
+                config[i].exec,
+                config[i].beforeFiles,
+                ("\"" + File(
+                    editors.openedFile.parentPath + "/" + parser.changeExt(
+                        editors.openedFile.name,
+                        config[i].changeExt
+                    )
+                ).absoluteFile + "\""),
+                config[i].afterFiles,
+                "-b \"$bpStr\""
             )
             val command = parser.addSpaces(preCommand)
             return runCommand(command, console)
@@ -142,8 +148,10 @@ fun usageButtonCompile(editors: Editors, console: Console, config: List<ConfigPa
 fun usageCompile(editors: Editors, console: Console) {
     val flagBuilt = ConfigManager.readFileDirtiness(editors.openedFile.filepath)
     if (!flagBuilt!!) {
-        ConfigManager.setFileDirtiness(editors.openedFile.filepath,
-            !usageButtonCompile(editors, console, parser.resultBuild.build))
+        ConfigManager.setFileDirtiness(
+            editors.openedFile.filepath,
+            !usageButtonCompile(editors, console, parser.resultBuild.build)
+        )
     }
 }
 

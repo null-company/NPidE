@@ -20,7 +20,7 @@ class ConfigParser {
         }
         return filename
     }
-    
+
     fun addSpaces(list: List<String>): String {
         val result = StringBuilder()
         for (element in list) {

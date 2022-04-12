@@ -28,7 +28,7 @@ import kotlin.text.Regex.Companion.fromLiteral
 @Composable
 fun EditorView(model: Editor, settings: Settings) = key(model) {
 
-    with (LocalDensity.current) {
+    with(LocalDensity.current) {
         SelectionContainer {
             Surface(
                 Modifier.fillMaxSize(),

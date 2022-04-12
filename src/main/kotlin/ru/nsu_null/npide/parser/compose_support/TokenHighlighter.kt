@@ -1,7 +1,6 @@
 package ru.nsu_null.npide.parser.compose_support
 
-import com.google.gson.*
-import java.util.*
+import com.google.gson.JsonParser
 
 class TokenHighlighter(jsonHighlightRulesString: String, var defColor: String = "#000000") {
     private var hashMap = HashMap<String, String>()

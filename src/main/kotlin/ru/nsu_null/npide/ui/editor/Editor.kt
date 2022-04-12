@@ -44,7 +44,7 @@ class Editor(
     var close: (() -> Unit)? = null
     lateinit var selection: SingleSelection
     val rtEditor: RTextScrollPane
-    val breakpointHighlightColor  = Color(0xC5, 0x53, 0x50, 200)
+    val breakpointHighlightColor = Color(0xC5, 0x53, 0x50, 200)
     var content = ""
     var translationUnit: TranslationUnit? = null
 
@@ -70,8 +70,7 @@ class Editor(
             textArea.syntaxScheme = languageSupport.syntaxScheme
         } catch (ignored: NoSuchElementException) {
 
-        }
-        catch (ignored: NullPointerException) {
+        } catch (ignored: NullPointerException) {
 
         }
 
@@ -140,10 +139,12 @@ class Editor(
         override fun insertUpdate(e: DocumentEvent?) {
             callback()
         }
+
         override fun removeUpdate(e: DocumentEvent?) {
             callback()
         }
-        override fun changedUpdate(e: DocumentEvent?) { }
+
+        override fun changedUpdate(e: DocumentEvent?) {}
     }
 
     private class SingleCallbackDocumentListenerAfterAWrite(val callback: () -> Unit) : DocumentListener {
@@ -157,13 +158,16 @@ class Editor(
                 }
             }
         }
+
         override fun insertUpdate(e: DocumentEvent?) {
             callbackIfEdit()
         }
+
         override fun removeUpdate(e: DocumentEvent?) {
             callbackIfEdit()
         }
-        override fun changedUpdate(e: DocumentEvent?) { }
+
+        override fun changedUpdate(e: DocumentEvent?) {}
     }
 
     val isActive: Boolean

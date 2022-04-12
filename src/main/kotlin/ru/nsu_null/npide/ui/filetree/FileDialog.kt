@@ -24,27 +24,29 @@ fun SimpleOutlinedTextFieldSample(): String {
     OutlinedTextField(
         value = text,
         onValueChange = { text = it },
-        label = { Text("Filename",fontWeight = FontWeight.Bold,  color = Color.Black) },
+        label = { Text("Filename", fontWeight = FontWeight.Bold, color = Color.Black) },
         textStyle = TextStyle(color = Color.Black, fontWeight = FontWeight.Bold),
         modifier = Modifier.padding(20.dp),
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = Color.Black,
             unfocusedBorderColor = Color.Black,
-            backgroundColor = Color.White)
+            backgroundColor = Color.White
+        )
     )
     return text
 }
 
-fun FileCreate(fileName:String) {
+fun FileCreate(fileName: String) {
     val file = ioFile(fileName)
     file.writeBytes(ByteArray(0))
 
 }
+
 @ExperimentalComposeUiApi
 @Composable
 fun OpenCreteFileDialog(state: MutableState<Boolean>, filepath: String) {
 // TODO добавить Enter
-    Dialog(onCloseRequest={state.value = false}) {
+    Dialog(onCloseRequest = { state.value = false }) {
         val text = SimpleOutlinedTextFieldSample()
         Button(
             onClick = {
@@ -67,9 +69,9 @@ fun OpenCreteFileDialog(state: MutableState<Boolean>, filepath: String) {
 @Composable
 fun OpenDeleteDialog(state: MutableState<Boolean>, filepath: String) {
 // TODO Enter
-    Dialog(onCloseRequest={state.value = false}, title = "Warning") {
+    Dialog(onCloseRequest = { state.value = false }, title = "Warning") {
         Text(
-            text= "Are you sure want to delete $filepath?" ,
+            text = "Are you sure want to delete $filepath?",
             modifier = Modifier.padding(60.dp, 40.dp),
             color = Color.Black,
             fontSize = 12.sp
@@ -99,9 +101,9 @@ fun OpenDeleteDialog(state: MutableState<Boolean>, filepath: String) {
     }
 }
 
-fun FileDelete( fileName:String) {
+fun FileDelete(fileName: String) {
     val file = ioFile(fileName)
-    if(file.exists())
+    if (file.exists())
         file.deleteRecursively()
 }
 
