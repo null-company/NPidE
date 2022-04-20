@@ -5,6 +5,7 @@ import ru.nsu_null.npide.ui.config.ConfigManager
 import ru.nsu_null.npide.ui.config.ConfigParser
 import ru.nsu_null.npide.ui.console.Console
 import ru.nsu_null.npide.ui.editor.Editors
+import ru.nsu_null.npide.ui.npide.NPIDE
 import java.io.File
 import java.io.IOException
 import java.lang.Thread.sleep
@@ -146,9 +147,9 @@ fun usageButtonCompile(editors: Editors, console: Console, config: List<ConfigPa
 }
 
 fun usageCompile(editors: Editors, console: Console) {
-    val flagBuilt = ConfigManager.readFileDirtiness(editors.openedFile.filepath)
-    if (!flagBuilt!!) {
-        ConfigManager.setFileDirtiness(
+    val flagBuilt = NPIDE.configManager.readFileDirtiness(editors.openedFile.filepath)
+    if (!flagBuilt) {
+        NPIDE.configManager.setFileDirtiness(
             editors.openedFile.filepath,
             !usageButtonCompile(editors, console, parser.resultBuild.build)
         )

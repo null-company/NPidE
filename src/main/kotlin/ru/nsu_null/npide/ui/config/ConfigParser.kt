@@ -2,12 +2,13 @@ package ru.nsu_null.npide.ui.config
 
 import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.Serializable
+import ru.nsu_null.npide.ui.npide.NPIDE
 import java.io.FileInputStream
 
 class ConfigParser {
-    private val configStreamBuild = FileInputStream(ConfigManager.currentProjectConfig.build)
-    private val configStreamRun = FileInputStream(ConfigManager.currentProjectConfig.run)
-    private val configStreamDebug = FileInputStream(ConfigManager.currentProjectConfig.debug)
+    private val configStreamBuild = FileInputStream(NPIDE.configManager.currentProjectConfig.build)
+    private val configStreamRun = FileInputStream(NPIDE.configManager.currentProjectConfig.run)
+    private val configStreamDebug = FileInputStream(NPIDE.configManager.currentProjectConfig.debug)
 
     var resultBuild = Yaml.default.decodeFromStream(Config.serializer(), configStreamBuild)
     var resultRun = Yaml.default.decodeFromStream(Config.serializer(), configStreamRun)

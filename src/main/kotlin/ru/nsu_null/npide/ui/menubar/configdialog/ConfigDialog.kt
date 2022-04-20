@@ -22,10 +22,11 @@ import androidx.compose.ui.window.rememberDialogState
 import ru.nsu_null.npide.ui.config.ConfigManager
 import ru.nsu_null.npide.ui.menubar.configdialog.ConfigureProjectAction.*
 import ru.nsu_null.npide.ui.menubar.configdialog.ConfigureProjectAction.Companion.actionToConfigParamAsString
+import ru.nsu_null.npide.ui.npide.NPIDE
 import javax.swing.JFileChooser
 
 private fun applyConfig(config: ConfigManager.ProjectConfig) {
-    ConfigManager.currentProjectConfig = ConfigManager.AutoUpdatedProjectConfig(config)
+    NPIDE.configManager.currentProjectConfig = NPIDE.configManager.AutoUpdatedProjectConfig(config)
 }
 
 private fun applyCommonPath(configDialogState: ConfigDialogState, path: String) {
