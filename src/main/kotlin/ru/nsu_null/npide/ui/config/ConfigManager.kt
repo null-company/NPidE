@@ -9,7 +9,7 @@ import java.io.FileInputStream
 import java.nio.file.Paths
 
 class ConfigManager(private val project: ProjectChooser.Project) {
-    private val projectFilePath: String = project.rootFolder.filepath + "config.yaml"
+    private val projectConfigPath: String = project.rootFolder.filepath + "/config.yaml"
     var currentProjectConfig: AutoUpdatedProjectConfig =
         AutoUpdatedProjectConfig(
             ProjectConfig("", "", "", hashMapOf(), listOf(), listOf())
@@ -113,15 +113,15 @@ class ConfigManager(private val project: ProjectChooser.Project) {
         val result = Yaml.default.encodeToString(
             ProjectConfig.serializer(), currentProjectConfig
         )
-        File(projectFilePath).writeText(result)
+        File(projectConfigPath).writeText(result)
     }
 
     private fun readConfig() {
-        val fileExists: Boolean = File(projectFilePath).createNewFile()
+        val fileExists: Boolean = File(projectConfigPath).createNewFile()
         if (fileExists) {
             storeConfig()
         }
-        val configStream = FileInputStream(projectFilePath)
+        val configStream = FileInputStream(projectConfigPath)
         val result = Yaml.default.decodeFromStream(ProjectConfig.serializer(), configStream)
         currentProjectConfig = AutoUpdatedProjectConfig(result)
     }

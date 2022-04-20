@@ -8,7 +8,8 @@ import java.nio.file.Path
 class DiskHomeDirectoryRepositoryManager : ProjectChooser.ProjectsRepositoryManager {
 
     companion object {
-        private val commonRepositoryPath = "${HomeFolder.filepath}/.config/npide/" // todo move to other place for it is shared
+        private val commonRepositoryPath =
+            "${HomeFolder.filepath}/.config/npide/" // todo move to other place for it is shared
         private val projectsRepositoryFilePath = commonRepositoryPath + "projects"
     }
 
@@ -17,12 +18,21 @@ class DiskHomeDirectoryRepositoryManager : ProjectChooser.ProjectsRepositoryMana
         java.io.File(projectsRepositoryFilePath).createNewFile()
     }
 
-    override val existingProjects: List<ProjectChooser.Project>
-        get() = java.io.File(projectsRepositoryFilePath).readLines().map {
+    override var existingProjects: List<ProjectChooser.Project>
+        get() = java.io.File(projectsRepositoryFilePath).readLines().filter { it.isNotBlank() }.map {
             ProjectChooser.Project(java.io.File(it).toProjectFile())
+        }
+        set(projects) {
+            java.io.File(projectsRepositoryFilePath).writeText(
+                (projects.map { it.rootFolder.filepath }).joinToString("\n")
+            )
         }
 
     override fun addNewProject(newProject: ProjectChooser.Project) {
-        TODO("Not yet implemented")
+        existingProjects = existingProjects + newProject
+    }
+
+    override fun deleteProject(index: Int) {
+        existingProjects = existingProjects.toMutableList().also { it.removeAt(index) }
     }
 }
