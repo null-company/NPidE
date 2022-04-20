@@ -1,6 +1,6 @@
-import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 
 plugins {
     kotlin("jvm") version "1.5.21"
@@ -25,6 +25,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("com.fifesoft:rsyntaxtextarea:3.1.3")
     implementation("me.tomassetti.kanvas:kanvas-core:0.2.1")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks.withType<KotlinCompile>() {
@@ -40,4 +41,12 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    jvmTarget = "1.8"
+}
+val compileTestKotlin: KotlinCompile by tasks
+compileTestKotlin.kotlinOptions {
+    jvmTarget = "1.8"
 }

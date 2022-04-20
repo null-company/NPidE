@@ -35,6 +35,8 @@ fun ButtonsBar(settings: Settings, editors: Editors, console: Console) = Box(
 
         ButtonsBarButton("Save file") { editors.active!!.writeContents(editors.active!!.content) }
 
+        ButtonsBarButton("Step") {DebugRunnableStepFlag.set(true)}
+
         Row {
             Text(
                 text = "Text size",

@@ -17,6 +17,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import org.fife.ui.rtextarea.RTextScrollPane
+import ru.nsu_null.npide.breakpoints.BreakpointStorage
 import ru.nsu_null.npide.ui.common.AppTheme
 import ru.nsu_null.npide.ui.common.Settings
 import ru.nsu_null.npide.util.loadableScoped
@@ -26,6 +27,7 @@ import kotlin.text.Regex.Companion.fromLiteral
 
 @Composable
 fun EditorView(model: Editor, settings: Settings) = key(model) {
+
     with (LocalDensity.current) {
         SelectionContainer {
             Surface(
@@ -37,6 +39,11 @@ fun EditorView(model: Editor, settings: Settings) = key(model) {
                 if (fileContents != null) {
                     Box {
                         CodeEditor(model.rtEditor, fileContents!!, Modifier.fillMaxSize())
+                        if (BreakpointStorage.map.containsKey(model.filePath)) {
+                            for (line in BreakpointStorage.map[model.filePath]!!) {
+                                model.rtEditor.textArea.addLineHighlight(line, model.breakpointHighlightColor)
+                            }
+                        }
                         Box(
                             Modifier
                                 .offset(

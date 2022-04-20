@@ -2,6 +2,7 @@ from cdm8_emu import CDM8Emu
 import argparse as ap
 import functools
 
+
 def main():
     main_parser = ap.ArgumentParser(description='CDM8 emulator')
     main_parser.add_argument('filename', type=str, const=None, default="", help='memory_image_file[.img]')

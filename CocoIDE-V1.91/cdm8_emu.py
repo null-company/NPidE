@@ -622,6 +622,7 @@ class CDM8Emu():
 ########## End of Emulator class
 def EP(s, term=True):
     sys.stderr.write(s + '\n')
+    raise ValueError('foo')
     if term:
         quit(-1)
 

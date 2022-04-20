@@ -1,15 +1,17 @@
-grammar CDM8;
+grammar asm;
 
 s:
     (inst)*?
 ;
 
 inst
-     :
-      ID COLON #def
-     |ID #usage
+     : ID '>' #global_def
+     | ID COLON #def
+     | ID #usage
      |.+? #nomatters
 ;
+
+
 
 COLON:':';
 
@@ -58,6 +60,13 @@ CMP_KEYWORD
 : 'gt'| 'lt'| 'le'| 'ge'| 'mi'| 'pl'| 'eq'| 'ne'| 'z'| 'nz'| 'cs'| 'cc'| 'vs'| 'vc' | 'hi' | 'lo' | 'hs'| 'ls'
 ;
 
+PREDEFINED_MACRO_INSTRUCTIONS
+    : 'jmp'| 'jsrr'| 'shl'| 'banything'| 'bngt'| 'bnge'| 'bneq'|
+                          'bnne'| 'bnlt'| 'bnle'| 'bnhi'| 'bnhs'| 'bncs'| 'bnlo'|
+                          'bnls'| 'bncc'| 'bnmi'| 'bnpl'| 'bnfalse'| 'bntrue'|
+                          'bnvs'| 'bnvc'| 'define'| 'ldv'| 'stv'
+;
+
 LOOP_KEYWORD
     :'continue'
     | 'break'
@@ -67,24 +76,19 @@ MACRO
 ;
 
 C_MACRO_INST
-    : 'mpop' | 'mpush' 
+    : 'mpop' | 'mpush'
 ;
 
 R_MACRO_INST
     : 'save'
 ;
 
-PREDEFINED_MACRO_INSTRUCTIONS
-    : 'jmp'| 'jsrr'| 'shl'| 'banything'| 'bngt'| 'bnge'| 'bneq'|
-                          'bnne'| 'bnlt'| 'bnle'| 'bnhi'| 'bnhs'| 'bncs'| 'bnlo'|
-                          'bnls'| 'bncc'| 'bnmi'| 'bnpl'| 'bnfalse'| 'bntrue'|
-                          'bnvs'| 'bnvc'| 'define'| 'ldv'| 'stv'
-;
+
 WS
 :    [ \t\u00A0\uFEFF\u2003,] + -> channel(1)
 ;
 NEWLINE
-  : '\r'? '\n' ->channel(1);
+  : ('\r' ? '\n' | '\r') ->channel(1);
 
 NUMBER
    : '0' [xX] HEX+
@@ -137,6 +141,9 @@ fragment HexadecimalDigit
         :   [0-9a-fA-F]
         ;
 
+
+
 COMMENT
  : '#' ~[\r\n\f]*
  ;
+UN: [\u0000-\uFFFF];

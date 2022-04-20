@@ -2,6 +2,8 @@ asect 0x00
 
 ldi r0, 0x0f
 ldi r1, 0xe0
+jsr clean
+halt
 loop:
 clr r3
 add r2, r3
@@ -25,7 +27,11 @@ add r1, r3
 ld r3, r2
 cmp r0, r2
 
+jsr clean
+
 halt
+
+clean: ext
 
 # comment
 end
