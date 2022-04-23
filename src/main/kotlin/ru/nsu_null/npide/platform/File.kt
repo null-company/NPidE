@@ -19,6 +19,8 @@ interface File {
 
 val HomeFolder: File get() = java.io.File(System.getProperty("user.home")).toProjectFile()
 
+fun File.toJavaFile(): java.io.File = java.io.File(this.filepath)
+
 fun java.io.File.toProjectFile(): File = object : File {
     override val name: String get() = this@toProjectFile.name
 
