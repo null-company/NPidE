@@ -15,7 +15,8 @@ class Console {
             if (newContent.last() == '\n') {
                 content += "\n"
             }
-        } catch (e: NoSuchElementException) { }
+        } catch (e: NoSuchElementException) {
+        }
     }
 }
 

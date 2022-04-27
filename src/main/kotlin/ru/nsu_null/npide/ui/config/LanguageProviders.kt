@@ -2,6 +2,7 @@ package ru.nsu_null.npide.ui.config
 
 import ru.nsu_null.npide.parser.generator.G4LanguageManager
 import ru.nsu_null.npide.parser.translation.ProjectSymbolManager
+import ru.nsu_null.npide.ui.npide.NPIDE
 
 internal interface ConfigDependent {
     fun syncToConfig()
@@ -15,7 +16,7 @@ object LanguageManagerProvider : ConfigDependent {
     }
 
     override fun syncToConfig() {
-        extensionToLanguageManager = ConfigManager.currentProjectConfig
+        extensionToLanguageManager = NPIDE.configManager.currentProjectConfig
             .grammarConfigs.map { it.ext to G4LanguageManager(it.ext) }.toMap()
     }
 
@@ -40,7 +41,7 @@ object ProjectSymbolProvider : ConfigDependent {
     init {
         syncToConfig()
         for (projectSymbolManager in languageManagerToProjectSymbolManager.values) {
-            for (projectFilePath in ConfigManager.currentProjectConfig.projectFilePaths) {
+            for (projectFilePath in NPIDE.configManager.currentProjectConfig.projectFilePaths) {
                 projectSymbolManager.addFileIfNotWatched(projectFilePath)
             }
         }

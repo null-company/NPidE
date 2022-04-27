@@ -1,6 +1,5 @@
 package ru.nsu_null.npide.platform
 
-import androidx.compose.runtime.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,6 +19,8 @@ interface File {
 
 val HomeFolder: File get() = java.io.File(System.getProperty("user.home")).toProjectFile()
 
+fun File.toJavaFile(): java.io.File = java.io.File(this.filepath)
+
 fun java.io.File.toProjectFile(): File = object : File {
     override val name: String get() = this@toProjectFile.name
 
@@ -32,7 +33,7 @@ fun java.io.File.toProjectFile(): File = object : File {
 
     override val children: List<File>
         get() = this@toProjectFile
-            .listFiles(FilenameFilter { _, name -> !name.startsWith(".")})
+            .listFiles(FilenameFilter { _, name -> !name.startsWith(".") })
             .orEmpty()
             .map { it.toProjectFile() }
 
@@ -41,7 +42,7 @@ fun java.io.File.toProjectFile(): File = object : File {
 
 
     override fun readContents(scope: CoroutineScope): String {
-        require (this@toProjectFile.length() < 50L * 1024 * 1024) {
+        require(this@toProjectFile.length() < 50L * 1024 * 1024) {
             "big files aren't supported"
         }
         // todo consider using scope with io dispatcher for faster return

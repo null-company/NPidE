@@ -82,8 +82,8 @@ fun FileTreeView(model: FileTree) = Surface(
 @ExperimentalFoundationApi
 @Composable
 private fun FileTreeItemView(fontSize: TextUnit, height: Dp, model: FileTree.Item) {
-    val stateCreate = remember {mutableStateOf(false)}
-    val stateRemove = remember {mutableStateOf(false)}
+    val stateCreate = remember { mutableStateOf(false) }
+    val stateRemove = remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -92,14 +92,14 @@ private fun FileTreeItemView(fontSize: TextUnit, height: Dp, model: FileTree.Ite
                 onClick = { model.open() },
 
 
-            )
+                )
             .padding(start = 24.dp * model.level)
             .height(height)
             .fillMaxWidth()
     ) {
         if (stateCreate.value) {
             model.createFile(stateCreate)
-        } else if (stateRemove.value){
+        } else if (stateRemove.value) {
             model.removeFile(stateRemove)
         }
         val active = remember { mutableStateOf(false) }

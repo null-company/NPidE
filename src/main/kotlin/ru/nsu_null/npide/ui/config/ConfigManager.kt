@@ -3,12 +3,13 @@ package ru.nsu_null.npide.ui.config
 import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.Serializable
 import ru.nsu_null.npide.parser.generator.generateLexerParserFiles
+import ru.nsu_null.npide.ui.projectchooser.ProjectChooser
 import java.io.File
 import java.io.FileInputStream
 import java.nio.file.Paths
 
-object ConfigManager {
-    private const val projectFilePath: String = "config.yaml"
+class ConfigManager(private val project: ProjectChooser.Project) {
+    private val projectConfigPath: String = project.rootFolder.filepath + "/config.yaml"
     var currentProjectConfig: AutoUpdatedProjectConfig =
         AutoUpdatedProjectConfig(
             ProjectConfig("", "", "", hashMapOf(), listOf(), listOf())
@@ -35,7 +36,8 @@ object ConfigManager {
         }
     }
 
-    class AutoUpdatedProjectConfig(projectConfig: ProjectConfig) : ProjectConfig(
+    class AutoUpdatedProjectConfig internal constructor(private val configManager: ConfigManager,
+                                   projectConfig: ProjectConfig) : ProjectConfig(
         projectConfig.build,
         projectConfig.run,
         projectConfig.debug,
@@ -47,34 +49,37 @@ object ConfigManager {
         override var build: String = super.build
             set(value) {
                 field = value
-                sync()
+                configManager.sync()
             }
         override var run: String = super.run
             set(value) {
                 field = value
-                sync()
+                configManager.sync()
             }
         override var debug: String = super.debug
             set(value) {
                 field = value
-                sync()
+                configManager.sync()
             }
         override var filePathToDirtyFlag: HashMap<String, Boolean> = super.filePathToDirtyFlag
             set(value) {
                 field = value
-                sync()
+                configManager.sync()
             }
         override var projectFilePaths: List<String> = super.projectFilePaths
             set(value) {
                 field = value
-                sync()
+                configManager.sync()
             }
         override var grammarConfigs: List<GrammarConfig> = super.grammarConfigs
             set(value) {
                 field = value
-                sync()
+                configManager.sync()
             }
     }
+
+    fun AutoUpdatedProjectConfig(projectConfig: ProjectConfig): AutoUpdatedProjectConfig =
+        AutoUpdatedProjectConfig(this, projectConfig)
 
     @Serializable
     open class ProjectConfig(
@@ -108,20 +113,20 @@ object ConfigManager {
         val result = Yaml.default.encodeToString(
             ProjectConfig.serializer(), currentProjectConfig
         )
-        File(projectFilePath).writeText(result)
+        File(projectConfigPath).writeText(result)
     }
 
     private fun readConfig() {
-        val fileExists: Boolean = File(projectFilePath).createNewFile()
-        if(fileExists) {
+        val fileExists: Boolean = File(projectConfigPath).createNewFile()
+        if (fileExists) {
             storeConfig()
         }
-        val configStream = FileInputStream(projectFilePath)
+        val configStream = FileInputStream(projectConfigPath)
         val result = Yaml.default.decodeFromStream(ProjectConfig.serializer(), configStream)
         currentProjectConfig = AutoUpdatedProjectConfig(result)
     }
 
-    fun setFileDirtiness(file: String, isDirty: Boolean){
+    fun setFileDirtiness(file: String, isDirty: Boolean) {
         currentProjectConfig.filePathToDirtyFlag[file] = isDirty
         storeConfig()
     }
@@ -132,7 +137,7 @@ object ConfigManager {
 
     fun isProjectFile(filePath: String): Boolean = filePath in currentProjectConfig.projectFilePaths
 
-    fun addGrammar(ext: String, grammarPath: String, syntaxHighlighter: String){
+    fun addGrammar(ext: String, grammarPath: String, syntaxHighlighter: String) {
         val newItem = GrammarConfig(ext, grammarPath, syntaxHighlighter)
         currentProjectConfig.grammarConfigs += newItem
     }
