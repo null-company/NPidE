@@ -5,32 +5,34 @@ import ru.nsu_null.npide.ui.config.ConfigManager
 import ru.nsu_null.npide.ui.config.ConfigParser
 import ru.nsu_null.npide.ui.console.Console
 import ru.nsu_null.npide.ui.editor.Editors
+import ru.nsu_null.npide.ui.npide.NPIDE
 import java.io.File
 import java.io.IOException
 import java.lang.Thread.sleep
 import java.util.concurrent.atomic.AtomicBoolean
 
 private var parser = ConfigParser()
+
 object DebugRunnableStepFlag : AtomicBoolean(true)
 
 class DebugRunnable(
     val console: Console,
     private val command: String,
-    ) : Runnable {
+) : Runnable {
     override fun run() {
         val process = Runtime.getRuntime().exec(command, arrayOf(), File(System.getProperty("user.dir")))
         var acc = ""
         val inputStreamReader = process.inputStream.reader(Charsets.UTF_8)
         val errorStreamReader = process.errorStream.reader(Charsets.UTF_8)
         val writer = process.outputStream.writer(Charsets.UTF_8)
-        while(process.isAlive) {
+        while (process.isAlive) {
             sleep(100)
-            while(inputStreamReader.ready()) {
+            while (inputStreamReader.ready()) {
                 val newChar = inputStreamReader.read()
                 acc += Char(newChar)
             }
 
-            while(errorStreamReader.ready()) {
+            while (errorStreamReader.ready()) {
                 val newChar = inputStreamReader.read()
                 acc += Char(newChar)
             }
@@ -43,7 +45,7 @@ class DebugRunnable(
                 writer.flush()
             }
         }
-        while(inputStreamReader.ready()) {
+        while (inputStreamReader.ready()) {
             val newChar = inputStreamReader.read()
             acc += Char(newChar)
         }
@@ -51,7 +53,7 @@ class DebugRunnable(
     }
 }
 
-var DebugThread : Thread = Thread()
+var DebugThread: Thread = Thread()
 
 private fun runCommand(arguments : List<String>, console: Console): Boolean {
     val process = Runtime.getRuntime().exec(arguments.toTypedArray(), arrayOf(), File(System.getProperty("user.dir")))
@@ -70,10 +72,12 @@ fun usageButton(editors: Editors, console: Console, config: List<ConfigParser.Co
             val preCommand = listOfNotNull(
                 config[i].exec,
                 config[i].beforeFiles,
-                (File(editors.openedFile.parentPath + "/" + parser.changeExt(
-                    editors.openedFile.name,
-                    config[i].changeExt
-                )).absolutePath),
+                (File(
+                    editors.openedFile.parentPath + "/" + parser.changeExt(
+                        editors.openedFile.name,
+                        config[i].changeExt
+                    )
+                ).absoluteFile),
                 config[i].afterFiles
             )
             return runCommand(preCommand, console)
@@ -125,15 +129,17 @@ fun usageButtonCompile(editors: Editors, console: Console, config: List<ConfigPa
                 else
                     bpStr.subSequence(0, bpStr.length - 2).toString()
             val preCommand = listOfNotNull(
-                    config[i].exec,
-                    config[i].beforeFiles,
-                    (File(editors.openedFile.parentPath + "/" + parser.changeExt(
-                            editors.openedFile.name,
-                            config[i].changeExt
-                    )).absoluteFile.absolutePath),
-                    config[i].afterFiles,
-                    "-b",
-                    bpStr
+                config[i].exec,
+                config[i].beforeFiles,
+                (File(
+                    editors.openedFile.parentPath + "/" + parser.changeExt(
+                        editors.openedFile.name,
+                        config[i].changeExt
+                    )
+                ).absoluteFile),
+                config[i].afterFiles,
+                "-b",
+                bpStr
             )
             return runCommand(preCommand, console)
         }
@@ -144,10 +150,12 @@ fun usageButtonCompile(editors: Editors, console: Console, config: List<ConfigPa
 }
 
 fun usageCompile(editors: Editors, console: Console) {
-    val flagBuilt = ConfigManager.readFileDirtiness(editors.openedFile.filepath)
+    val flagBuilt = NPIDE.configManager.readFileDirtiness(editors.openedFile.filepath)
     if (!flagBuilt) {
-        ConfigManager.setFileDirtiness(editors.openedFile.filepath,
-            usageButtonCompile(editors, console, parser.resultBuild.build))
+        NPIDE.configManager.setFileDirtiness(
+            editors.openedFile.filepath,
+            !usageButtonCompile(editors, console, parser.resultBuild.build)
+        )
     }
 }
 

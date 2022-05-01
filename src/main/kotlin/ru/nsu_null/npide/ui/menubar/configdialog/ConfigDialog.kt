@@ -22,10 +22,11 @@ import androidx.compose.ui.window.rememberDialogState
 import ru.nsu_null.npide.ui.config.ConfigManager
 import ru.nsu_null.npide.ui.menubar.configdialog.ConfigureProjectAction.*
 import ru.nsu_null.npide.ui.menubar.configdialog.ConfigureProjectAction.Companion.actionToConfigParamAsString
+import ru.nsu_null.npide.ui.npide.NPIDE
 import javax.swing.JFileChooser
 
 private fun applyConfig(config: ConfigManager.ProjectConfig) {
-    ConfigManager.currentProjectConfig = ConfigManager.AutoUpdatedProjectConfig(config)
+    NPIDE.configManager.currentProjectConfig = NPIDE.configManager.AutoUpdatedProjectConfig(config)
 }
 
 private fun applyCommonPath(configDialogState: ConfigDialogState, path: String) {
@@ -36,10 +37,11 @@ private fun applyCommonPath(configDialogState: ConfigDialogState, path: String) 
 
 @ExperimentalComposeUiApi
 @Composable
-fun ConfigDialog(isOpen: MutableState<Boolean>){
+fun ConfigDialog(isOpen: MutableState<Boolean>) {
     val stateVertical = rememberScrollState(0)
 
-    Dialog(onCloseRequest = { isOpen.value = false },
+    Dialog(
+        onCloseRequest = { isOpen.value = false },
         title = "Configuration of project",
         resizable = false,
         state = rememberDialogState(size = WindowSize(1280.dp, 720.dp))
@@ -56,15 +58,21 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
             Column {
                 ApplyConfigButton(isOpen, configurationState)
 
-                AddAllConfigItem(configurationState,
+                AddAllConfigItem(
+                    configurationState,
                     configurationState.projectConfig.buildPath,
-                    ChooseBuild)
-                AddAllConfigItem(configurationState,
+                    ChooseBuild
+                )
+                AddAllConfigItem(
+                    configurationState,
                     configurationState.projectConfig.runPath,
-                    ChooseRun)
-                AddAllConfigItem(configurationState,
+                    ChooseRun
+                )
+                AddAllConfigItem(
+                    configurationState,
                     configurationState.projectConfig.debugPath,
-                    ChooseDebug)
+                    ChooseDebug
+                )
 
                 GrammarConfigurationForm(configurationState)
                 CurrentlySelectedGrammarsList(configurationState)
@@ -80,9 +88,11 @@ fun ConfigDialog(isOpen: MutableState<Boolean>){
 
 @ExperimentalComposeUiApi
 @Composable
-private fun AddAllConfigItem(configurationState: ConfigDialogState,
-                             configField: MutableState<String>,
-                             action: ConfigureProjectAction) {
+private fun AddAllConfigItem(
+    configurationState: ConfigDialogState,
+    configField: MutableState<String>,
+    action: ConfigureProjectAction
+) {
     SimpleConfigItem(configurationState, configField, action) {
         Button(
             onClick = { applyCommonPath(configurationState, configField.value) },
@@ -95,10 +105,12 @@ private fun AddAllConfigItem(configurationState: ConfigDialogState,
 
 @ExperimentalComposeUiApi
 @Composable
-private fun SimpleConfigItem(configurationState: ConfigDialogState,
-                             configField: MutableState<String>,
-                             action: ConfigureProjectAction,
-                             afterChooseFileButton: (@Composable @ExtensionFunctionType RowScope.() -> Unit)? = null) {
+private fun SimpleConfigItem(
+    configurationState: ConfigDialogState,
+    configField: MutableState<String>,
+    action: ConfigureProjectAction,
+    afterChooseFileButton: (@Composable @ExtensionFunctionType RowScope.() -> Unit)? = null
+) {
     Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
         val configPropertyName = actionToConfigParamAsString[action]!!
         Text("Configuration of $configPropertyName:")
@@ -150,20 +162,28 @@ private fun GrammarConfigurationForm(configurationState: ConfigDialogState) {
             .background(color = Color(0, 0, 0, 20))
 
     ) {
-        Text("Configuration of Grammar:",
+        Text(
+            "Configuration of Grammar:",
             modifier = Modifier.padding(10.dp),
-            fontWeight = FontWeight.Bold)
+            fontWeight = FontWeight.Bold
+        )
 
         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            SimpleOutlinedTextFieldSample("Extension of grammar",
-                configurationState.selectionState.grammarExtension)
+            SimpleOutlinedTextFieldSample(
+                "Extension of grammar",
+                configurationState.selectionState.grammarExtension
+            )
             Column(modifier = Modifier.padding(40.dp)) {
-                SimpleConfigItem(configurationState,
+                SimpleConfigItem(
+                    configurationState,
                     configurationState.selectionState.grammarPath,
-                    ChooseGrammar)
-                SimpleConfigItem(configurationState,
+                    ChooseGrammar
+                )
+                SimpleConfigItem(
+                    configurationState,
                     configurationState.selectionState.highlighterPath,
-                    ChooseSyntaxHighlighter)
+                    ChooseSyntaxHighlighter
+                )
                 AddGrammarConfigButton(configurationState)
             }
         }
@@ -211,13 +231,14 @@ private fun SimpleOutlinedTextFieldSample(labelText: String, valueText: MutableS
     OutlinedTextField(
         value = valueText.value,
         onValueChange = { valueText.value = it },
-        label = { Text(labelText,fontWeight = FontWeight.Bold,  color = Color.Black) },
+        label = { Text(labelText, fontWeight = FontWeight.Bold, color = Color.Black) },
         textStyle = TextStyle(color = Color.Black, fontWeight = FontWeight.Bold),
         modifier = Modifier.padding(20.dp),
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = Color.Black,
             unfocusedBorderColor = Color.Black,
-            backgroundColor = Color.White)
+            backgroundColor = Color.White
+        )
     )
 }
 
@@ -240,7 +261,7 @@ private enum class ConfigureProjectAction {
 }
 
 //TODO: FileChooser with updating text in field
-private fun chooseFile(configButtonState: ConfigureProjectAction, dialogState: ConfigDialogState){
+private fun chooseFile(configButtonState: ConfigureProjectAction, dialogState: ConfigDialogState) {
     JFileChooser(System.getProperty("user.home")).apply {
         showOpenDialog(null)
         if (selectedFile != null) {

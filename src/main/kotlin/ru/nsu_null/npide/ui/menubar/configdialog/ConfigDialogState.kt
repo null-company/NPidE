@@ -3,6 +3,7 @@ package ru.nsu_null.npide.ui.menubar.configdialog
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import ru.nsu_null.npide.ui.config.ConfigManager
+import ru.nsu_null.npide.ui.npide.NPIDE
 
 internal data class CurrentSelectionsState(
     val highlighterPath: MutableState<String>,
@@ -24,7 +25,7 @@ internal data class ConfigDialogState(
 
 internal fun getStateByConfig(): ConfigDialogState {
 
-    val currentProjectConfig = ConfigManager.currentProjectConfig
+    val currentProjectConfig = NPIDE.configManager.currentProjectConfig
 
     val runPath = currentProjectConfig.run
     val buildPath = currentProjectConfig.build
@@ -51,8 +52,8 @@ internal fun projectConfigByState(configDialogState: ConfigDialogState): ConfigM
         configDialogState.projectConfig.buildPath.value,
         configDialogState.projectConfig.runPath.value,
         configDialogState.projectConfig.debugPath.value,
-        ConfigManager.currentProjectConfig.filePathToDirtyFlag,
-        ConfigManager.currentProjectConfig.projectFilePaths,
+        NPIDE.configManager.currentProjectConfig.filePathToDirtyFlag,
+        NPIDE.configManager.currentProjectConfig.projectFilePaths,
         configDialogState.projectConfig.grammarConfigs.value
     )
 }

@@ -35,7 +35,7 @@ fun ButtonsBar(settings: Settings, editors: Editors, console: Console) = Box(
 
         ButtonsBarButton("Save file") { editors.active!!.writeContents(editors.active!!.content) }
 
-        ButtonsBarButton("Step") {DebugRunnableStepFlag.set(true)}
+        ButtonsBarButton("Step") { DebugRunnableStepFlag.set(true) }
 
         Row {
             Text(
@@ -61,9 +61,11 @@ fun ButtonsBar(settings: Settings, editors: Editors, console: Console) = Box(
 
 @Composable
 fun RowScope.ButtonsBarButton(name: String, onClick: () -> Unit) {
-    Button(onClick = onClick,
+    Button(
+        onClick = onClick,
         contentPadding = PaddingValues(),
-        modifier = Modifier.align(Alignment.CenterVertically)) {
+        modifier = Modifier.align(Alignment.CenterVertically)
+    ) {
         Text(
             text = name,
             color = LocalContentColor.current.copy(alpha = 0.60f),

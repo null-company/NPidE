@@ -21,8 +21,10 @@ fun ConsoleView(settings: Settings, console: Console) {
     val lines = console.content.value.lineSequence().toList()
 
     with(LocalDensity.current) {
-        Box(Modifier.fillMaxSize()
-            .background(AppTheme.colors.backgroundDark)) {
+        Box(
+            Modifier.fillMaxSize()
+                .background(AppTheme.colors.backgroundDark)
+        ) {
             val scrollState = rememberLazyListState()
             val lineHeight = settings.fontSize.toDp() * 1.6f
 

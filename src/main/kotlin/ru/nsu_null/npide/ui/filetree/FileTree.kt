@@ -54,10 +54,10 @@ class FileTree(root: File, private val editors: Editors) {
 
         @OptIn(ExperimentalComposeUiApi::class)
         @Composable
-        fun createFile(state:MutableState<Boolean>) = when (type) {
+        fun createFile(state: MutableState<Boolean>) = when (type) {
             is ItemType.Folder -> OpenCreteFileDialog(state, file.file.filepath)
             is ItemType.File -> OpenCreteFileDialog(state, file.file.parentPath)
-            }
+        }
 
 
         @OptIn(ExperimentalComposeUiApi::class)
@@ -65,8 +65,8 @@ class FileTree(root: File, private val editors: Editors) {
         fun removeFile(state: MutableState<Boolean>) = when (type) {
             is ItemType.Folder -> OpenDeleteDialog(state, file.file.filepath)
             is ItemType.File -> OpenDeleteDialog(state, file.file.filepath)
-            }
         }
+    }
 
 
     sealed class ItemType {

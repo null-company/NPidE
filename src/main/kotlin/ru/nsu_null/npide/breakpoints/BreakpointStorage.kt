@@ -2,7 +2,8 @@ package ru.nsu_null.npide.breakpoints
 
 import com.charleskorn.kaml.EmptyYamlDocumentException
 import com.charleskorn.kaml.Yaml
-import kotlinx.serialization.*
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -12,16 +13,16 @@ import java.io.OutputStreamWriter
 object BreakpointStorage {
 
     @Serializable
-    data class BreakpointStorageYaml (
-        val map : HashMap<String, HashSet<Int>> = hashMapOf()
+    data class BreakpointStorageYaml(
+        val map: HashMap<String, HashSet<Int>> = hashMapOf()
     )
 
 
     const val bpPath = "breakpoints.yml"
-    var map : HashMap<String, HashSet<Int>> = loadBreakpoints()
+    var map: HashMap<String, HashSet<Int>> = loadBreakpoints()
 
     fun addBreakpoint(path: String, line: Int) {
-        if(!map.containsKey(path)) {
+        if (!map.containsKey(path)) {
             map[path] = hashSetOf()
         }
         map[path]!! += line

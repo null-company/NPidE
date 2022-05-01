@@ -5,7 +5,10 @@ import org.fife.ui.rsyntaxtextarea.Style
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme
 import java.awt.Color
 
-class LanguageSyntaxScheme(private val tokenHighlighter: TokenHighlighter, private val tokenNumToTokenName: Vocabulary) :
+class LanguageSyntaxScheme(
+    private val tokenHighlighter: TokenHighlighter,
+    private val tokenNumToTokenName: Vocabulary
+) :
     SyntaxScheme(false) {
 
     override fun getStyle(index: Int): Style {

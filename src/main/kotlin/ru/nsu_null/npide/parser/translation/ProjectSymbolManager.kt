@@ -18,7 +18,7 @@ class ProjectSymbolManager(private val g4LanguageManager: G4LanguageManager) {
 
     // TODO Изменить представление файла в соответствии с архитектурой RSyntaxTextArea
     fun goToDefinition(filename: String, caretPosition: Int): Pair<String, Int> {
-        for(path in pathToTranslationUnit.keys){
+        for (path in pathToTranslationUnit.keys) {
             pathToTranslationUnit[path]!!.updateText(readFile(path));
         }
         if (!pathToTranslationUnit.containsKey(filename)) {
@@ -46,12 +46,14 @@ class ProjectSymbolManager(private val g4LanguageManager: G4LanguageManager) {
         }
         pathToTranslationUnit[filename] = TranslationUnit(g4LanguageManager)
     }
+
     fun hasFile(filename: String): Boolean {
         if (pathToTranslationUnit.containsKey(filename)) {
             return true
         }
         return false
     }
+
     fun removeFile(filename: String) {
         if (!hasFile(filename)) {
             throw IllegalArgumentException("Unknown filename")
@@ -66,6 +68,7 @@ class ProjectSymbolManager(private val g4LanguageManager: G4LanguageManager) {
         return pathToTranslationUnit[filename]!!
     }
 }
+
 fun readFile(filename: String): String {
     return java.io.File(filename).inputStream().readBytes().toString(Charsets.UTF_8)
 }

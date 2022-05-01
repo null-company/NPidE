@@ -15,6 +15,7 @@ import ru.nsu_null.npide.parser.generator.G4LanguageManager
 import ru.nsu_null.npide.parser.translation.TranslationUnit
 import ru.nsu_null.npide.platform.File
 import ru.nsu_null.npide.ui.config.ConfigManager
+import ru.nsu_null.npide.ui.npide.NPIDE
 import ru.nsu_null.npide.util.SingleSelection
 import java.awt.Color
 import java.awt.event.ActionEvent
@@ -34,7 +35,7 @@ class Editor(
 ) {
     val fileExtension = java.io.File(filePath).extension
     lateinit var gotoHandler: (String, Int) -> Unit
-    private val isProjectFile: Boolean = ConfigManager.isProjectFile(filePath)
+    private val isProjectFile: Boolean = NPIDE.configManager.isProjectFile(filePath)
     private lateinit var doneLoadingCallback: () -> Unit
     val readContents: (backgroundScope: CoroutineScope) -> String = { backgroundScope ->
         val res = readContents(backgroundScope)
@@ -44,7 +45,7 @@ class Editor(
     var close: (() -> Unit)? = null
     lateinit var selection: SingleSelection
     val rtEditor: RTextScrollPane
-    val breakpointHighlightColor  = Color(0xC5, 0x53, 0x50, 200)
+    val breakpointHighlightColor = Color(0xC5, 0x53, 0x50, 200)
     var content = ""
     var translationUnit: TranslationUnit? = null
 
@@ -55,11 +56,11 @@ class Editor(
         try {
             val lexerClass = languageManager!!.loadLexerClass()
 
-            if (!ConfigManager.isProjectFile(filePath)) {
+            if (!NPIDE.configManager.isProjectFile(filePath)) {
                 throw NoSuchElementException()
             }
 
-            val grammarConfig = ConfigManager.findGrammarConfigByExtension(fileExtension)
+            val grammarConfig = NPIDE.configManager.findGrammarConfigByExtension(fileExtension)
 
             val languageSupport = CustomLanguageSupport(
                 TokenHighlighter(readFile(grammarConfig.syntaxHighlighter)),
@@ -70,8 +71,7 @@ class Editor(
             textArea.syntaxScheme = languageSupport.syntaxScheme
         } catch (ignored: NoSuchElementException) {
 
-        }
-        catch (ignored: NullPointerException) {
+        } catch (ignored: NullPointerException) {
 
         }
 
@@ -124,7 +124,7 @@ class Editor(
                 SingleCallbackDocumentListenerAfterAWrite {
                     content = rtEditor.textArea.text
                     if (isProjectFile) {
-                        ConfigManager.setFileDirtiness(filePath, true)
+                        NPIDE.configManager.setFileDirtiness(filePath, true)
                     }
                 }
             )
@@ -140,10 +140,12 @@ class Editor(
         override fun insertUpdate(e: DocumentEvent?) {
             callback()
         }
+
         override fun removeUpdate(e: DocumentEvent?) {
             callback()
         }
-        override fun changedUpdate(e: DocumentEvent?) { }
+
+        override fun changedUpdate(e: DocumentEvent?) {}
     }
 
     private class SingleCallbackDocumentListenerAfterAWrite(val callback: () -> Unit) : DocumentListener {
@@ -157,13 +159,16 @@ class Editor(
                 }
             }
         }
+
         override fun insertUpdate(e: DocumentEvent?) {
             callbackIfEdit()
         }
+
         override fun removeUpdate(e: DocumentEvent?) {
             callbackIfEdit()
         }
-        override fun changedUpdate(e: DocumentEvent?) { }
+
+        override fun changedUpdate(e: DocumentEvent?) {}
     }
 
     val isActive: Boolean

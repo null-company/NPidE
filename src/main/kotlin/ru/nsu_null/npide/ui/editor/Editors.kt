@@ -8,7 +8,6 @@ import ru.nsu_null.npide.platform.toProjectFile
 import ru.nsu_null.npide.ui.config.LanguageManagerProvider
 import ru.nsu_null.npide.ui.config.ProjectSymbolProvider
 import ru.nsu_null.npide.util.SingleSelection
-import java.lang.IllegalArgumentException
 import java.lang.Thread.sleep
 import java.util.concurrent.CompletableFuture
 
@@ -24,7 +23,8 @@ class Editors {
             val alreadyOpenedEditor = editors.first { it.filePath == file.filepath }
             alreadyOpenedEditor.activate()
             return alreadyOpenedEditor
-        } catch (ignored: NoSuchElementException) { }
+        } catch (ignored: NoSuchElementException) {
+        }
 
 
         val extension = java.io.File(file.filepath).extension
@@ -33,7 +33,8 @@ class Editors {
         try {
             languageManager = LanguageManagerProvider.getLanguageManager(extension)
             projectSymbolManager = ProjectSymbolProvider.getProjectSymbolManager(languageManager)
-        } catch (ignored: NoSuchElementException) { }
+        } catch (ignored: NoSuchElementException) {
+        }
         val editor = Editor(file, languageManager)
         openedFile = file
         editor.selection = selection
@@ -42,7 +43,8 @@ class Editors {
             projectSymbolManager?.let {
                 editor.translationUnit = it.getTranslationUnit(file.filepath)
             }
-        } catch (ignored: IllegalArgumentException) { }
+        } catch (ignored: IllegalArgumentException) {
+        }
         editor.gotoHandler = { filename: String, caretPosition: Int ->
             val pair = projectSymbolManager?.goToDefinition(filename, caretPosition) ?: Pair("", -1)
             val gotoFilename = pair.first
