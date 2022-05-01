@@ -1,4 +1,4 @@
-package ru.nsu_null.npide.ui.statusbar
+package ru.nsu_null.npide.ui.buttonsbar
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
@@ -27,11 +27,11 @@ fun ButtonsBar(settings: Settings, editors: Editors, console: Console) = Box(
 ) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
 
-        ButtonsBarButton("Compile") { usageCompile(editors, console) }
+        ButtonsBarButton("Compile") { build(editors, console) }
 
-        ButtonsBarButton("Run") { usageRun(editors, console) }
+        ButtonsBarButton("Run") { run(editors, console) }
 
-        ButtonsBarButton("Debug") { usageDebug(editors, console) }
+        ButtonsBarButton("Debug") { debug(editors, console) }
 
         ButtonsBarButton("Save file") { editors.active!!.writeContents(editors.active!!.content) }
 
