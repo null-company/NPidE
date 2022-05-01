@@ -57,7 +57,7 @@ class G4LanguageManager(
     fun loadParserSubclass(subclassName: String): Class<*>? {
         val ParserClass = loadParserClass()
         for (clazz in ParserClass.declaredClasses) {
-            if (clazz.name == "${languageName}Parser$${subclassName}") {
+            if (clazz.name == "${languageName}Parser$${subclassName}" || clazz.name == "${languageName}$${subclassName}") {
                 return clazz
             }
         }

@@ -32,7 +32,8 @@
     {
       "color": "#FFCCCC",
       "instructions": [
-        "INT"
+        "INT",
+        "ID_USAGE"
       ]
     },
     {
@@ -86,7 +87,7 @@
       ]
     },
     {
-      "color": "#FFFFFF",
+      "color": "#FF7F50",
       "instructions": [
         "ID"
       ]

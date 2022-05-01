@@ -86,7 +86,7 @@ SYMBOL
     ;
 
 NS_SYMBOL
-    : NAME '/' SYMBOL
+    : NAME '/' ID
     ;
 
 PARAM_NAME: '%' ((('1'..'9')('0'..'9')*)|'&')? ;
@@ -127,11 +127,16 @@ TRASH
 UN_ : [\u0000-\uFFFF];
 
 mode OPEN_BRACKET_MODE;
-DEFN : ('defn' | 'def') -> popMode;
-FUNC_NAME
-: ('.'
+DEFN : ('defn' | 'def') -> pushMode(SYMBOL_DEFENITION_MODE);
+ID_USAGE: ('.'
     | '/'
     | NAME) -> popMode;
 
 UN: [\u0000-\uFFFF];
 WS_: WS->popMode;
+
+mode SYMBOL_DEFENITION_MODE;
+ID: ('.'
+    | '/'
+    | NAME) -> popMode;
+WS__: WS;

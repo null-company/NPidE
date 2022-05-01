@@ -20,8 +20,9 @@ parser grammar clj;
 
 options {tokenVocab=clj_lexer;}
 s: form*;
-form: OPEN_BRACKET_SCOPE ID #global_def
-    | UN_+ #nomatters;
+form: ID #global_def
+    | ID #def
+    | .+? #nomatters;
 //form: literal
 //    | list_
 //    | vector
