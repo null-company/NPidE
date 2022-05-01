@@ -53,8 +53,8 @@ class DebugRunnable(
 
 var DebugThread : Thread = Thread()
 
-private fun runCommand(arguments : String, console: Console): Boolean {
-    val process = Runtime.getRuntime().exec(arguments, arrayOf(), File(System.getProperty("user.dir")))
+private fun runCommand(arguments : List<String>, console: Console): Boolean {
+    val process = Runtime.getRuntime().exec(arguments.toTypedArray(), arrayOf(), File(System.getProperty("user.dir")))
     process.inputStream.reader(Charsets.UTF_8).use {
         console.add(it.readText())
     }
@@ -63,20 +63,20 @@ private fun runCommand(arguments : String, console: Console): Boolean {
     }
     return process.exitValue() == 0
 }
+
 fun usageButton(editors: Editors, console: Console, config: List<ConfigParser.ConfigInternal>): Boolean {
     try {
         for (i in 0 until config.count()) {
             val preCommand = listOfNotNull(
                 config[i].exec,
                 config[i].beforeFiles,
-                ("\"" + File(editors.openedFile.parentPath + "/" + parser.changeExt(
+                (File(editors.openedFile.parentPath + "/" + parser.changeExt(
                     editors.openedFile.name,
                     config[i].changeExt
-                )).absoluteFile + "\""),
+                )).absolutePath),
                 config[i].afterFiles
             )
-            val command = parser.addSpaces(preCommand)
-            return runCommand(command, console)
+            return runCommand(preCommand, console)
         }
     } catch (e: IOException) {
         e.printStackTrace()
@@ -90,10 +90,10 @@ fun usageButtonDebug(editors: Editors, console: Console, config: List<ConfigPars
             val preCommand = listOfNotNull(
                 config[i].exec,
                 config[i].beforeFiles,
-                ("\"" + editors.openedFile.parentPath + "/" + parser.changeExt(
+                (editors.openedFile.parentPath + "/" + parser.changeExt(
                     editors.openedFile.name,
                     config[i].changeExt
-                ) + "\""),
+                )),
                 config[i].afterFiles
             )
             val command = parser.addSpaces(preCommand)
@@ -119,19 +119,23 @@ fun usageButtonCompile(editors: Editors, console: Console, config: List<ConfigPa
                 bpStr = bpStr.subSequence(0, bpStr.length - 2).toString()
                 bpStr += "; "
             }
-            bpStr = bpStr.subSequence(0, bpStr.length - 2).toString()
+            bpStr =
+                if (bpStr.isEmpty())
+                    bpStr
+                else
+                    bpStr.subSequence(0, bpStr.length - 2).toString()
             val preCommand = listOfNotNull(
                     config[i].exec,
                     config[i].beforeFiles,
-                    ("\"" + File(editors.openedFile.parentPath + "/" + parser.changeExt(
+                    (File(editors.openedFile.parentPath + "/" + parser.changeExt(
                             editors.openedFile.name,
                             config[i].changeExt
-                    )).absoluteFile + "\""),
+                    )).absoluteFile.absolutePath),
                     config[i].afterFiles,
-                    "-b \"$bpStr\""
+                    "-b",
+                    bpStr
             )
-            val command = parser.addSpaces(preCommand)
-            return runCommand(command, console)
+            return runCommand(preCommand, console)
         }
     } catch (e: IOException) {
         e.printStackTrace()
@@ -141,9 +145,9 @@ fun usageButtonCompile(editors: Editors, console: Console, config: List<ConfigPa
 
 fun usageCompile(editors: Editors, console: Console) {
     val flagBuilt = ConfigManager.readFileDirtiness(editors.openedFile.filepath)
-    if (!flagBuilt!!) {
+    if (!flagBuilt) {
         ConfigManager.setFileDirtiness(editors.openedFile.filepath,
-            !usageButtonCompile(editors, console, parser.resultBuild.build))
+            usageButtonCompile(editors, console, parser.resultBuild.build))
     }
 }
 
