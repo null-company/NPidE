@@ -2,7 +2,7 @@ package ru.nsu_null.npide.ui.editor
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun EditorEmptyView() = Box(Modifier.fillMaxSize()) {
+fun EditorEmptyView(modifier: Modifier) = Box(Modifier.fillMaxWidth().then(modifier)) {
     Column(Modifier.align(Alignment.Center)) {
         Icon(
             Icons.Default.Code,
