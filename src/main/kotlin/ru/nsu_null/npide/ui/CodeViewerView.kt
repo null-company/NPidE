@@ -76,11 +76,11 @@ fun CodeViewerView(model: CodeViewer) {
                     Box(Modifier.weight(1f)) {
                         EditorView(model.editors.active!!, model.settings)
                     }
-                    Box(Modifier.weight(0.4f)) {
-                        ConsolePanelView(model.settings, NPIDE.console)
-                    }
                 } else {
                     EditorEmptyView(Modifier.weight(1f))
+                }
+                Box(Modifier.weight(0.4f)) {
+                    ConsolePanelView(model.settings, NPIDE.console)
                 }
                 GitBranchTellerView(Modifier.weight(0.07f))
             }
