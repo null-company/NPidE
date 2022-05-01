@@ -97,7 +97,9 @@ fun GitBranchTellerView(modifier: Modifier) {
         Icon(painterResource("icons8-git.svg"),
             "Git icon", modifier = Modifier.padding(2.dp))
         Spacer(Modifier.padding(3.dp))
-        Text(currentGitBranch.value, fontSize = 15.sp, modifier = Modifier.align(Alignment.CenterVertically))
+        Box(Modifier.align(Alignment.Bottom).padding(0.dp, 6.dp, 0.dp, 0.dp)) {
+            Text(currentGitBranch.value, fontSize = 15.sp)
+        }
     }
 }
 
