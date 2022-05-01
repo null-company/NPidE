@@ -38,9 +38,9 @@ fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
     with(LocalDensity.current) {
         val lines = console.content.value.lineSequence().toList()
         val lineHeight = settings.fontSize.toDp() * 1.6f
-        Column(modifier) {
+        Column(modifier, verticalArrangement = Arrangement.SpaceBetween) {
             Box(
-                Modifier.weight(0.8f).fillMaxWidth()
+                Modifier.fillMaxWidth()
                     .background(AppTheme.colors.backgroundDark)
             ) {
                 val scrollState = rememberLazyListState()
@@ -63,26 +63,22 @@ fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
                     lineHeight
                 )
             }
-            Box(
-                Modifier.weight(0.2f)
-            ) {
-                Box(Modifier.height(lineHeight).fillMaxWidth().background(Color.Black)) {
-                    val input = remember(NPIDE.currentProject) { mutableStateOf("") }
-                    val onChange = fun(enteredValue: String) {
-                        if (enteredValue.endsWith('\n')) {
-                            console.display(enteredValue)
-                            input.value = ""
-                        } else {
-                            input.value = enteredValue
-                        }
+            Box(Modifier.requiredHeight(lineHeight).fillMaxWidth().background(Color.Black)) {
+                val input = remember(NPIDE.currentProject) { mutableStateOf("") }
+                val onChange = fun(enteredValue: String) {
+                    if (enteredValue.endsWith('\n')) {
+                        console.display(enteredValue)
+                        input.value = ""
+                    } else {
+                        input.value = enteredValue
                     }
-                    BasicTextField(input.value,
-                        onValueChange = onChange,
-                        textStyle = TextStyle.Default + TextStyle(Color.White),
-                        cursorBrush = SolidColor(Color.White),
-                        modifier = Modifier.padding(5.dp, 0.dp)
-                    )
                 }
+                BasicTextField(input.value,
+                    onValueChange = onChange,
+                    textStyle = TextStyle.Default + TextStyle(Color.White),
+                    cursorBrush = SolidColor(Color.White),
+                    modifier = Modifier.padding(5.dp, 0.dp).fillMaxWidth()
+                )
             }
         }
     }

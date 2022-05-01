@@ -21,16 +21,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import ru.nsu_null.npide.ui.console.ConsolePanelView
 import androidx.compose.ui.unit.sp
 import ru.nsu_null.npide.ui.buttonsbar.ButtonsBar
-import ru.nsu_null.npide.ui.console.ConsoleView
+import ru.nsu_null.npide.ui.console.ConsolePanelView
 import ru.nsu_null.npide.ui.editor.EditorEmptyView
 import ru.nsu_null.npide.ui.editor.EditorTabsView
 import ru.nsu_null.npide.ui.editor.EditorView
 import ru.nsu_null.npide.ui.filetree.FileTreeView
 import ru.nsu_null.npide.ui.filetree.FileTreeViewTabView
-import ru.nsu_null.npide.ui.buttonsbar.ButtonsBar
 import ru.nsu_null.npide.ui.npide.NPIDE
 import ru.nsu_null.npide.util.SplitterState
 import ru.nsu_null.npide.util.VerticalSplittable
@@ -82,7 +80,7 @@ fun CodeViewerView(model: CodeViewer) {
                 Box(Modifier.weight(0.4f)) {
                     ConsolePanelView(model.settings, NPIDE.console)
                 }
-                GitBranchTellerView(Modifier.weight(0.07f))
+                GitBranchTellerView(Modifier.weight(0.07f, true))
             }
         }
     }
@@ -90,7 +88,7 @@ fun CodeViewerView(model: CodeViewer) {
 
 @Preview
 @Composable
-fun GitBranchTellerView(modifier: Modifier) {
+fun GitBranchTellerView(modifier: Modifier = Modifier) {
     val currentPath = NPIDE.currentProject!!.rootFolder.filepath
     val currentGitBranch = remember { mutableStateOf("") }
     LaunchedEffect(currentPath) {
