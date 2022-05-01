@@ -19,7 +19,7 @@ import ru.nsu_null.npide.ui.projectchooser.ProjectChooserView
 fun main() = singleWindowApplication(
     title = "NPidE",
     state = WindowState(width = 1280.dp, height = 768.dp),
-    icon = BitmapPainter(useResource("ic_launcher.png", ::loadImageBitmap)),
+    icon = BitmapPainter(useResource("npide.png", ::loadImageBitmap)),
 ) {
     when(NPIDE.state) {
         CHOOSING_PROJECT -> ProjectChooserView()
