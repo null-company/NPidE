@@ -21,13 +21,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.nsu_null.npide.ui.buttonsbar.ButtonsBar
 import ru.nsu_null.npide.ui.console.ConsoleView
 import ru.nsu_null.npide.ui.editor.EditorEmptyView
 import ru.nsu_null.npide.ui.editor.EditorTabsView
 import ru.nsu_null.npide.ui.editor.EditorView
 import ru.nsu_null.npide.ui.filetree.FileTreeView
 import ru.nsu_null.npide.ui.filetree.FileTreeViewTabView
-import ru.nsu_null.npide.ui.buttonsbar.ButtonsBar
 import ru.nsu_null.npide.ui.npide.NPIDE
 import ru.nsu_null.npide.util.SplitterState
 import ru.nsu_null.npide.util.VerticalSplittable
@@ -62,24 +62,24 @@ fun CodeViewerView(model: CodeViewer) {
         }
 
         Box {
-            if (model.editors.active != null) {
-                Column(Modifier.fillMaxSize()) {
-                    Box(Modifier.weight(0.07f)) {
-                        ButtonsBar(model.settings, model.editors, model.console)
-                    }
-                    Box(Modifier.weight(0.05f)) {
-                        EditorTabsView(model.editors)
-                    }
+            Column(Modifier.fillMaxSize()) {
+                Box(Modifier.weight(0.07f)) {
+                    ButtonsBar(model.settings, model.editors, model.console)
+                }
+                Box(Modifier.weight(0.05f)) {
+                    EditorTabsView(model.editors)
+                }
+                if (model.editors.active != null) {
                     Box(Modifier.weight(1f)) {
                         EditorView(model.editors.active!!, model.settings)
                     }
-                    Box(Modifier.weight(0.45f).padding(0.dp, 0.dp, 0.dp, 0.dp)) {
-                        ConsoleView(model.settings, model.console)
-                    }
-                    GitBranchTellerView(Modifier.weight(0.07f))
+                } else {
+                    EditorEmptyView(Modifier.weight(1f))
                 }
-            } else {
-                EditorEmptyView()
+                Box(Modifier.weight(0.45f).padding(0.dp, 0.dp, 0.dp, 0.dp)) {
+                    ConsoleView(model.settings, model.console)
+                }
+                GitBranchTellerView(Modifier.weight(0.07f))
             }
         }
     }
