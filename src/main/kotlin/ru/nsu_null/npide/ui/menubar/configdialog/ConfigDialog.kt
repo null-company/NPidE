@@ -262,7 +262,7 @@ private enum class ConfigureProjectAction {
 
 //TODO: FileChooser with updating text in field
 private fun chooseFile(configButtonState: ConfigureProjectAction, dialogState: ConfigDialogState) {
-    JFileChooser(System.getProperty("user.home")).apply {
+    JFileChooser(NPIDE.currentProject!!.rootFolder.filepath).apply {
         showOpenDialog(null)
         if (selectedFile != null) {
             when (configButtonState) {
