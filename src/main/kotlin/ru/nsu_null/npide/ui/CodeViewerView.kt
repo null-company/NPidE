@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nsu_null.npide.ui.buttonsbar.ButtonsBar
@@ -93,18 +94,17 @@ fun GitBranchTellerView(modifier: Modifier) {
     LaunchedEffect(currentPath) {
         currentGitBranch.value = getGitBranchByPath(currentPath)
     }
-    Row(modifier) {
+    Row(modifier = modifier) {
         Icon(painterResource("icons8-git.svg"),
             "Git icon", modifier = Modifier.padding(2.dp))
+
         Spacer(Modifier.padding(3.dp))
-        Box(Modifier.align(Alignment.Bottom).padding(0.dp, 6.dp, 0.dp, 0.dp)) {
-            Text(currentGitBranch.value, fontSize = 15.sp)
-        }
+        Text(currentGitBranch.value, fontSize = 20.sp, textAlign = TextAlign.Center)
     }
 }
 
 private fun getGitBranchByPath(currentPath: String): String {
-    val gitProcess = Runtime.getRuntime().exec("git --git-dir \"$currentPath/.git\" branch --show-current")
+    val gitProcess = Runtime.getRuntime().exec(arrayOf("git","--git-dir=$currentPath/.git", "branch", "--show-current"))
     fun java.io.InputStream.readTextCompletely(): String = use { stream ->
         stream.reader().use { it.readText() }
     }
