@@ -101,5 +101,5 @@ private fun chooseProjectFolderDialog(): String? {
     f.dialogTitle = "New project folder"
     f.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
     f.showDialog(null, "Choose project directory")
-    return f.selectedFile.absolutePath
+    return f.selectedFile?.absolutePath
 }
