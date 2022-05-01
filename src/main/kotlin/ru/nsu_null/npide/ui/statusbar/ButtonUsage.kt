@@ -77,7 +77,7 @@ fun usageButton(editors: Editors, console: Console, config: List<ConfigParser.Co
                         editors.openedFile.name,
                         config[i].changeExt
                     )
-                ).absoluteFile),
+                ).absolutePath),
                 config[i].afterFiles
             )
             return runCommand(preCommand, console)
@@ -136,7 +136,7 @@ fun usageButtonCompile(editors: Editors, console: Console, config: List<ConfigPa
                         editors.openedFile.name,
                         config[i].changeExt
                     )
-                ).absoluteFile),
+                ).absolutePath),
                 config[i].afterFiles,
                 "-b",
                 bpStr
