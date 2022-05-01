@@ -3,14 +3,15 @@ package ru.nsu_null.npide.ui.buttonsbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.LocalContentColor
-import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ru.nsu_null.npide.ui.common.Settings
 import ru.nsu_null.npide.ui.console.Console
 import ru.nsu_null.npide.ui.editor.Editors
@@ -25,37 +26,18 @@ fun ButtonsBar(settings: Settings, editors: Editors, console: Console) = Box(
         .fillMaxWidth()
         .padding(4.dp)
 ) {
-    Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
 
-        ButtonsBarButton("Compile") { build(editors, console) }
+        ButtonsBarButton("Build") { build(editors, console) }
 
         ButtonsBarButton("Run") { run(editors, console) }
 
         ButtonsBarButton("Debug") { debug(editors, console) }
 
-        ButtonsBarButton("Save file") { editors.active!!.writeContents(editors.active!!.content) }
+        ButtonsBarButton("Save") { editors.active!!.writeContents(editors.active!!.content) }
 
         ButtonsBarButton("Step") { DebugRunnableStepFlag.set(true) }
 
-        Row {
-            Text(
-                text = "Text size",
-                modifier = Modifier.align(Alignment.CenterVertically),
-                color = LocalContentColor.current.copy(alpha = 0.60f),
-                fontSize = 12.sp
-            )
-
-            Spacer(Modifier.width(8.dp))
-
-
-            CompositionLocalProvider(LocalDensity provides LocalDensity.current.scale(0.5f)) {
-                Slider(
-                    (settings.fontSize - MinFontSize) / (MaxFontSize - MinFontSize),
-                    onValueChange = { settings.fontSize = lerp(MinFontSize, MaxFontSize, it) },
-                    modifier = Modifier.width(240.dp).align(Alignment.CenterVertically)
-                )
-            }
-        }
     }
 }
 
@@ -69,6 +51,7 @@ fun RowScope.ButtonsBarButton(name: String, onClick: () -> Unit) {
         Text(
             text = name,
             color = LocalContentColor.current.copy(alpha = 0.60f),
+            fontWeight = FontWeight.SemiBold,
             fontSize = 12.sp
         )
     }
