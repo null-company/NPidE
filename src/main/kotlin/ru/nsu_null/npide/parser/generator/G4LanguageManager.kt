@@ -25,9 +25,21 @@ class G4LanguageManager(
                 url
             ), Lexer::class.java.classLoader
         )
-        val clazz = urlClassLoader.loadClass("${languageName}${className}")
-        classNameToClass[className] = clazz
-        return clazz
+        try {
+            val clazz = urlClassLoader.loadClass("${languageName}${className}");
+            classNameToClass[className] = clazz
+            return clazz
+        } catch (e: ClassNotFoundException) {
+            val newClassName = if (className == "Parser") {
+                "";
+            } else {
+                "_" + className.lowercase();
+            }
+
+            val clazz = urlClassLoader.loadClass("${languageName}${newClassName}");
+            classNameToClass[className] = clazz
+            return clazz
+        }
     }
 
     fun loadLexerClass(): Class<*> {

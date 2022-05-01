@@ -1,6 +1,7 @@
 package ru.nsu_null.npide.parser.generator
 
 import org.antlr.v4.Tool
+import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -13,9 +14,29 @@ fun generateLexerParserFiles(grammarPath: Path) {
         outputBaseDirectory.toString(),
         removeExt(filename.toString())
     )
-
-    println(outputDir.toString())
-    val args: Array<String> = arrayOf(grammarPath.toAbsolutePath().toString(), "-o", outputDir.toString())
+    println("Provided grammar path is: $grammarPath")
+    val lexerPath = Paths.get(
+        grammarPath.parent.toString(),
+        removeExt(filename.toString()) + "_lexer.g4"
+    )
+    println("Possible lexer file is: $lexerPath")
+    if (File(lexerPath.toString()).exists()) {
+        println("Addition lexer file was found")
+        val args: Array<String> = arrayOf(lexerPath.toAbsolutePath().toString(), "-o", outputDir.toString())
+        val antlr = Tool(args)
+        antlr.processGrammarsOnCommandLine()
+        println("Lexer rules was generated")
+    } else {
+        println("No lexer file was found")
+    }
+    val targetParserPath = Paths.get(outputDir.toString(), grammarPath.fileName.toString());
+    File(grammarPath.toString()).copyTo(
+        File(
+            targetParserPath.toString()
+        ).also { it.parentFile.mkdirs() }, overwrite = true
+    )
+    println("Parser file was copied to $targetParserPath")
+    val args: Array<String> = arrayOf(targetParserPath.toAbsolutePath().toString(), "-o", outputDir.toString())
     val antlr = Tool(args)
     antlr.processGrammarsOnCommandLine()
 }
