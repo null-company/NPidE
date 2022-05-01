@@ -2,6 +2,7 @@ package ru.nsu_null.npide.ui.npide
 
 import androidx.compose.runtime.mutableStateOf
 import ru.nsu_null.npide.ui.config.ConfigManager
+import ru.nsu_null.npide.ui.console.Console
 import ru.nsu_null.npide.ui.npide.NPIDE.State.CHOOSING_PROJECT
 import ru.nsu_null.npide.ui.npide.NPIDE.State.IN_PROJECT
 import ru.nsu_null.npide.ui.projectchooser.ProjectChooser.Project
@@ -21,9 +22,12 @@ object NPIDE {
     var currentProject: Project? = null
     lateinit var configManager: ConfigManager
 
+    lateinit var console: Console
+
     fun openProject(project: Project) {
         currentProject = project
         configManager = ConfigManager(project)
+        console = Console()
         _state.value = IN_PROJECT
     }
 

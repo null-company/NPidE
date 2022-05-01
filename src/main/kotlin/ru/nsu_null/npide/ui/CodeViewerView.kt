@@ -17,13 +17,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import ru.nsu_null.npide.ui.console.ConsoleView
+import ru.nsu_null.npide.ui.console.ConsolePanelView
 import ru.nsu_null.npide.ui.editor.EditorEmptyView
 import ru.nsu_null.npide.ui.editor.EditorTabsView
 import ru.nsu_null.npide.ui.editor.EditorView
 import ru.nsu_null.npide.ui.filetree.FileTreeView
 import ru.nsu_null.npide.ui.filetree.FileTreeViewTabView
 import ru.nsu_null.npide.ui.buttonsbar.ButtonsBar
+import ru.nsu_null.npide.ui.npide.NPIDE
 import ru.nsu_null.npide.util.SplitterState
 import ru.nsu_null.npide.util.VerticalSplittable
 
@@ -64,9 +65,9 @@ fun CodeViewerView(model: CodeViewer) {
                         EditorView(model.editors.active!!, model.settings)
                     }
                     Box(Modifier.weight(0.4f)) {
-                        ConsoleView(model.settings, model.console)
+                        ConsolePanelView(model.settings, NPIDE.console)
                     }
-                    ButtonsBar(model.settings, model.editors, model.console)
+                    ButtonsBar(model.settings, model.editors, NPIDE.console)
                 }
             } else {
                 EditorEmptyView()

@@ -26,7 +26,6 @@ fun FrameWindowScope.ProjectView() {
         CodeViewer(
             editors = editors,
             fileTree = FileTree(NPIDE.currentProject!!.rootFolder, editors),
-            console = Console(),
             settings = Settings()
         )
     }

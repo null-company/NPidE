@@ -14,7 +14,7 @@ private val parser = ConfigParser()
 
 object DebugRunnableStepFlag : AtomicBoolean(true)
 
-fun debugRun(console: Console, command: String) {
+private fun debugRun(console: Console, command: String) {
     val process = Runtime.getRuntime().exec(command, arrayOf(), File(System.getProperty("user.dir")))
     var acc = ""
     val inputStreamReader = process.inputStream.reader(Charsets.UTF_8)
@@ -34,7 +34,7 @@ fun debugRun(console: Console, command: String) {
 
         if (DebugRunnableStepFlag.get()) {
             DebugRunnableStepFlag.set(false)
-            console.add(acc)
+            console.display(acc)
             acc = ""
             writer.write("s\n")
             writer.flush()
@@ -44,7 +44,7 @@ fun debugRun(console: Console, command: String) {
         val newChar = inputStreamReader.read()
         acc += Char(newChar)
     }
-    console.add(acc)
+    console.display(acc)
 }
 
 lateinit var DebugThread: Thread
@@ -52,15 +52,15 @@ lateinit var DebugThread: Thread
 private fun runCommand(arguments: String, console: Console): Boolean {
     val process = Runtime.getRuntime().exec(arguments, arrayOf(), File(System.getProperty("user.dir")))
     process.inputStream.reader(Charsets.UTF_8).use {
-        console.add(it.readText())
+        console.display(it.readText())
     }
     process.errorStream.reader(Charsets.UTF_8).use {
-        console.add(it.readText())
+        console.display(it.readText())
     }
     return process.exitValue() == 0
 }
 
-fun runWithConfig(editors: Editors,
+private fun runWithConfig(editors: Editors,
                   console: Console,
                   config: List<ConfigParser.ConfigInternal>): Boolean {
     try {
@@ -110,7 +110,7 @@ private fun debugWithConfig(editors: Editors, console: Console, config: List<Con
     }
 }
 
-fun buildWithConfig(editors: Editors,
+private fun buildWithConfig(editors: Editors,
                     console: Console,
                     config: List<ConfigParser.ConfigInternal>): Boolean {
     try {

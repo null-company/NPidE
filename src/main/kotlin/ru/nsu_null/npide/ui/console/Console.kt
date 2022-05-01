@@ -2,21 +2,32 @@ package ru.nsu_null.npide.ui.console
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import java.io.PipedOutputStream
 
-// that could be an object to achieve singleton,
-// didn't do that for monotony
 class Console {
     var content: MutableState<String> = mutableStateOf("")
         private set
 
-    fun add(newContent: String) {
+    /**
+     * Display new content in console
+     */
+    fun display(newContent: String) {
         content += newContent
-        try {
-            if (newContent.last() == '\n') {
-                content += "\n"
-            }
-        } catch (e: NoSuchElementException) {
-        }
+    }
+
+    private var userInputBuffer: String = ""
+    private var userInput = PipedOutputStream()
+
+    /**
+     * Read from buffer that the user is writing to
+     */
+    fun read(): String = userInputBuffer.also { userInputBuffer = "" }
+
+    /**
+     * Writes that are performed by user
+     */
+    fun write(newUserContent: String) {
+        userInputBuffer += newUserContent
     }
 }
 
