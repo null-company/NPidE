@@ -64,8 +64,10 @@ fun ProjectChooserView() {
                 onClick = {
                     val newProject =
                         Project(chooseProjectFolderDialog() ?: return@Button)
-                    projectChooser.addProject(newProject)
-                    NPIDE.openProject(newProject)
+                    if (newProject.rootFolder.isDirectory) {
+                        projectChooser.addProject(newProject)
+                        NPIDE.openProject(newProject)
+                    }
                 },
                 colors = grayButtonColor,
                 content = {
