@@ -104,12 +104,9 @@ fun GitBranchTellerView(modifier: Modifier = Modifier) {
 }
 
 private fun getGitBranchByPath(currentPath: String): String {
-    val gitProcess =
-        Runtime.getRuntime().exec(arrayOf("git", "--git-dir=$currentPath/.git", "branch", "--show-current"))
+    val gitProcess = Runtime.getRuntime().exec(arrayOf("git","--git-dir=$currentPath/.git", "branch", "--show-current"))
+    fun java.io.InputStream.readTextCompletely(): String = reader().use { it.readText() }
 
-    fun java.io.InputStream.readTextCompletely(): String = use { stream ->
-        stream.reader().use { it.readText() }
-    }
     val maybeBranch = gitProcess.inputStream.readTextCompletely()
     val errors = gitProcess.errorStream.readTextCompletely()
 

@@ -64,8 +64,10 @@ fun ProjectChooserView() {
                 onClick = {
                     val newProject =
                         Project(chooseProjectFolderDialog() ?: return@Button)
-                    projectChooser.addProject(newProject)
-                    NPIDE.openProject(newProject)
+                    if (newProject.rootFolder.isDirectory) {
+                        projectChooser.addProject(newProject)
+                        NPIDE.openProject(newProject)
+                    }
                 },
                 colors = grayButtonColor,
                 content = {
@@ -81,10 +83,11 @@ fun ProjectChooserView() {
             for (project in availableProjects.value) {
                 Box(Modifier.fillMaxWidth(0.4f)) {
                     Row(
-                        Modifier.fillMaxWidth().padding(start = 50.dp),
+                        Modifier.fillMaxWidth().padding(start = 50.dp).height(IntrinsicSize.Min),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Button(
+                            modifier = Modifier.width(300.dp).fillMaxHeight(),
                             onClick = { NPIDE.openProject(project) },
                             content = {
                                 Text(project.rootFolder.filepath, color = Color.White)
@@ -93,6 +96,7 @@ fun ProjectChooserView() {
                         )
                         Button(
                             onClick = { projectChooser.deleteProject(project) },
+                            modifier = Modifier.width(70.dp).fillMaxHeight(),
                             content = {
                                 Icon(Icons.Default.DeleteForever,
                                     tint = Color.White,
