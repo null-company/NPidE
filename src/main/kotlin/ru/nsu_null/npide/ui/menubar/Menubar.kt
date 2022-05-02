@@ -17,7 +17,10 @@ fun FrameWindowScope.CustomMenuBar() = MenuBar {
         ConfigDialog(configDialogIsOpen)
     }
     Menu("Menu", mnemonic = 'C') {
-        Item("Config", onClick = { configDialogIsOpen.value = true })
+        val isInProject = remember(NPIDE.state) { NPIDE.state == NPIDE.State.IN_PROJECT }
+        if (isInProject) {
+            Item("Config", onClick = { configDialogIsOpen.value = true })
+        }
         Item("Choose Project", onClick = { NPIDE.openChooseProject() })
     }
 }
