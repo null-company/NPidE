@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nsu_null.npide.ui.buttonsbar.ButtonsBar
-import ru.nsu_null.npide.ui.console.ConsolePanelView
+import ru.nsu_null.npide.ui.console.ConsolePane
 import ru.nsu_null.npide.ui.editor.EditorEmptyView
 import ru.nsu_null.npide.ui.editor.EditorTabsView
 import ru.nsu_null.npide.ui.editor.EditorView
@@ -78,7 +78,7 @@ fun CodeViewerView(model: CodeViewer) {
                     EditorEmptyView(Modifier.weight(1f))
                 }
                 Box(Modifier.weight(0.4f)) {
-                    ConsolePanelView(model.settings, NPIDE.console)
+                    ConsolePane(model.settings, NPIDE.console)
                 }
                 GitBranchTellerView(Modifier.weight(0.07f, true))
             }
@@ -104,7 +104,9 @@ fun GitBranchTellerView(modifier: Modifier = Modifier) {
 }
 
 private fun getGitBranchByPath(currentPath: String): String {
-    val gitProcess = Runtime.getRuntime().exec(arrayOf("git","--git-dir=$currentPath/.git", "branch", "--show-current"))
+    val gitProcess =
+        Runtime.getRuntime().exec(arrayOf("git", "--git-dir=$currentPath/.git", "branch", "--show-current"))
+
     fun java.io.InputStream.readTextCompletely(): String = use { stream ->
         stream.reader().use { it.readText() }
     }

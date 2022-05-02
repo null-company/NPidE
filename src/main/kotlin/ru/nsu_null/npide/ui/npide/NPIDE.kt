@@ -1,6 +1,8 @@
 package ru.nsu_null.npide.ui.npide
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import ru.nsu_null.npide.ui.config.ConfigManager
 import ru.nsu_null.npide.ui.console.Console
 import ru.nsu_null.npide.ui.npide.NPIDE.State.CHOOSING_PROJECT
@@ -8,11 +10,8 @@ import ru.nsu_null.npide.ui.npide.NPIDE.State.IN_PROJECT
 import ru.nsu_null.npide.ui.projectchooser.ProjectChooser.Project
 
 object NPIDE {
-    @Suppress("ObjectPropertyName")
-    private var _state = mutableStateOf(CHOOSING_PROJECT)
-    var state: State = CHOOSING_PROJECT
+    var state: State by mutableStateOf(CHOOSING_PROJECT)
         private set
-        get() = _state.value
 
     enum class State {
         CHOOSING_PROJECT,
@@ -28,11 +27,11 @@ object NPIDE {
         currentProject = project
         configManager = ConfigManager(project)
         console = Console()
-        _state.value = IN_PROJECT
+        state = IN_PROJECT
     }
 
     fun openChooseProject() {
         currentProject = null
-        _state.value = CHOOSING_PROJECT
+        state = CHOOSING_PROJECT
     }
 }
