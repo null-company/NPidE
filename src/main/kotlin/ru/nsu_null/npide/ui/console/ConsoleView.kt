@@ -11,9 +11,7 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DoNotTouch
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -108,10 +106,17 @@ fun ConsoleControlPanelView(modifier: Modifier, settings: Settings, console: Con
                 Text(processMessage, textAlign = TextAlign.Center)
             }
             Divider(Modifier.padding(0.dp, 15.dp))
-            Icon(Icons.Default.Stop, "Stop process", tint = Color.Red,
-                modifier = Modifier.clickable {
-                    console.detachCurrentProcess()
-                }.scale(1.5f))
+            Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                Icon(Icons.Default.Stop, "Stop process", tint = Color.Red,
+                    modifier = Modifier.clickable {
+                        console.detachCurrentProcess()
+                    })
+                Spacer(Modifier.padding(3.dp))
+                Icon(Icons.Default.DeleteSweep, "Clear terminal", tint = Color.White,
+                    modifier = Modifier.clickable {
+                        console.clear()
+                    })
+            }
         }
     }
 }

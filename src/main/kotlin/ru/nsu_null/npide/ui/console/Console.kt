@@ -18,6 +18,10 @@ class Console {
         content += newContent
     }
 
+    fun clear() {
+        content = ""
+    }
+
     /**
      * Write a string to be sent to an attached process if such process exists
      *
