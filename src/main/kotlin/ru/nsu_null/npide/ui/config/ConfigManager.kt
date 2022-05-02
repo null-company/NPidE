@@ -7,6 +7,7 @@ import ru.nsu_null.npide.ui.projectchooser.ProjectChooser
 import java.io.File
 import java.io.FileInputStream
 import java.nio.file.Paths
+import kotlin.reflect.KProperty
 
 class ConfigManager(private val project: ProjectChooser.Project) {
     private val projectConfigPath: String = project.rootFolder.filepath + "/config.yaml"
@@ -46,36 +47,30 @@ class ConfigManager(private val project: ProjectChooser.Project) {
         projectConfig.grammarConfigs
     ) {
 
-        override var build: String = super.build
-            set(value) {
-                field = value
+        private inner class AutoUpdateDelegate<T>(initialValue: T) {
+            var content: T = initialValue
+            operator fun getValue(
+                autoUpdatedProjectConfig: AutoUpdatedProjectConfig,
+                property: KProperty<*>
+            ): T {
+                return content
+            }
+            operator fun setValue(
+                autoUpdatedProjectConfig: AutoUpdatedProjectConfig,
+                property: KProperty<*>,
+                newContent: T
+            ) {
+                content = newContent
                 configManager.sync()
             }
-        override var run: String = super.run
-            set(value) {
-                field = value
-                configManager.sync()
-            }
-        override var debug: String = super.debug
-            set(value) {
-                field = value
-                configManager.sync()
-            }
-        override var filePathToDirtyFlag: HashMap<String, Boolean> = super.filePathToDirtyFlag
-            set(value) {
-                field = value
-                configManager.sync()
-            }
-        override var projectFilePaths: List<String> = super.projectFilePaths
-            set(value) {
-                field = value
-                configManager.sync()
-            }
-        override var grammarConfigs: List<GrammarConfig> = super.grammarConfigs
-            set(value) {
-                field = value
-                configManager.sync()
-            }
+        }
+
+        override var build: String by AutoUpdateDelegate(super.build)
+        override var run: String by AutoUpdateDelegate(super.run)
+        override var debug: String by AutoUpdateDelegate(super.debug)
+        override var filePathToDirtyFlag: HashMap<String, Boolean> by AutoUpdateDelegate(super.filePathToDirtyFlag)
+        override var projectFilePaths: List<String> by AutoUpdateDelegate(super.projectFilePaths)
+        override var grammarConfigs: List<GrammarConfig> by AutoUpdateDelegate(super.grammarConfigs)
     }
 
     fun AutoUpdatedProjectConfig(projectConfig: ProjectConfig): AutoUpdatedProjectConfig =
