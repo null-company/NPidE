@@ -1,17 +1,14 @@
 package ru.nsu_null.npide.ui.filetree
 
-import androidx.compose.desktop.DesktopMaterialTheme
 import androidx.compose.foundation.ContextMenuDataProvider
+import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
@@ -23,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerMoveFilter
-import androidx.compose.ui.platform.ContextMenuItem
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -105,7 +101,7 @@ private fun FileTreeItemView(fontSize: TextUnit, height: Dp, model: FileTree.Ite
         val active = remember { mutableStateOf(false) }
 
         FileItemIcon(Modifier.align(Alignment.CenterVertically), model)
-        DesktopMaterialTheme {
+        MaterialTheme {
             ContextMenuDataProvider(
                 items = {
                     listOf(
