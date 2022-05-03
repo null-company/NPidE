@@ -28,14 +28,14 @@ class Console {
      * Calls [display] in both situations
      */
     fun send(command: String) {
-        display(command)
         if (!processIsAttached) {
+            display(command)
             return
         }
         val process = attachedProcess!!
         val outputStream = process.outputStream
-        // the writer is not closed on purpose so that it is possible to write to it later
-        outputStream.writer().write(command)
+        outputStream.write(command.encodeToByteArray())
+        outputStream.flush()
     }
 
     private var attachedProcess: Process? by mutableStateOf(null)
@@ -135,6 +135,7 @@ private class MiddleWareWorker(clientPipes: ProcessCommunicationPipes,
         val clientMessage = try { clientInput.readSafe() } catch (e: IOException) { null }
         if (clientMessage != null) {
             stdinWriter?.write(clientMessage)
+            stdinWriter?.flush()
         } else {
             stdinWriter?.close()
             clientInput.close()
@@ -148,6 +149,7 @@ private class MiddleWareWorker(clientPipes: ProcessCommunicationPipes,
         if (stdoutMessage != null) {
             NPIDE.console.display(Char(stdoutMessage).toString())
             clientWriter?.write(stdoutMessage)
+            clientWriter?.flush()
         } else {
             stdout.close()
             clientWriter?.close()

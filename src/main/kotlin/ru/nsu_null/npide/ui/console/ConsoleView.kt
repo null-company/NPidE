@@ -106,17 +106,35 @@ fun ConsoleControlPanelView(modifier: Modifier, settings: Settings, console: Con
                 Text(processMessage, textAlign = TextAlign.Center)
             }
             Divider(Modifier.padding(0.dp, 15.dp))
-            Row(horizontalArrangement = Arrangement.SpaceBetween) {
-                Icon(Icons.Default.Stop, "Stop process", tint = Color.Red,
-                    modifier = Modifier.clickable {
-                        console.detachCurrentProcess()
-                    })
-                Spacer(Modifier.padding(3.dp))
-                Icon(Icons.Default.DeleteSweep, "Clear terminal", tint = Color.White,
-                    modifier = Modifier.clickable {
-                        console.clear()
-                    })
-            }
+            IconBar(console)
         }
+    }
+}
+
+@Composable
+private fun IconBar(console: Console) {
+    fun launchShell() {
+        val shell = Runtime.getRuntime().exec("powershell")
+        NPIDE.console.attachProcess(shell, "shell")
+    }
+    @Composable
+    fun IconsSpacer() {
+        Spacer(Modifier.padding(5.dp))
+    }
+
+    Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()) {
+        Icon(Icons.Default.Stop, "Stop process", tint = Color.Red,
+            modifier = Modifier.clickable {
+                console.detachCurrentProcess()
+            })
+        IconsSpacer()
+        Icon(Icons.Default.DeleteSweep, "Clear terminal", tint = Color.White,
+            modifier = Modifier.clickable {
+                console.clear()
+            })
+        IconsSpacer()
+        Icon(Icons.Default.Computer, "Clear terminal", tint = Color.White,
+            modifier = Modifier.clickable(onClick = ::launchShell)
+        )
     }
 }
