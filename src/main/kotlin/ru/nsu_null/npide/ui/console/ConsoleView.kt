@@ -113,8 +113,11 @@ fun ConsoleControlPanelView(modifier: Modifier, settings: Settings, console: Con
 
 @Composable
 private fun IconBar(console: Console) {
+    val isWindows = "Win" in System.getProperty("os.name")
     fun launchShell() {
-        val shell = Runtime.getRuntime().exec("powershell")
+        val shell = Runtime.getRuntime().let {
+            if (isWindows) it.exec("powershell") else it.exec("bash")
+        }
         NPIDE.console.attachProcess(shell, "shell")
     }
     @Composable
