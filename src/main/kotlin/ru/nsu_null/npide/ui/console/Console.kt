@@ -7,6 +7,9 @@ import ru.nsu_null.npide.ui.npide.NPIDE
 import java.io.*
 
 class Console {
+    /**
+     * Text in console that is currently available
+     */
     var content: String by mutableStateOf("")
         private set
 
@@ -18,14 +21,16 @@ class Console {
         content += newContent
     }
 
+    /**
+     * Delete all content from the console rendering it clear
+     */
     fun clear() {
         content = ""
     }
 
     /**
      * Write a string to be sent to an attached process if such process exists
-     *
-     * Calls [display] in both situations
+     * [display] method is not called, but it could be okay because child process does that anyway
      */
     fun send(command: String) {
         if (!processIsAttached) {
@@ -39,9 +44,14 @@ class Console {
     }
 
     private var attachedProcess: Process? by mutableStateOf(null)
+
+    /**
+     * Label of the attached process, if such process exists, null otherwise
+     */
     var attachedProcessLabel: String? = null
         get() = if (!processIsAttached) null else field
         private set
+
     var processIsAttached: Boolean = false
         get() = attachedProcess != null
         private set
@@ -103,6 +113,12 @@ class Console {
 data class ProcessCommunicationPipes(val to: PipedOutputStream, val from: PipedInputStream)
 private data class ProcessStreams(val stdin: OutputStream, val stdout: InputStream)
 
+/**
+ * [MiddleWareWorker] is responsible for proxying client's pipes by writing
+ * the messages to console
+ *
+ * A client is a caller of [Console.attachProcess]
+ */
 private class MiddleWareWorker(clientPipes: ProcessCommunicationPipes,
                                processStreams: ProcessStreams) {
     var stdinWriter: OutputStreamWriter? = processStreams.stdin.writer()
@@ -110,22 +126,11 @@ private class MiddleWareWorker(clientPipes: ProcessCommunicationPipes,
     var clientReader: InputStreamReader? = clientPipes.from.reader()
     var clientWriter: OutputStreamWriter? = clientPipes.to.writer()
 
-    private fun safeThreadLaunch(task: () -> Unit) = Thread {
-        while (true) {
-            try {
-                if (Thread.interrupted()) {
-                    throw InterruptedException()
-                }
-                task()
-            } catch (e: InterruptedException) {
-                return@Thread
-            } catch (e: IOException) {
-                return@Thread
-            }
-        }
-    }
-    val threads = listOf(safeThreadLaunch(::communicateClientWithStdin),
-        safeThreadLaunch(::communicateStdoutWithConsoleAndClient))
+    /**
+     * Threads that are piping client, process and console
+     */
+    val threads = listOf(safeThreadContinuousTask(::communicateClientWithStdin),
+        safeThreadContinuousTask(::communicateStdoutWithConsoleAndClient))
     fun work() {
         threads.forEach(Thread::start)
     }
@@ -159,7 +164,37 @@ private class MiddleWareWorker(clientPipes: ProcessCommunicationPipes,
     }
 }
 
+/**
+ * Calls [Console.display] and [Console.send]
+ *
+ * Can be used as a shortcut when the child process doesn't echo written command,
+ * but is the desired behaviour
+ */
+fun Console.displayAndSend(command: String) {
+    display(command)
+    send(command)
+}
 
+/**
+ * Log to NPidE console
+ * @param who sender name to be displayed
+ * @param message text to log
+ */
 fun Console.log(who: String, message: String) {
     display("[$who]: $message\n")
+}
+
+private fun safeThreadContinuousTask(task: () -> Unit) = Thread {
+    while (true) {
+        try {
+            if (Thread.interrupted()) {
+                throw InterruptedException()
+            }
+            task()
+        } catch (e: InterruptedException) {
+            return@Thread
+        } catch (e: IOException) {
+            return@Thread
+        }
+    }
 }
