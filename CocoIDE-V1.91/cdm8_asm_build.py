@@ -28,7 +28,7 @@ def main():
     breakpoint_files = breakpoints_str.split('-')
     breakpoint_map = {}
     for i in breakpoint_files:
-        if i == '':
+        if '::' not in i:
             continue
         bp_file, bp_list_str = i.split('::')
         bp_file: str
@@ -40,10 +40,8 @@ def main():
         cocas.filename = filename
         if cocas.filename[-4:] == ".asm":
             cocas.filename = cocas.filename[:-4]
-        try:
-            file = open(cocas.filename + '.asm', 'r')
-        except IOError:
-            raise IOError(cocas.filename + ".asm: file not found")
+
+        file = open(cocas.filename + '.asm', 'r')
 
         text = []
         for line in file.readlines():
@@ -132,7 +130,7 @@ def main():
     print(sects)
     print(line_byte_map)
     print(breakpoint_map)
-    with open(args.output_file, 'wt') as file:
+    with open(args.output_file.strip(), 'wt') as file:
         yaml.dump(finaldict, file)
 
 

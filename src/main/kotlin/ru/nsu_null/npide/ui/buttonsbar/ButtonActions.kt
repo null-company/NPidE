@@ -14,49 +14,73 @@ private val parser = ConfigParser()
 
 object DebugRunnableStepFlag : AtomicBoolean(true)
 
-fun debugRun(console: Console, command: String) {
-    val process = Runtime.getRuntime().exec(command, arrayOf(), File(System.getProperty("user.dir")))
+fun debugRun(console: Console, command: List<String>) {
+    println("debugRun() running with command:")
+    println(command)
+    val process = Runtime.getRuntime().exec(command.toTypedArray(), arrayOf(), File(System.getProperty("user.dir")))
     var acc = ""
     val inputStreamReader = process.inputStream.reader(Charsets.UTF_8)
     val errorStreamReader = process.errorStream.reader(Charsets.UTF_8)
     val writer = process.outputStream.writer(Charsets.UTF_8)
-    while (process.isAlive) {
-        sleep(100)
+
+    val readAndAccumulate = {
         while (inputStreamReader.ready()) {
             val newChar = inputStreamReader.read()
+            if (newChar == -1)
+                break
             acc += Char(newChar)
         }
 
         while (errorStreamReader.ready()) {
             val newChar = inputStreamReader.read()
+            if (newChar == -1)
+                break
             acc += Char(newChar)
         }
+    }
+
+    while (process.isAlive) {
+        sleep(100)
+
+        readAndAccumulate()
 
         if (DebugRunnableStepFlag.get()) {
             DebugRunnableStepFlag.set(false)
             console.add(acc)
             acc = ""
-            writer.write("s\n")
-            writer.flush()
+            try {
+                writer.write("s\n")
+                writer.flush()
+            } catch (e: IOException) {
+                println("Debug process stdin failed:")
+                println(e)
+                println("Aborting process...")
+                break
+            }
+
         }
     }
-    while (inputStreamReader.ready()) {
-        val newChar = inputStreamReader.read()
-        acc += Char(newChar)
-    }
+
+    readAndAccumulate()
     console.add(acc)
 }
 
 lateinit var DebugThread: Thread
 
-private fun runCommand(arguments: String, console: Console): Boolean {
-    val process = Runtime.getRuntime().exec(arguments, arrayOf(), File(System.getProperty("user.dir")))
+private fun runCommand(arguments: List<String>, console: Console): Boolean {
+    val argumentsArr = arguments.filter { it.trim().isNotEmpty() }.toTypedArray()
+    val process = Runtime.getRuntime().exec(argumentsArr, arrayOf(), File(System.getProperty("user.dir")))
     process.inputStream.reader(Charsets.UTF_8).use {
-        console.add(it.readText())
+        val s = it.readText()
+        console.add(s)
+        println(s)
     }
     process.errorStream.reader(Charsets.UTF_8).use {
-        console.add(it.readText())
+        val s = it.readText()
+        console.add(s)
+        println(s)
     }
+    println(process.exitValue())
     return process.exitValue() == 0
 }
 
@@ -65,18 +89,17 @@ fun runWithConfig(editors: Editors,
                   config: List<ConfigParser.ConfigInternal>): Boolean {
     try {
         for (i in 0 until config.count()) {
-            val preCommand = listOfNotNull(
+            val command = listOfNotNull(
                 config[i].exec,
                 config[i].beforeFiles,
-                ("\"" + File(
+                (File(
                     editors.openedFile.parentPath + "/" + parser.changeExt(
                         editors.openedFile.name,
                         config[i].changeExt
                     )
-                ).absoluteFile + "\""),
+                ).absolutePath),
                 config[i].afterFiles
             )
-            val command = parser.addSpaces(preCommand)
             if (!runCommand(command, console)) {
                 return false
             }
@@ -91,7 +114,7 @@ fun runWithConfig(editors: Editors,
 private fun debugWithConfig(editors: Editors, console: Console, config: List<ConfigParser.ConfigInternal>) {
     try {
         for (i in 0 until config.count()) {
-            val preCommand = listOfNotNull(
+            val command = listOfNotNull(
                 config[i].exec,
                 config[i].beforeFiles,
                 ("\"" + editors.openedFile.parentPath + "/" + parser.changeExt(
@@ -100,7 +123,6 @@ private fun debugWithConfig(editors: Editors, console: Console, config: List<Con
                 ) + "\""),
                 config[i].afterFiles
             )
-            val command = parser.addSpaces(preCommand)
             DebugThread = Thread {
                 debugRun(console, command)
             }.also { it.start() }
@@ -126,20 +148,22 @@ fun buildWithConfig(editors: Editors,
                 bpStr = bpStr.subSequence(0, bpStr.length - 2).toString()
                 bpStr += "; "
             }
-            bpStr = bpStr.subSequence(0, bpStr.length - 2).toString()
-            val preCommand = listOfNotNull(
+            bpStr =
+                if (bpStr.isEmpty()) bpStr
+                else bpStr.subSequence(0, bpStr.length - 2).toString()
+            val command = listOfNotNull(
                 config[i].exec,
                 config[i].beforeFiles,
-                ("\"" + File(
+                (File(
                     editors.openedFile.parentPath + "/" + parser.changeExt(
                         editors.openedFile.name,
                         config[i].changeExt
                     )
-                ).absoluteFile + "\""),
+                ).absolutePath),
                 config[i].afterFiles,
-                "-b \"$bpStr\""
+                "-b",
+                bpStr
             )
-            val command = parser.addSpaces(preCommand)
             if(!runCommand(command, console)) {
                 return false
             }
