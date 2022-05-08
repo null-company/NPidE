@@ -18,6 +18,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.isPrimaryPressed
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.pointerMoveFilter
@@ -179,15 +180,17 @@ fun FileTreeDropDownMenu(expanded: Boolean, onDismissRequest: () -> Unit, model:
 
 @Composable
 private fun FileItemIcon(modifier: Modifier, model: FileTree.Item) = Box(modifier.size(24.dp).padding(4.dp)) {
+    @Composable
+    fun dirIcon(icon: ImageVector) = Icon(
+        icon,
+        contentDescription = null,
+        tint = LocalContentColor.current
+    )
     when (val type = model.type) {
         is FileTree.ItemType.Folder -> when {
-            !type.canExpand -> Unit
-            type.isExpanded -> Icon(
-                Icons.Default.KeyboardArrowDown, contentDescription = null, tint = LocalContentColor.current
-            )
-            else -> Icon(
-                Icons.Default.KeyboardArrowRight, contentDescription = null, tint = LocalContentColor.current
-            )
+            !type.canExpand -> dirIcon(Icons.Default.FolderSpecial)
+            type.isExpanded -> dirIcon(Icons.Default.FolderOpen)
+            else -> dirIcon(Icons.Default.Folder)
         }
         is FileTree.ItemType.File -> when (type.ext) {
             "clj" -> Icon(Icons.Default.Code, contentDescription = null, tint = Color(0xFF3E86A0))
