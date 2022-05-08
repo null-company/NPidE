@@ -1,11 +1,11 @@
 package ru.nsu_null.npide.ui.filetree
 
-import OpenCreteFileDialog
-import OpenDeleteDialog
 import androidx.compose.runtime.*
-import androidx.compose.ui.ExperimentalComposeUiApi
 import ru.nsu_null.npide.platform.File
+import ru.nsu_null.npide.platform.toJavaFile
+import ru.nsu_null.npide.platform.toProjectFile
 import ru.nsu_null.npide.ui.editor.Editors
+import java.util.*
 
 class ExpandableFile(
     val file: File,
@@ -13,6 +13,8 @@ class ExpandableFile(
 ) {
     var children: List<ExpandableFile> by mutableStateOf(emptyList())
     val canExpand: Boolean get() = file.hasChildren
+
+    val isExpanded: Boolean get() = children.isNotEmpty()
 
     fun toggleExpanded() {
         children = if (children.isEmpty()) {
@@ -33,10 +35,23 @@ class FileTree(root: File, private val editors: Editors) {
 
     val items: List<Item> get() = expandableRoot.toItems()
 
+    enum class ActionType {
+        CreateFolder, CreateFile
+    }
+
     inner class Item constructor(
         private val file: ExpandableFile
     ) {
         val name: String get() = file.file.name
+
+        private fun getParent(): Item {
+            if (level == 0) throw IllegalArgumentException("Cannot find parent of root")
+            return expandableRoot.toItems().find {
+                it.file.level == level - 1
+                        && it.file.file.isDirectory
+                        && this.file.file.filepath in it.file.file.children.map { file -> file.filepath }
+            }!!
+        }
 
         val level: Int get() = file.level
 
@@ -44,7 +59,7 @@ class FileTree(root: File, private val editors: Editors) {
             get() = if (file.file.isDirectory) {
                 ItemType.Folder(isExpanded = file.children.isNotEmpty(), canExpand = file.canExpand)
             } else {
-                ItemType.File(ext = file.file.name.substringAfterLast(".").toLowerCase())
+                ItemType.File(ext = file.file.name.substringAfterLast(".").lowercase(Locale.getDefault()))
             }
 
         fun open() = when (type) {
@@ -52,19 +67,41 @@ class FileTree(root: File, private val editors: Editors) {
             is ItemType.File -> editors.open(file.file)
         }
 
-        @OptIn(ExperimentalComposeUiApi::class)
-        @Composable
-        fun createFile(state: MutableState<Boolean>) = when (type) {
-            is ItemType.Folder -> OpenCreteFileDialog(state, file.file.filepath)
-            is ItemType.File -> OpenCreteFileDialog(state, file.file.parentPath)
+        /**
+         * @param newItemName relative path to the item
+         * @param newItemType folder to create folder, file to create file
+         */
+        fun addItem(newItemName: String, newItemType: ActionType) {
+            val newItemAction: (java.io.File) -> Unit = {
+                when (newItemType) {
+                    ActionType.CreateFile -> it.createNewFile()
+                    ActionType.CreateFolder -> it.mkdir()
+                }
+            }
+            when (type) {
+                is ItemType.File -> { // create as sibling
+                    val parent = getParent()
+                    val newItem = java.io.File("${parent.file.file.filepath}/$newItemName")
+                        .also(newItemAction).toProjectFile()
+                    parent.file.children += ExpandableFile(newItem, level)
+                }
+                is ItemType.Folder -> { // create as child
+                    val newItem = java.io.File("${file.file.filepath}/$newItemName")
+                        .also(newItemAction).toProjectFile()
+                    if (!file.isExpanded) {
+                        file.toggleExpanded()  // expand so user can see the result
+                        /** do not add to children because
+                         * done implicitly by [ExpandableFile.toggleExpanded] */
+                    } else {
+                        file.children += ExpandableFile(newItem, level + 1)
+                    }
+                }
+            }
         }
 
-
-        @OptIn(ExperimentalComposeUiApi::class)
-        @Composable
-        fun removeFile(state: MutableState<Boolean>) = when (type) {
-            is ItemType.Folder -> OpenDeleteDialog(state, file.file.filepath)
-            is ItemType.File -> OpenDeleteDialog(state, file.file.filepath)
+        fun removeItem() {
+            getParent().file.children -= this.file
+            file.file.toJavaFile().delete()
         }
     }
 
