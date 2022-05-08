@@ -15,9 +15,8 @@ private val parser = ConfigParser()
 object DebugRunnableStepFlag : AtomicBoolean(true)
 
 fun debugRun(console: Console, command: List<String>) {
-    println("debugRun() running with command:")
-    println(command)
-    val process = Runtime.getRuntime().exec(command.toTypedArray(), arrayOf(), File(System.getProperty("user.dir")))
+    val dir  = File(NPIDE.currentProject!!.rootFolder.filepath)
+    val process = Runtime.getRuntime().exec(command.toTypedArray(), arrayOf(), dir)
     var acc = ""
     val inputStreamReader = process.inputStream.reader(Charsets.UTF_8)
     val errorStreamReader = process.errorStream.reader(Charsets.UTF_8)
@@ -52,9 +51,10 @@ fun debugRun(console: Console, command: List<String>) {
                 writer.write("s\n")
                 writer.flush()
             } catch (e: IOException) {
-                println("Debug process stdin failed:")
+                println("[LOG] Debug process stdin failed:")
+                print("[LOG] ")
                 println(e)
-                println("Aborting process...")
+                println("[LOG] Aborting process...")
                 break
             }
 
@@ -69,18 +69,19 @@ lateinit var DebugThread: Thread
 
 private fun runCommand(arguments: List<String>, console: Console): Boolean {
     val argumentsArr = arguments.filter { it.trim().isNotEmpty() }.toTypedArray()
-    val process = Runtime.getRuntime().exec(argumentsArr, arrayOf(), File(System.getProperty("user.dir")))
+
+    val dir  = File(NPIDE.currentProject!!.rootFolder.filepath)
+
+    val process = Runtime.getRuntime().exec(argumentsArr, arrayOf(), dir)
+
     process.inputStream.reader(Charsets.UTF_8).use {
         val s = it.readText()
         console.add(s)
-        println(s)
     }
     process.errorStream.reader(Charsets.UTF_8).use {
         val s = it.readText()
         console.add(s)
-        println(s)
     }
-    println(process.exitValue())
     return process.exitValue() == 0
 }
 
