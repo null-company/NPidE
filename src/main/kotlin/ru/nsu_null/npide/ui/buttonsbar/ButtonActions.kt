@@ -72,7 +72,7 @@ private fun runCommand(arguments: List<String>, console: Console): Boolean {
 
     val dir  = File(NPIDE.currentProject!!.rootFolder.filepath)
 
-    val process = Runtime.getRuntime().exec(argumentsArr, arrayOf(), dir)
+    val process = Runtime.getRuntime().exec(argumentsArr, null, dir)
 
     process.inputStream.reader(Charsets.UTF_8).use {
         val s = it.readText()
@@ -85,21 +85,47 @@ private fun runCommand(arguments: List<String>, console: Console): Boolean {
     return process.exitValue() == 0
 }
 
+private fun buildCommand(
+    python_file: String,
+    flag: String,
+    name: String,
+    root_folder: String,
+    files: List<String>,
+    entry_point: String,
+    ext: String,
+    bpStr: String = "0"
+): List<String> {
+    return listOf<String>()+ "python3"+
+        python_file +
+        "-f"+
+        flag+
+        "-n"+
+        name+
+        "-d"+
+        root_folder+
+        "-p"+
+        files+
+        "-e"+
+        entry_point+
+        "-ext"+
+        ext+
+        "-b"+
+        bpStr
+}
+
 fun runWithConfig(editors: Editors,
                   console: Console,
                   config: List<ConfigParser.ConfigInternal>): Boolean {
     try {
         for (i in 0 until config.count()) {
-            val command = listOfNotNull(
-                config[i].exec,
-                config[i].beforeFiles,
-                (File(
-                    editors.openedFile.parentPath + "/" + parser.changeExt(
-                        editors.openedFile.name,
-                        config[i].changeExt
-                    )
-                ).absolutePath),
-                config[i].afterFiles
+            val command = buildCommand(
+                config[i].python_file,
+                "run",
+                config[i].name,
+                NPIDE.currentProject!!.rootFolder.filepath,
+                NPIDE.configManager.currentProjectConfig.projectFilePaths,
+                config[i].entry_point,
+                config[i].ext
             )
             if (!runCommand(command, console)) {
                 return false
@@ -115,14 +141,14 @@ fun runWithConfig(editors: Editors,
 private fun debugWithConfig(editors: Editors, console: Console, config: List<ConfigParser.ConfigInternal>) {
     try {
         for (i in 0 until config.count()) {
-            val command = listOfNotNull(
-                config[i].exec,
-                config[i].beforeFiles,
-                ("\"" + editors.openedFile.parentPath + "/" + parser.changeExt(
-                    editors.openedFile.name,
-                    config[i].changeExt
-                ) + "\""),
-                config[i].afterFiles
+            val command = buildCommand(
+                config[i].python_file,
+                "debug",
+                config[i].name,
+                NPIDE.currentProject!!.rootFolder.filepath,
+                NPIDE.configManager.currentProjectConfig.projectFilePaths,
+                config[i].entry_point,
+                config[i].ext
             )
             DebugThread = Thread {
                 debugRun(console, command)
@@ -150,21 +176,19 @@ fun buildWithConfig(editors: Editors,
                 bpStr += "; "
             }
             bpStr =
-                if (bpStr.isEmpty()) bpStr
+                if (bpStr.isEmpty()) "0"
                 else bpStr.subSequence(0, bpStr.length - 2).toString()
-            val command = listOfNotNull(
-                config[i].exec,
-                config[i].beforeFiles,
-                (File(
-                    editors.openedFile.parentPath + "/" + parser.changeExt(
-                        editors.openedFile.name,
-                        config[i].changeExt
-                    )
-                ).absolutePath),
-                config[i].afterFiles,
-                "-b",
+            val command =  buildCommand(
+                config[i].python_file,
+                "build",
+                config[i].name,
+                NPIDE.currentProject!!.rootFolder.filepath,
+                NPIDE.configManager.currentProjectConfig.projectFilePaths,
+                config[i].entry_point,
+                config[i].ext,
                 bpStr
             )
+            println(command)
             if(!runCommand(command, console)) {
                 return false
             }
@@ -177,13 +201,14 @@ fun buildWithConfig(editors: Editors,
 }
 
 fun build(editors: Editors, console: Console) {
-    val flagBuilt = NPIDE.configManager.readFileDirtiness(editors.openedFile.filepath)
-    if (!flagBuilt) {
-        NPIDE.configManager.setFileDirtiness(
-            editors.openedFile.filepath,
-            !buildWithConfig(editors, console, parser.resultBuild.build)
-        )
-    }
+//    val flagBuilt = NPIDE.configManager.readFileDirtiness(editors.openedFile.filepath)
+//    if (!flagBuilt) {
+//        NPIDE.configManager.setFileDirtiness(
+//            editors.openedFile.filepath,
+//            !buildWithConfig(editors, console, parser.resultBuild.build)
+//        )
+//    }
+    buildWithConfig(editors, console, parser.resultBuild.build)
 }
 
 fun run(editors: Editors, console: Console) {

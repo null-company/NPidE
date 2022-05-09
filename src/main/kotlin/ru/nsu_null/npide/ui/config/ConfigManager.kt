@@ -104,6 +104,7 @@ class ConfigManager(private val project: ProjectChooser.Project) {
         val syntaxHighlighter: String,
     )
 
+
     private fun storeConfig() {
         val result = Yaml.default.encodeToString(
             ProjectConfig.serializer(), currentProjectConfig

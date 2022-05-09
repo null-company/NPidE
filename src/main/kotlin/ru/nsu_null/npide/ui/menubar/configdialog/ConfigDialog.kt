@@ -74,6 +74,8 @@ fun ConfigDialog(isOpen: MutableState<Boolean>) {
                     ChooseDebug
                 )
 
+                ProjectConfigForm(configurationState)
+                CurrentlySelectedProjectPathsList(configurationState)
                 GrammarConfigurationForm(configurationState)
                 CurrentlySelectedGrammarsList(configurationState)
             }
@@ -138,6 +140,69 @@ private fun ApplyConfigButton(isOpen: MutableState<Boolean>, configurationState:
     }
 }
 
+
+@Composable
+private fun AddProjectFileConfigButton(configurationState: ConfigDialogState) {
+
+    fun selectionIsReady(): Boolean {
+        return (configurationState.selectionState.projectFilePath.value.isNotBlank())
+    }
+
+    Button(
+        onClick = {
+            if (selectionIsReady()) {
+                configurationState.projectConfig.projectFilePaths.value +=
+                    (configurationState.selectionState.projectFilePath.value)
+            }
+        },
+        modifier = Modifier.padding(20.dp)
+    ) {
+        Text("Add project file source path")
+    }
+}
+
+@Composable
+private fun CurrentlySelectedProjectPathsList(configurationState: ConfigDialogState) {
+    for (value in configurationState.projectConfig.projectFilePaths.value) {
+        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            TextBox("$value")
+            Button(
+                onClick = { configurationState.projectConfig.projectFilePaths.value -= value }
+            ) {
+                Text("Delete")
+            }
+            Spacer(modifier = Modifier.height(5.dp))
+        }
+    }
+}
+
+
+
+@ExperimentalComposeUiApi
+@Composable
+private fun ProjectConfigForm(configurationState: ConfigDialogState, ) {
+    Box(
+        modifier = Modifier
+            .padding(end = 12.dp, bottom = 12.dp)
+            .background(color = Color(0, 0, 0, 20))
+
+    ) {
+        Text(
+            "Project sources:",
+            modifier = Modifier.padding(10.dp),
+            fontWeight = FontWeight.Bold
+        )
+
+        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            SimpleConfigItem(
+                configurationState,
+                configurationState.selectionState.projectFilePath,
+                ChooseSource
+            )
+            AddProjectFileConfigButton(configurationState)
+        }
+    }
+}
 @Composable
 private fun CurrentlySelectedGrammarsList(configurationState: ConfigDialogState) {
     for (value in configurationState.projectConfig.grammarConfigs.value) {
@@ -247,7 +312,8 @@ private enum class ConfigureProjectAction {
     ChooseRun,
     ChooseDebug,
     ChooseGrammar,
-    ChooseSyntaxHighlighter;
+    ChooseSyntaxHighlighter,
+    ChooseSource;
 
     companion object {
         val actionToConfigParamAsString = mapOf(
@@ -255,7 +321,8 @@ private enum class ConfigureProjectAction {
             ChooseRun to "Run",
             ChooseDebug to "Debug",
             ChooseGrammar to "Grammar",
-            ChooseSyntaxHighlighter to "Syntax Highlighter"
+            ChooseSyntaxHighlighter to "Syntax Highlighter",
+            ChooseSource to "Source File Path"
         )
     }
 }
@@ -280,6 +347,9 @@ private fun chooseFile(configButtonState: ConfigureProjectAction, dialogState: C
                 }
                 ChooseSyntaxHighlighter -> {
                     dialogState.selectionState.highlighterPath.value = selectedFile.toString()
+                }
+                ChooseSource ->{
+                    dialogState.selectionState.projectFilePath.value = selectedFile.toString()
                 }
             }
         }

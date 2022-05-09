@@ -8,14 +8,16 @@ import ru.nsu_null.npide.ui.npide.NPIDE
 internal data class CurrentSelectionsState(
     val highlighterPath: MutableState<String>,
     val grammarPath: MutableState<String>,
-    val grammarExtension: MutableState<String>
+    val grammarExtension: MutableState<String>,
+    val projectFilePath: MutableState<String>
 )
 
 internal data class ProjectConfigState(
     val runPath: MutableState<String>,
     val buildPath: MutableState<String>,
     val debugPath: MutableState<String>,
-    val grammarConfigs: MutableState<List<ConfigManager.GrammarConfig>>
+    val grammarConfigs: MutableState<List<ConfigManager.GrammarConfig>>,
+    val projectFilePaths: MutableState<List<String>>
 )
 
 internal data class ConfigDialogState(
@@ -31,18 +33,22 @@ internal fun getStateByConfig(): ConfigDialogState {
     val buildPath = currentProjectConfig.build
     val debugPath = currentProjectConfig.debug
     val grammarConfigs = currentProjectConfig.grammarConfigs
+    val projectFilePaths = currentProjectConfig.projectFilePaths
+
 
     return ConfigDialogState(
         ProjectConfigState(
             mutableStateOf(runPath),
             mutableStateOf(buildPath),
             mutableStateOf(debugPath),
-            mutableStateOf(grammarConfigs)
+            mutableStateOf(grammarConfigs),
+            mutableStateOf(projectFilePaths)
         ),
         CurrentSelectionsState(
             mutableStateOf(""),
             mutableStateOf(""),
             mutableStateOf(""),
+            mutableStateOf("")
         ),
     )
 }
@@ -53,7 +59,7 @@ internal fun projectConfigByState(configDialogState: ConfigDialogState): ConfigM
         configDialogState.projectConfig.runPath.value,
         configDialogState.projectConfig.debugPath.value,
         NPIDE.configManager.currentProjectConfig.filePathToDirtyFlag,
-        NPIDE.configManager.currentProjectConfig.projectFilePaths,
+        configDialogState.projectConfig.projectFilePaths.value,
         configDialogState.projectConfig.grammarConfigs.value
     )
 }
