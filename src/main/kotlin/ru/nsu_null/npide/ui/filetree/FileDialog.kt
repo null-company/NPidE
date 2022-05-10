@@ -18,13 +18,13 @@ import java.io.File as ioFile
 
 @ExperimentalComposeUiApi
 @Composable
-fun SimpleOutlinedTextFieldSample(): String {
+fun OutlineFieldItemNameGetter(): String {
     var text by remember { mutableStateOf("") }
 
     OutlinedTextField(
         value = text,
         onValueChange = { text = it },
-        label = { Text("Filename", fontWeight = FontWeight.Bold, color = Color.Black) },
+        label = { Text("Item name", fontWeight = FontWeight.Bold, color = Color.Black) },
         textStyle = TextStyle(color = Color.Black, fontWeight = FontWeight.Bold),
         modifier = Modifier.padding(20.dp),
         colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -36,42 +36,40 @@ fun SimpleOutlinedTextFieldSample(): String {
     return text
 }
 
-fun FileCreate(fileName: String) {
-    val file = ioFile(fileName)
-    file.writeBytes(ByteArray(0))
-
-}
-
+/**
+ * In fact is a blocking call to receive a file name
+ * @return a name of an item (Folder or File) to create. NOTE: this is not a full path to it
+ */
 @ExperimentalComposeUiApi
 @Composable
-fun OpenCreteFileDialog(state: MutableState<Boolean>, filepath: String) {
+fun CreateItemDialog(onCloseRequest: () -> Unit): String? {
 // TODO добавить Enter
-    Dialog(onCloseRequest = { state.value = false }) {
-        val text = SimpleOutlinedTextFieldSample()
+    var fileName: String? by remember { mutableStateOf(null) }
+    Dialog(onCloseRequest = onCloseRequest,
+        title = "Choose new item name") {
+        val text = OutlineFieldItemNameGetter().ifBlank { null }
         Button(
             onClick = {
-                val filename = "$filepath/$text"
-                println(filename)
-                FileCreate(filename)
-                state.value = false
+                fileName = text
             },
             modifier = Modifier.padding(120.dp)
         ) {
-            Text("ok")
-
+            Text("Create")
         }
-
     }
+    return fileName
 }
 
 
 @ExperimentalComposeUiApi
 @Composable
-fun OpenDeleteDialog(state: MutableState<Boolean>, filepath: String) {
+fun DeleteItemDialog(onCloseRequest: () -> Unit, fullFileName: String): Boolean {
 // TODO Enter
-    Dialog(onCloseRequest = { state.value = false }, title = "Warning") {
+    var userAnswer by remember { mutableStateOf(false) }
+    Dialog(onCloseRequest = onCloseRequest, title = "Delete file?") {
+        val buttonModifier = Modifier.padding(60.dp, 100.dp)
         Text(
-            text = "Are you sure want to delete $filepath?",
+            text = "Are you sure you want to delete $fullFileName?",
             modifier = Modifier.padding(60.dp, 40.dp),
             color = Color.Black,
             fontSize = 12.sp
@@ -79,31 +77,30 @@ fun OpenDeleteDialog(state: MutableState<Boolean>, filepath: String) {
         Row {
             Button(
                 onClick = {
-                    FileDelete(filepath)
-                    state.value = false
+                    userAnswer = true
+                    onCloseRequest()
                 },
-                modifier = Modifier.padding(60.dp, 100.dp)
+                modifier = buttonModifier
             ) {
-                Text("Ok")
-
+                Text("Delete file")
             }
             Button(
                 onClick = {
-                    state.value = false
+                    userAnswer = false
+                    onCloseRequest()
                 },
-                modifier = Modifier.padding(60.dp, 100.dp)
+                modifier = buttonModifier
             ) {
                 Text("Cancel")
-
             }
         }
 
     }
+    return userAnswer
 }
 
-fun FileDelete(fileName: String) {
+fun deleteFile(fileName: String) {
     val file = ioFile(fileName)
     if (file.exists())
         file.deleteRecursively()
 }
-
