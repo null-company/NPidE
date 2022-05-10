@@ -131,12 +131,12 @@ DEFN : ('defn' | 'def') -> pushMode(SYMBOL_DEFENITION_MODE);
 ID_USAGE: ('.'
     | '/'
     | NAME) -> popMode;
-
+CLOSE_BRACKET_: ')' -> popMode;
 UN: [\u0000-\uFFFF];
 WS_: WS->popMode;
 
 mode SYMBOL_DEFENITION_MODE;
 ID: ('.'
     | '/'
-    | NAME) -> popMode;
+    | NAME) -> popMode, popMode;
 WS__: WS;
