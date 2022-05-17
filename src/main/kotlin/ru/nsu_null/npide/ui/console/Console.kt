@@ -3,7 +3,6 @@ package ru.nsu_null.npide.ui.console
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import ru.nsu_null.npide.ui.npide.NPIDE
 import java.io.*
 
 class Console {
@@ -56,7 +55,7 @@ class Console {
         get() = attachedProcess != null
         private set
 
-    private var proxyWorker: ProxyWorker? = null
+    private var communicationProxyWorker: CommunicationProxyWorker? = null
 
     /**
      * Attach a process to console for user and ide-wide communication
@@ -83,7 +82,7 @@ class Console {
         val workerStdout = PipedOutputStream().also { it.connect(processStdout) }
         val workerStderr = PipedOutputStream().also { it.connect(processStderr) }
 
-        proxyWorker = ProxyWorker(
+        communicationProxyWorker = CommunicationProxyWorker(
             this,
             ConsoleProxyPipes(workerStdin, workerStdout, workerStderr),
             ProcessCommunicationPipes(process.outputStream, process.inputStream, process.errorStream)
@@ -104,8 +103,8 @@ class Console {
         } else {
             log("Detaching process $attachedProcessLabel")
             process.destroy()
-            proxyWorker?.threads?.forEach(Thread::interrupt)
-            proxyWorker = null
+            communicationProxyWorker?.stop()
+            communicationProxyWorker = null
             attachedProcess = null
         }
     }
@@ -124,7 +123,7 @@ private data class ConsoleProxyPipes(val stdin: InputStream,
                                      val stderr: OutputStream)
 
 /**
- * [ProxyWorker] is responsible for proxying client's pipes by writing
+ * [CommunicationProxyWorker] is responsible for proxying client's pipes by writing
  * the messages to console
  *
  * A client is a caller of [Console.attachProcess]
@@ -132,9 +131,9 @@ private data class ConsoleProxyPipes(val stdin: InputStream,
  * @param clientPipes streams with which communication with client happens
  * @param processStreams streams with which communication with the process happens
  */
-private class ProxyWorker(val console: Console,
-                          clientPipes: ConsoleProxyPipes,
-                          processStreams: ProcessCommunicationPipes) {
+private class CommunicationProxyWorker(val console: Console,
+                                       clientPipes: ConsoleProxyPipes,
+                                       processStreams: ProcessCommunicationPipes) {
     var stdin: OutputStreamWriter? = processStreams.stdin.writer()
     var stdout: InputStreamReader? = processStreams.stdout.reader()
     var stderr: InputStreamReader? = processStreams.stderr.reader()
@@ -143,17 +142,29 @@ private class ProxyWorker(val console: Console,
     var clientStdout: OutputStreamWriter? = clientPipes.stdout.writer()
     var clientStderr: OutputStreamWriter? = clientPipes.stderr.writer()
 
-    /**
-     * Threads that are piping client, process and console
-     */
-    val threads = listOf(
-        safeThreadContinuousTask(::communicateClientWithStdin),
-        safeThreadContinuousTask(::communicateStdoutWithConsoleAndClient),
-        safeThreadContinuousTask(::communicateStderrWithConsoleAndClient)
-    )
-
     fun work() {
-        threads.forEach(Thread::start)
+        safeThreadContinuousTask(::communicate).start()
+    }
+
+    private fun communicate() {
+        // todo ineffective to construct this every time?
+        val communicatingPairs = listOf(
+            clientStdin to stdin,
+            stdout to clientStdout,
+            stderr to clientStderr
+        ).mapNotNull { (l, r) ->  if (l == null || r == null) null else l to r }
+        communicatingPairs.forEach { (input, output) -> communicatePipes(input, output) }
+    }
+
+    private fun communicatePipes(inputStreamReader: InputStreamReader, outputStreamWriter: OutputStreamWriter: OutputStreamWriter) {
+        val readAndAccumulate = {
+            while (inputStreamReader.ready()) {
+                val newChar = inputStreamReader.read()
+                if (newChar == -1)
+                    break
+                acc += Char(newChar)
+            }
+        }
     }
 
     private fun InputStreamReader.readSafe(): Int? = read().let { if (it != -1) it else null }
@@ -197,6 +208,10 @@ private class ProxyWorker(val console: Console,
             stderr = null
             clientStderr = null
         }
+    }
+
+    fun stop() {
+        threads.forEach(Thread::interrupt)
     }
 }
 
