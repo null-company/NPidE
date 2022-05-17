@@ -62,6 +62,9 @@ class Console {
      * Allows user to write to the process and see the output in the console
      * Allows communicating with the process programmatically using ProcessCommunicationPipes
      * User sees programmatic communication in the console
+     *
+     * It is caller's responsibility to close given pipes, and caller is expected to read
+     * from them so that console is not blocked on writes
      * @param process the process to attach to console
      * @param label some name for this process. The user will see it in the gui
      * @return pipes with which to communicate with the process programmatically
@@ -84,6 +87,7 @@ class Console {
 
         communicationProxyWorker = CommunicationProxyWorker(
             this,
+            process,
             ConsoleProxyPipes(workerStdin, workerStdout, workerStderr),
             ProcessCommunicationPipes(process.outputStream, process.inputStream, process.errorStream)
         ).also { it.work() }
@@ -102,8 +106,8 @@ class Console {
             log("Error: no attached process")
         } else {
             log("Detaching process $attachedProcessLabel")
-            process.destroy()
             communicationProxyWorker?.stop()
+            process.destroy()
             communicationProxyWorker = null
             attachedProcess = null
         }
@@ -112,6 +116,18 @@ class Console {
     private fun log(message: String) {
         log("Console", message)
     }
+}
+
+/**
+ * Run a single command or a process
+ * Same as [Console.attachProcess], but closes your pipes immediately
+ *
+ * Note: so far this is not really safe for short commands, because a process can die before
+ * all stdin is read, but as we haven't needed that so far, should be ok
+ */
+fun Console.runProcess(process: Process, label: String) {
+    val (stdin, stdout, stderr) = attachProcess(process, label)
+    listOf(stdin, stdout, stderr).forEach(Closeable::close)
 }
 
 data class ProcessCommunicationPipes(val stdin: OutputStream,
@@ -131,87 +147,65 @@ private data class ConsoleProxyPipes(val stdin: InputStream,
  * @param clientPipes streams with which communication with client happens
  * @param processStreams streams with which communication with the process happens
  */
-private class CommunicationProxyWorker(val console: Console,
+private class CommunicationProxyWorker(private val console: Console,
+                                       private val watchedProcess: Process,
                                        clientPipes: ConsoleProxyPipes,
                                        processStreams: ProcessCommunicationPipes) {
-    var stdin: OutputStreamWriter? = processStreams.stdin.writer()
-    var stdout: InputStreamReader? = processStreams.stdout.reader()
-    var stderr: InputStreamReader? = processStreams.stderr.reader()
+    var stdin = processStreams.stdin.writer()
+    var stdout = processStreams.stdout.reader()
+    var stderr = processStreams.stderr.reader()
 
-    var clientStdin: InputStreamReader? = clientPipes.stdin.reader()
-    var clientStdout: OutputStreamWriter? = clientPipes.stdout.writer()
-    var clientStderr: OutputStreamWriter? = clientPipes.stderr.writer()
+    var clientStdin = clientPipes.stdin.reader()
+    var clientStdout = clientPipes.stdout.writer()
+    var clientStderr = clientPipes.stderr.writer()
+
+    private var thread: Thread? = null
 
     fun work() {
-        safeThreadContinuousTask(::communicate).start()
+        thread = safeThreadContinuousTask(::job).also { it.start() }
+    }
+
+    private fun job() {
+        if (!watchedProcess.isAlive) {
+            console.detachCurrentProcess()
+        }
+        communicate()
     }
 
     private fun communicate() {
-        // todo ineffective to construct this every time?
         val communicatingPairs = listOf(
             clientStdin to stdin,
             stdout to clientStdout,
             stderr to clientStderr
-        ).mapNotNull { (l, r) ->  if (l == null || r == null) null else l to r }
+        )
         communicatingPairs.forEach { (input, output) -> communicatePipes(input, output) }
     }
 
-    private fun communicatePipes(inputStreamReader: InputStreamReader, outputStreamWriter: OutputStreamWriter: OutputStreamWriter) {
-        val readAndAccumulate = {
-            while (inputStreamReader.ready()) {
-                val newChar = inputStreamReader.read()
-                if (newChar == -1)
-                    break
-                acc += Char(newChar)
+    private fun communicatePipes(inputStreamReader: InputStreamReader, outputStreamWriter: OutputStreamWriter) {
+        val batchSize = 100
+        fun readBatch(): CharArray? {
+            val acc = CharArray(batchSize)
+            if (inputStreamReader.ready()) {
+                val readN = inputStreamReader.read(acc)
+                if (readN == -1 || readN == 0) {
+                    return null
+                }
+                return acc.sliceArray(0 until readN)
             }
+            return CharArray(0)
         }
-    }
-
-    private fun InputStreamReader.readSafe(): Int? = read().let { if (it != -1) it else null }
-    private fun communicateClientWithStdin() {
-        val clientInput = clientStdin ?: return
-        val clientMessage = try { clientInput.readSafe() } catch (e: IOException) { null }
-        if (clientMessage != null) {
-            stdin?.write(clientMessage)
-            stdin?.flush()
-        } else {
-            stdin?.close()
-            clientInput.close()
-            stdin = null
-            clientStdin = null
-        }
-    }
-    private fun communicateStdoutWithConsoleAndClient() {
-        val actualStdout = stdout ?: return
-        val stdoutMessage = try { actualStdout.readSafe() } catch (e: IOException) { null }
-        if (stdoutMessage != null) {
-            console.display(Char(stdoutMessage).toString())
-            clientStdout?.write(stdoutMessage)
-            clientStdout?.flush()
-        } else {
-            actualStdout.close()
-            clientStdout?.close()
-            stdout = null
-            clientStdout = null
-        }
-    }
-    private fun communicateStderrWithConsoleAndClient() {
-        val actualStderr = stderr ?: return
-        val stderrMessage = try { actualStderr.readSafe() } catch (e: IOException) { null }
-        if (stderrMessage != null) {
-            console.display(Char(stderrMessage).toString())
-            clientStderr?.write(stderrMessage)
-            clientStderr?.flush()
-        } else {
-            actualStderr.close()
-            clientStderr?.close()
-            stderr = null
-            clientStderr = null
+        readBatch()?.let { input ->
+            if (input.isEmpty()) {
+                return
+            }
+            console.display(String(input))
+            outputStreamWriter.write(input)
+            outputStreamWriter.flush()
         }
     }
 
     fun stop() {
-        threads.forEach(Thread::interrupt)
+        thread?.interrupt()
     }
 }
 
@@ -238,20 +232,23 @@ fun Console.log(who: String, message: String) {
 private fun safeThreadContinuousTask(task: () -> Unit) = Thread {
     while (true) {
         try {
+            Thread.sleep(100)
             if (Thread.interrupted()) {
                 throw InterruptedException()
             }
             task()
         } catch (e: InterruptedException) {
+            // usual termination
             return@Thread
-        } catch (e: IOException) {
+        } catch (anyPipeReadWriteException: IOException) {
+            // TODO(Roman) investigate whether this is the best way to do that
             continue
         }
     }
 }
 
 /**
- * An example of [Console.attachProcess] usage
+ * An example of [Console.attachProcess] and [Console.runProcess] usage
  */
 private fun main() {
 
@@ -262,6 +259,7 @@ private fun main() {
 
     // Immediately attach it. If some sneaky-beaky like action is needed, perform it before attaching
     // But the user won't see any action in the console then
+    // Remember to read from needed pipes or close them right after calling!
     val (stdin, stdout, stderr) = console.attachProcess(gitStatusProcess, "git status")
 
     // Since this moment, only use the given streams to interact with the process so that the users sees everything
@@ -278,7 +276,11 @@ private fun main() {
     Thread.sleep(500) // waiting for the git process to tell everything it needs for presentation purposes
 
     // You MAY do that in the end. This kills the process
+    // If you don't, when the process ends, console will detach itself
     console.detachCurrentProcess()
 
     println(console.content)
+
+    // if you need not to actually communicate, do this instead
+    console.runProcess(gitStatusProcess, "git status i dont care about")
 }

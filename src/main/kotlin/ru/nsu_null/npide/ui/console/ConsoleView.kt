@@ -28,6 +28,7 @@ import ru.nsu_null.npide.platform.VerticalScrollbar
 import ru.nsu_null.npide.ui.common.AppTheme
 import ru.nsu_null.npide.ui.common.Settings
 import ru.nsu_null.npide.ui.npide.NPIDE
+import java.io.Closeable
 
 
 @Preview
@@ -118,7 +119,7 @@ private fun IconBar(console: Console) {
         val shell = Runtime.getRuntime().let {
             if (isWindows) it.exec("powershell") else it.exec("bash")
         }
-        NPIDE.console.attachProcess(shell, "shell")
+        console.runProcess(shell, "shell")
     }
     @Composable
     fun IconsSpacer() {
