@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nsu_null.npide.ui.buttonsbar.ButtonsBar
-import ru.nsu_null.npide.ui.console.ConsoleView
+import ru.nsu_null.npide.ui.console.ConsolePane
 import ru.nsu_null.npide.ui.editor.EditorEmptyView
 import ru.nsu_null.npide.ui.editor.EditorTabsView
 import ru.nsu_null.npide.ui.editor.EditorView
@@ -65,7 +65,7 @@ fun CodeViewerView(model: CodeViewer) {
         Box {
             Column(Modifier.fillMaxSize()) {
                 Box(Modifier.weight(0.07f)) {
-                    ButtonsBar(model.settings, model.editors, model.console)
+                    ButtonsBar(model.settings, model.editors, NPIDE.console)
                 }
                 Box(Modifier.weight(0.05f)) {
                     EditorTabsView(model.editors)
@@ -77,10 +77,10 @@ fun CodeViewerView(model: CodeViewer) {
                 } else {
                     EditorEmptyView(Modifier.weight(1f))
                 }
-                Box(Modifier.weight(0.45f).padding(0.dp, 0.dp, 0.dp, 0.dp)) {
-                    ConsoleView(model.settings, model.console)
+                Box(Modifier.weight(0.4f)) {
+                    ConsolePane(model.settings, NPIDE.console)
                 }
-                GitBranchTellerView(Modifier.weight(0.07f))
+                GitBranchTellerView(Modifier.weight(0.07f, true))
             }
         }
     }
@@ -88,7 +88,7 @@ fun CodeViewerView(model: CodeViewer) {
 
 @Preview
 @Composable
-fun GitBranchTellerView(modifier: Modifier) {
+fun GitBranchTellerView(modifier: Modifier = Modifier) {
     val currentPath = NPIDE.currentProject!!.rootFolder.filepath
     val currentGitBranch = remember { mutableStateOf("") }
     LaunchedEffect(currentPath) {

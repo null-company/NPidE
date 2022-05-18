@@ -45,7 +45,7 @@ fun debugRun(console: Console, command: List<String>) {
 
         if (DebugRunnableStepFlag.get()) {
             DebugRunnableStepFlag.set(false)
-            console.add(acc)
+            console.display(acc)
             acc = ""
             try {
                 writer.write("s\n")
@@ -60,9 +60,8 @@ fun debugRun(console: Console, command: List<String>) {
 
         }
     }
-
     readAndAccumulate()
-    console.add(acc)
+    console.display(acc)
 }
 
 lateinit var DebugThread: Thread
@@ -76,16 +75,16 @@ private fun runCommand(arguments: List<String>, console: Console): Boolean {
 
     process.inputStream.reader(Charsets.UTF_8).use {
         val s = it.readText()
-        console.add(s)
+        console.display(s)
     }
     process.errorStream.reader(Charsets.UTF_8).use {
         val s = it.readText()
-        console.add(s)
+        console.display(s)
     }
     return process.exitValue() == 0
 }
 
-fun runWithConfig(editors: Editors,
+private fun runWithConfig(editors: Editors,
                   console: Console,
                   config: List<ConfigParser.ConfigInternal>): Boolean {
     try {
@@ -133,7 +132,7 @@ private fun debugWithConfig(editors: Editors, console: Console, config: List<Con
     }
 }
 
-fun buildWithConfig(editors: Editors,
+private fun buildWithConfig(editors: Editors,
                     console: Console,
                     config: List<ConfigParser.ConfigInternal>): Boolean {
     try {
