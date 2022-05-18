@@ -16,7 +16,7 @@ object DebugRunnableStepFlag : AtomicBoolean(true)
 
 fun debugRun(console: Console, command: List<String>) {
     val dir  = File(NPIDE.currentProject!!.rootFolder.filepath)
-    val process = Runtime.getRuntime().exec(command.toTypedArray(), arrayOf(), dir)
+    val process = Runtime.getRuntime().exec(command.map { it.trim() }.filter { it.isNotEmpty() }.toTypedArray(), arrayOf(), dir)
     var acc = ""
     val inputStreamReader = process.inputStream.reader(Charsets.UTF_8)
     val errorStreamReader = process.errorStream.reader(Charsets.UTF_8)
