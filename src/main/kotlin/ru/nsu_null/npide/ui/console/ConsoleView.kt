@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Divider
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,11 +25,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import ru.nsu_null.npide.platform.VerticalScrollbar
 import ru.nsu_null.npide.ui.GitBranchTellerView
 import ru.nsu_null.npide.ui.common.AppTheme
 import ru.nsu_null.npide.ui.common.Settings
 import ru.nsu_null.npide.ui.npide.NPIDE
+import kotlin.coroutines.coroutineContext
 
 
 @Preview
@@ -42,7 +47,6 @@ fun ConsolePane(settings: Settings, console: Console) {
 @Composable
 fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
     with(LocalDensity.current) {
-        val lines = console.content.lineSequence().toList()
         val lineHeight = settings.fontSize.toDp() * 1.6f
         Column(modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
             Box(
@@ -51,6 +55,10 @@ fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
                     .background(AppTheme.colors.backgroundDark)
             ) {
                 val scrollState = rememberLazyListState()
+                val lines = console.content.lineSequence().toList()
+                rememberCoroutineScope().launch {
+                    scrollState.animateScrollToItem(lines.lastIndex)
+                }
 
                 LazyColumn(
                     state = scrollState
