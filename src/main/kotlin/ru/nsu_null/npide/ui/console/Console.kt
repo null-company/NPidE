@@ -151,22 +151,35 @@ private class CommunicationProxyWorker(private val console: Console,
                                        private val watchedProcess: Process,
                                        clientPipes: ConsoleProxyPipes,
                                        processStreams: ProcessCommunicationPipes) {
-    var stdin = processStreams.stdin.writer()
-    var stdout = processStreams.stdout.reader()
-    var stderr = processStreams.stderr.reader()
+    val stdin = processStreams.stdin.writer()
+    val stdout = processStreams.stdout.reader()
+    val stderr = processStreams.stderr.reader()
 
-    var clientStdin = clientPipes.stdin.reader()
-    var clientStdout = clientPipes.stdout.writer()
-    var clientStderr = clientPipes.stderr.writer()
+    val clientStdin = clientPipes.stdin.reader()
+    val clientStdout = clientPipes.stdout.writer()
+    val clientStderr = clientPipes.stderr.writer()
 
     private var thread: Thread? = null
+    private var allConnectionsAreFinished = false
+    private var drainPipes = false
 
     fun work() {
-        thread = safeThreadContinuousTask(::job).also { it.start() }
+        thread = safeThreadContinuousTask(::job) {
+            listOf(stdin, stdout, stderr, clientStdin, clientStdout, clientStderr).forEach { stream ->
+                try {
+                    stream.close()
+                } catch (e: IOException) {
+                    console.log("ConsoleProxyWorker Warning", "IOException on closing a stream")
+                }
+            }
+        }.also { it.start() }
     }
 
     private fun job() {
         if (!watchedProcess.isAlive) {
+            drainPipes = true
+        }
+        if (allConnectionsAreFinished) {
             console.detachCurrentProcess()
         }
         communicate()
@@ -178,14 +191,28 @@ private class CommunicationProxyWorker(private val console: Console,
             stdout to clientStdout,
             stderr to clientStderr
         )
-        communicatingPairs.forEach { (input, output) -> communicatePipes(input, output) }
+        var closedInputs = 0
+        communicatingPairs.forEach { (input, output) ->
+            if (communicatePipes(input, output)) {
+                closedInputs++
+            }
+            val totalInputs = 3
+            if (closedInputs == totalInputs) {
+                allConnectionsAreFinished = true
+            }
+        }
     }
 
-    private fun communicatePipes(inputStreamReader: InputStreamReader, outputStreamWriter: OutputStreamWriter) {
-        val batchSize = 100
+    /**
+     * @return true iff inputStreamReader was closed during the read
+     * Doesn't report outputStreamWriter closing so that console show everything anyway
+     */
+    private fun communicatePipes(inputStreamReader: InputStreamReader,
+                                 outputStreamWriter: OutputStreamWriter): Boolean {
+        val batchSize = 300
         fun readBatch(): CharArray? {
             val acc = CharArray(batchSize)
-            if (inputStreamReader.ready()) {
+            if (inputStreamReader.ready() || drainPipes) {
                 val readN = inputStreamReader.read(acc)
                 if (readN == -1 || readN == 0) {
                     return null
@@ -194,14 +221,13 @@ private class CommunicationProxyWorker(private val console: Console,
             }
             return CharArray(0)
         }
-        readBatch()?.let { input ->
-            if (input.isEmpty()) {
-                return
-            }
-            console.display(String(input))
-            outputStreamWriter.write(input)
-            outputStreamWriter.flush()
-        }
+        val batch = readBatch() ?: return true
+        console.display(String(batch))
+        try {
+            outputStreamWriter.write(batch)
+        } catch (_: IOException) { /* ignore output is closed */ }
+        outputStreamWriter.flush()
+        return false
     }
 
     fun stop() {
@@ -229,7 +255,7 @@ fun Console.log(who: String, message: String) {
     display("[$who]: $message\n")
 }
 
-private fun safeThreadContinuousTask(task: () -> Unit) = Thread {
+private fun safeThreadContinuousTask(task: () -> Unit, onExit: () -> Unit) = Thread {
     while (true) {
         try {
             Thread.sleep(100)
@@ -239,6 +265,7 @@ private fun safeThreadContinuousTask(task: () -> Unit) = Thread {
             task()
         } catch (e: InterruptedException) {
             // usual termination
+            onExit()
             return@Thread
         } catch (anyPipeReadWriteException: IOException) {
             // TODO(Roman) investigate whether this is the best way to do that
