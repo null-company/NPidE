@@ -24,6 +24,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ru.nsu_null.npide.platform.VerticalScrollbar
+import ru.nsu_null.npide.ui.GitBranchTellerView
 import ru.nsu_null.npide.ui.common.AppTheme
 import ru.nsu_null.npide.ui.common.Settings
 import ru.nsu_null.npide.ui.npide.NPIDE
@@ -43,15 +44,15 @@ fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
     with(LocalDensity.current) {
         val lines = console.content.lineSequence().toList()
         val lineHeight = settings.fontSize.toDp() * 1.6f
-        Column(modifier, verticalArrangement = Arrangement.SpaceBetween) {
+        Column(modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
             Box(
-                Modifier.fillMaxWidth()
+                // weight is essential so that the lazycolumn doesn't eat up all the space
+                Modifier.fillMaxWidth().weight(0.1f)
                     .background(AppTheme.colors.backgroundDark)
             ) {
                 val scrollState = rememberLazyListState()
 
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
                     state = scrollState
                 ) {
                     items(lines.size) { index ->
@@ -68,7 +69,7 @@ fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
                     lineHeight
                 )
             }
-            Box(Modifier.requiredHeight(lineHeight).fillMaxWidth().background(Color.Black)) {
+            Box(Modifier.height(lineHeight).background(Color.Black)) {
                 val input = remember(NPIDE.currentProject) { mutableStateOf("") }
                 val onChange = fun(enteredValue: String) {
                     if (enteredValue.endsWith('\n')) {
@@ -85,6 +86,7 @@ fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
                     modifier = Modifier.padding(5.dp, 0.dp).fillMaxWidth()
                 )
             }
+            Spacer(Modifier.padding(10.dp))
         }
     }
 }
@@ -92,7 +94,7 @@ fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
 @Composable
 fun ConsoleControlPanelView(modifier: Modifier, settings: Settings, console: Console) {
     Box(Modifier.fillMaxSize().padding(15.dp).then(modifier)) {
-        Column {
+        Column(Modifier.fillMaxSize()) {
             Row(horizontalArrangement = Arrangement.Start) {
                 val processMessage = if (!console.processIsAttached)
                     "No process attached" else "Process '${console.attachedProcessLabel}' is attached"
@@ -105,13 +107,16 @@ fun ConsoleControlPanelView(modifier: Modifier, settings: Settings, console: Con
                 Text(processMessage, textAlign = TextAlign.Center)
             }
             Divider(Modifier.padding(0.dp, 15.dp))
-            IconBar(console)
+            Column(Modifier.fillMaxSize()) {
+                IconBar(Modifier.weight(0.8f), console)
+                GitBranchTellerView(Modifier.weight(0.2f))
+            }
         }
     }
 }
 
 @Composable
-private fun IconBar(console: Console) {
+private fun IconBar(modifier: Modifier = Modifier, console: Console) {
     val isWindows = remember { "Win" in System.getProperty("os.name") }
     fun launchShell() {
         val shell = Runtime.getRuntime().let {
@@ -124,7 +129,7 @@ private fun IconBar(console: Console) {
         Spacer(Modifier.padding(5.dp))
     }
 
-    Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()) {
+    Row(horizontalArrangement = Arrangement.Start, modifier = modifier.fillMaxWidth()) {
         Icon(Icons.Default.Stop, "Stop process", tint = Color.Red,
             modifier = Modifier.clickable {
                 console.detachCurrentProcess()
