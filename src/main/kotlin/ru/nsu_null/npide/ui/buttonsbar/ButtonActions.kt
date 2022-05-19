@@ -16,7 +16,11 @@ object DebugRunnableStepFlag : AtomicBoolean(true)
 
 fun debugRun(console: Console, command: List<String>) {
     val dir  = File(NPIDE.currentProject!!.rootFolder.filepath)
-    val process = Runtime.getRuntime().exec(command.map { it.trim() }.filter { it.isNotEmpty() }.toTypedArray(), arrayOf(), dir)
+    val process = Runtime.getRuntime().exec(
+        command.map { it.trim() }.filter { it.isNotEmpty() }.toTypedArray(),
+        null,
+        dir
+    )
     var acc = ""
     val inputStreamReader = process.inputStream.reader(Charsets.UTF_8)
     val errorStreamReader = process.errorStream.reader(Charsets.UTF_8)
@@ -71,7 +75,7 @@ private fun runCommand(arguments: List<String>, console: Console): Boolean {
 
     val dir  = File(NPIDE.currentProject!!.rootFolder.filepath)
 
-    val process = Runtime.getRuntime().exec(argumentsArr, arrayOf(), dir)
+    val process = Runtime.getRuntime().exec(argumentsArr, null, dir)
 
     process.inputStream.reader(Charsets.UTF_8).use {
         val s = it.readText()
@@ -117,10 +121,10 @@ private fun debugWithConfig(editors: Editors, console: Console, config: List<Con
             val command = listOfNotNull(
                 config[i].exec,
                 config[i].beforeFiles,
-                ("\"" + editors.openedFile.parentPath + "/" + parser.changeExt(
+                (editors.openedFile.parentPath + "/" + parser.changeExt(
                     editors.openedFile.name,
                     config[i].changeExt
-                ) + "\""),
+                )),
                 config[i].afterFiles
             )
             DebugThread = Thread {
