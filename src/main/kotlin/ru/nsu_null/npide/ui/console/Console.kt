@@ -37,7 +37,7 @@ class Console {
         }
         val spanStyle: SpanStyle = when(annotationType) {
             Basic -> SpanStyle()
-            Error -> SpanStyle(color = Color.Red, fontWeight = FontWeight(15), shadow = Shadow(color = Color.Black, blurRadius = 0.3f, offset = Offset(0.5f, 0.5f)))
+            Error -> SpanStyle(color = Color.Red, fontWeight = FontWeight(15))
             Special -> SpanStyle(color = Color.Yellow, fontWeight = FontWeight(20))
         }
         val lines = newContent.lines()
