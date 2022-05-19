@@ -9,6 +9,7 @@ import java.io.File
 import java.io.IOException
 import java.lang.Thread.sleep
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.concurrent.thread
 
 private val parser = ConfigParser()
 
@@ -16,7 +17,11 @@ object DebugRunnableStepFlag : AtomicBoolean(true)
 
 fun debugRun(console: Console, command: List<String>) {
     val dir  = File(NPIDE.currentProject!!.rootFolder.filepath)
-    val process = Runtime.getRuntime().exec(command.toTypedArray(), arrayOf(), dir)
+    val process = Runtime.getRuntime().exec(
+        command.map { it.trim() }.filter { it.isNotEmpty() }.toTypedArray(),
+        null,
+        dir
+    )
     var acc = ""
     val inputStreamReader = process.inputStream.reader(Charsets.UTF_8)
     val errorStreamReader = process.errorStream.reader(Charsets.UTF_8)
@@ -45,7 +50,7 @@ fun debugRun(console: Console, command: List<String>) {
 
         if (DebugRunnableStepFlag.get()) {
             DebugRunnableStepFlag.set(false)
-            console.add(acc)
+            console.display(acc)
             acc = ""
             try {
                 writer.write("s\n")
@@ -60,9 +65,8 @@ fun debugRun(console: Console, command: List<String>) {
 
         }
     }
-
     readAndAccumulate()
-    console.add(acc)
+    console.display(acc)
 }
 
 lateinit var DebugThread: Thread
@@ -76,11 +80,11 @@ private fun runCommand(arguments: List<String>, console: Console): Boolean {
 
     process.inputStream.reader(Charsets.UTF_8).use {
         val s = it.readText()
-        console.add(s)
+        console.display(s)
     }
     process.errorStream.reader(Charsets.UTF_8).use {
         val s = it.readText()
-        console.add(s)
+        console.display(s)
     }
     return process.exitValue() == 0
 }
@@ -95,7 +99,7 @@ private fun buildCommand(
     ext: String,
     bpStr: String = "0"
 ): List<String> {
-    return listOf<String>()+ "python3"+
+    return listOf<String>()+ "python"+
         python_file +
         "-f"+
         flag+
@@ -113,7 +117,7 @@ private fun buildCommand(
         bpStr
 }
 
-fun runWithConfig(editors: Editors,
+private fun runWithConfig(editors: Editors,
                   console: Console,
                   config: List<ConfigParser.ConfigInternal>): Boolean {
     try {
@@ -150,16 +154,16 @@ private fun debugWithConfig(editors: Editors, console: Console, config: List<Con
                 config[i].entry_point,
                 config[i].ext
             )
-            DebugThread = Thread {
+            DebugThread = thread {
                 debugRun(console, command)
-            }.also { it.start() }
+            }
         }
     } catch (e: IOException) {
         e.printStackTrace()
     }
 }
 
-fun buildWithConfig(editors: Editors,
+private fun buildWithConfig(editors: Editors,
                     console: Console,
                     config: List<ConfigParser.ConfigInternal>): Boolean {
     try {
@@ -201,13 +205,7 @@ fun buildWithConfig(editors: Editors,
 }
 
 fun build(editors: Editors, console: Console) {
-//    val flagBuilt = NPIDE.configManager.readFileDirtiness(editors.openedFile.filepath)
-//    if (!flagBuilt) {
-//        NPIDE.configManager.setFileDirtiness(
-//            editors.openedFile.filepath,
-//            !buildWithConfig(editors, console, parser.resultBuild.build)
-//        )
-//    }
+    // TODO fix dirty flag checking
     buildWithConfig(editors, console, parser.resultBuild.build)
 }
 

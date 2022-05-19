@@ -9,5 +9,4 @@ class CodeViewer(
     val editors: Editors,
     val fileTree: FileTree,
     val settings: Settings,
-    val console: Console
 )
