@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Divider
@@ -25,14 +24,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import ru.nsu_null.npide.platform.VerticalScrollbar
 import ru.nsu_null.npide.ui.GitBranchTellerView
 import ru.nsu_null.npide.ui.common.AppTheme
 import ru.nsu_null.npide.ui.common.Settings
 import ru.nsu_null.npide.ui.npide.NPIDE
-import kotlin.coroutines.coroutineContext
 
 
 @Preview
@@ -52,12 +49,14 @@ fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
             Box(
                 // weight is essential so that the lazycolumn doesn't eat up all the space
                 Modifier.fillMaxWidth().weight(0.1f)
-                    .background(AppTheme.colors.backgroundDark)
+                    .background(AppTheme.colors.backgroundDark.copy(alpha = 0.3f))
             ) {
                 val scrollState = rememberLazyListState()
-                val lines = console.content.lineSequence().toList()
+                val lines = console.content
                 rememberCoroutineScope().launch {
-                    scrollState.animateScrollToItem(lines.lastIndex)
+                    if (lines.isNotEmpty()) {
+                        scrollState.animateScrollToItem(lines.lastIndex)
+                    }
                 }
 
                 LazyColumn(
@@ -77,7 +76,7 @@ fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
                     lineHeight
                 )
             }
-            Box(Modifier.height(lineHeight).background(Color.Black)) {
+            Box(Modifier.height(lineHeight).background(Color.Black.copy(alpha = 0.5f))) {
                 val input = remember(NPIDE.currentProject) { mutableStateOf("") }
                 val onChange = fun(enteredValue: String) {
                     if (enteredValue.endsWith('\n')) {

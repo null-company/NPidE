@@ -1,30 +1,61 @@
 package ru.nsu_null.npide.ui.console
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontWeight
+import ru.nsu_null.npide.ui.console.Console.AnnotationType.*
 import java.io.*
 
 class Console {
     /**
      * Text in console that is currently available
      */
-    var content: String by mutableStateOf("")
+    var content: MutableList<AnnotatedString> = mutableStateListOf()
         private set
+
+    enum class AnnotationType {
+        Basic, Error, Special
+    }
 
     /**
      * A simple way to show new text content in console
      * Doesn't get sent to any process
+     *
+     * Defaults to usual text with no style
      */
-    fun display(newContent: String) {
-        content += newContent
+    fun display(newContent: String, annotationType: AnnotationType = Basic) {
+        if (newContent.isEmpty()) {
+            return
+        }
+        val spanStyle: SpanStyle = when(annotationType) {
+            Basic -> SpanStyle()
+            Error -> SpanStyle(color = Color.Red, fontWeight = FontWeight(15), shadow = Shadow(color = Color.Black, blurRadius = 0.3f, offset = Offset(0.5f, 0.5f)))
+            Special -> SpanStyle(color = Color.Yellow, fontWeight = FontWeight(20))
+        }
+        val lines = newContent.lines()
+        content += lines.map { AnnotatedString(it, spanStyle) }
+    }
+
+    /**
+     * todo
+     */
+    fun display(annotatedString: AnnotatedString) {
+        content += annotatedString
     }
 
     /**
      * Delete all content from the console rendering it clear
      */
     fun clear() {
-        content = ""
+        content.clear()
     }
 
     /**
@@ -103,7 +134,7 @@ class Console {
     fun detachCurrentProcess() {
         val process = attachedProcess
         if (process == null) {
-            log("Error: no attached process")
+            log("Error: no attached process", Error)
         } else {
             log("Detaching process $attachedProcessLabel")
             communicationProxyWorker?.stop()
@@ -113,8 +144,8 @@ class Console {
         }
     }
 
-    private fun log(message: String) {
-        log("Console", message)
+    private fun log(message: String, type: AnnotationType = Special) {
+        log("Console", message, type)
     }
 }
 
@@ -187,13 +218,14 @@ private class CommunicationProxyWorker(private val console: Console,
 
     private fun communicate() {
         val communicatingPairs = listOf(
-            clientStdin to stdin,
-            stdout to clientStdout,
-            stderr to clientStderr
+            clientStdin to stdin to Basic,
+            stdout to clientStdout to Basic,
+            stderr to clientStderr to Error
         )
         var closedInputs = 0
-        communicatingPairs.forEach { (input, output) ->
-            if (communicatePipes(input, output)) {
+        communicatingPairs.forEach { (route, flavour) ->
+            val (input, output) = route
+            if (communicatePipes(input, output, flavour)) {
                 closedInputs++
             }
             val totalInputs = 3
@@ -208,7 +240,8 @@ private class CommunicationProxyWorker(private val console: Console,
      * Doesn't report outputStreamWriter closing so that console show everything anyway
      */
     private fun communicatePipes(inputStreamReader: InputStreamReader,
-                                 outputStreamWriter: OutputStreamWriter): Boolean {
+                                 outputStreamWriter: OutputStreamWriter,
+                                 consoleWriteFlavour: Console.AnnotationType): Boolean {
         val batchSize = 300
         fun readBatch(): CharArray? {
             val acc = CharArray(batchSize)
@@ -222,7 +255,7 @@ private class CommunicationProxyWorker(private val console: Console,
             return CharArray(0)
         }
         val batch = readBatch() ?: return true
-        console.display(String(batch))
+        console.display(String(batch), consoleWriteFlavour)
         try {
             outputStreamWriter.write(batch)
         } catch (_: IOException) { /* ignore output is closed */ }
@@ -251,8 +284,8 @@ fun Console.displayAndSend(command: String) {
  * @param who sender name to be displayed
  * @param message text to log
  */
-fun Console.log(who: String, message: String) {
-    display("[$who]: $message\n")
+fun Console.log(who: String, message: String, annotationType: Console.AnnotationType = Special) {
+    display("[$who]: $message\n", annotationType)
 }
 
 private fun safeThreadContinuousTask(task: () -> Unit, onExit: () -> Unit) = Thread {
