@@ -277,7 +277,7 @@ private class CommunicationProxyWorker(private val console: Console,
     private fun communicatePipes(inputStreamReader: InputStreamReader,
                                  outputStreamWriter: OutputStreamWriter,
                                  consoleWriteFlavour: Console.AnnotationType): Boolean {
-        val batchSize = 300
+        val batchSize = 5012
         fun readBatch(): CharArray? {
             val acc = CharArray(batchSize)
             if (inputStreamReader.ready() || drainPipes) {
