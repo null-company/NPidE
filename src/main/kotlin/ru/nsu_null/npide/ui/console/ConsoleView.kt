@@ -29,6 +29,8 @@ import ru.nsu_null.npide.platform.VerticalScrollbar
 import ru.nsu_null.npide.ui.GitBranchTellerView
 import ru.nsu_null.npide.ui.common.AppTheme
 import ru.nsu_null.npide.ui.common.Settings
+import ru.nsu_null.npide.ui.console.Console.AnnotationType
+import ru.nsu_null.npide.ui.console.Console.AnnotationType.*
 import ru.nsu_null.npide.ui.npide.NPIDE
 
 
@@ -147,8 +149,16 @@ private fun IconBar(modifier: Modifier = Modifier, console: Console) {
                 console.clear()
             })
         IconsSpacer()
-        Icon(Icons.Default.Computer, "Clear terminal", tint = Color.White,
+        Icon(Icons.Default.Computer, "Launch shell", tint = Color.White,
             modifier = Modifier.clickable(onClick = ::launchShell)
         )
+        IconsSpacer()
+        Icon(Icons.Default.Help, "Get help message", tint = Color.LightGray,
+            modifier = Modifier.clickable {
+                val helpText = "Use buttons to start processes (run/build/debug/shell).\n" +
+                        "Interact using console.\n" +
+                        "F11 for fullscreen mode.\n"
+                console.display(helpText, Special)
+            })
     }
 }
