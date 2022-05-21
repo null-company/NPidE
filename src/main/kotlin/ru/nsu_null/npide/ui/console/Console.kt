@@ -4,22 +4,58 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import ru.nsu_null.npide.ui.console.Console.AnnotationType.*
 import java.io.*
 
+/**
+ * Returns copy of its container, so should be somewhat safe
+ * The objects in the copy of list are still modifiable though
+ */
+private class MultilineAnnotatedStringStorage {
+    private val storageLines = mutableStateListOf<AnnotatedString>()
+    private var unfinishedLeftovers = AnnotatedString("")
+    // TODO come up with a more effective solution. this could be a bottleneck
+    fun add(newContent: AnnotatedString) {
+        if (newContent.isEmpty()) {
+            return
+        }
+        val spanStyle = newContent.spanStyles[0].item
+        val lines = newContent.lines()
+        val contentToAppend = lines.map {
+            AnnotatedString(it, spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, it.length)))
+        }.let { if (it.last().isEmpty()) it.subList(0, it.lastIndex) else it }.toMutableList()
+        contentToAppend[0] = unfinishedLeftovers + contentToAppend[0]
+        val isComplete = newContent.endsWith('\n')
+        if (isComplete) {
+            unfinishedLeftovers = AnnotatedString("")
+            storageLines += contentToAppend
+        } else {
+            unfinishedLeftovers = contentToAppend.last()
+            storageLines += contentToAppend.subList(0, contentToAppend.lastIndex)
+        }
+    }
+    fun clear() {
+        storageLines.clear()
+    }
+    fun get(): List<AnnotatedString> {
+        return storageLines + unfinishedLeftovers
+    }
+}
+
+private operator fun MultilineAnnotatedStringStorage.plusAssign(newContent: AnnotatedString) {
+    add(newContent)
+}
+
 class Console {
     /**
      * Text in console that is currently available
      */
-    var content: MutableList<AnnotatedString> = mutableStateListOf()
-        private set
+    val content: List<AnnotatedString> get() = contentStorage.get()
+    private val contentStorage = MultilineAnnotatedStringStorage()
 
     enum class AnnotationType {
         Basic, Error, Special
@@ -40,22 +76,21 @@ class Console {
             Error -> SpanStyle(color = Color.Red, fontWeight = FontWeight(15))
             Special -> SpanStyle(color = Color.Yellow, fontWeight = FontWeight(20))
         }
-        val lines = newContent.lines()
-        content += lines.map { AnnotatedString(it, spanStyle) }
+        contentStorage += AnnotatedString(newContent, spanStyle)
     }
 
     /**
      * todo
      */
     fun display(annotatedString: AnnotatedString) {
-        content += annotatedString
+        contentStorage += annotatedString
     }
 
     /**
      * Delete all content from the console rendering it clear
      */
     fun clear() {
-        content.clear()
+        contentStorage.clear()
     }
 
     /**
