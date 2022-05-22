@@ -6,8 +6,10 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Text
@@ -17,12 +19,14 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nsu_null.npide.ui.buttonsbar.ButtonsBar
+import ru.nsu_null.npide.ui.console.ClosedConsole
 import ru.nsu_null.npide.ui.console.ConsolePane
 import ru.nsu_null.npide.ui.editor.EditorEmptyView
 import ru.nsu_null.npide.ui.editor.EditorTabsView
@@ -77,10 +81,18 @@ fun CodeViewerView(model: CodeViewer) {
                 } else {
                     EditorEmptyView(Modifier.weight(1f))
                 }
-                Box(Modifier.weight(0.4f)) {
-                    ConsolePane(model.settings, NPIDE.console)
+                var showConsole by remember { mutableStateOf(true) }
+                if (showConsole) {
+                    Divider(Modifier.background(Color.Black).height(1.dp))
+                    Box(Modifier.weight(0.4f)) {
+                        ConsolePane(model.settings, NPIDE.console) { showConsole = false }
+                    }
+                } else {
+                    Divider(Modifier.background(Color.Black).height(1.dp))
+                    Box(Modifier.weight(0.05f)) {
+                        ClosedConsole(model.settings, NPIDE.console) { showConsole = true }
+                    }
                 }
-                GitBranchTellerView(Modifier.weight(0.07f, true))
             }
         }
     }
@@ -99,7 +111,9 @@ fun GitBranchTellerView(modifier: Modifier = Modifier) {
             "Git icon", modifier = Modifier.padding(2.dp))
 
         Spacer(Modifier.padding(3.dp))
-        Text(currentGitBranch.value, fontSize = 20.sp, textAlign = TextAlign.Center)
+        Box(modifier = Modifier, Alignment.BottomStart) {
+            Text(currentGitBranch.value, fontSize = 17.sp, textAlign = TextAlign.Center)
+        }
     }
 }
 

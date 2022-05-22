@@ -93,3 +93,21 @@ fun VerticalSplitter(
             .background(color)
     )
 }
+
+@Composable
+fun SimpleVerticalSplitter(
+    color: Color = AppTheme.colors.backgroundDark
+) = Box {
+    Box(
+        Modifier
+            .width(8.dp)
+            .fillMaxHeight()
+    )
+
+    Box(
+        Modifier
+            .width(1.dp)
+            .fillMaxHeight()
+            .background(color)
+    )
+}

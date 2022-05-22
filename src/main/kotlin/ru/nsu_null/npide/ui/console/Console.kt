@@ -1,30 +1,90 @@
 package ru.nsu_null.npide.ui.console
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontWeight
+import ru.nsu_null.npide.ui.console.Console.MessageType.*
 import java.io.*
+import kotlin.concurrent.thread
+
+/**
+ * Returns copy of its container, so should be somewhat safe
+ * The objects in the copy of list are still modifiable though
+ */
+private class MultilineAnnotatedStringStorage {
+    private val storageLines = mutableStateListOf<AnnotatedString>()
+    private var unfinishedLeftovers = AnnotatedString("")
+    // TODO come up with a more effective solution. this could be a bottleneck
+    fun add(newContent: AnnotatedString) {
+        if (newContent.isEmpty()) {
+            return
+        }
+        val spanStyle = newContent.spanStyles[0].item
+        val lines = newContent.lines()
+        val contentToAppend = lines.map {
+            AnnotatedString(it, spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, it.length)))
+        }.let { if (it.last().isEmpty()) it.subList(0, it.lastIndex) else it }.toMutableList()
+        contentToAppend[0] = unfinishedLeftovers + contentToAppend[0]
+        val isComplete = newContent.endsWith('\n')
+        if (isComplete) {
+            unfinishedLeftovers = AnnotatedString("")
+            storageLines += contentToAppend
+        } else {
+            unfinishedLeftovers = contentToAppend.last()
+            storageLines += contentToAppend.subList(0, contentToAppend.lastIndex)
+        }
+    }
+    fun clear() {
+        storageLines.clear()
+    }
+    fun get(): List<AnnotatedString> {
+        return storageLines + unfinishedLeftovers
+    }
+}
+
+private operator fun MultilineAnnotatedStringStorage.plusAssign(newContent: AnnotatedString) {
+    add(newContent)
+}
 
 class Console {
     /**
      * Text in console that is currently available
      */
-    var content: String by mutableStateOf("")
-        private set
+    val content: List<AnnotatedString> get() = contentStorage.get()
+    private val contentStorage = MultilineAnnotatedStringStorage()
+
+    enum class MessageType {
+        Basic, Error, Special
+    }
 
     /**
      * A simple way to show new text content in console
      * Doesn't get sent to any process
+     *
+     * Defaults to usual text with no style
      */
-    fun display(newContent: String) {
-        content += newContent
+    fun display(message: String, messageType: MessageType = Basic) {
+        if (message.isEmpty()) {
+            return
+        }
+        val spanStyle: SpanStyle = when(messageType) {
+            Basic -> SpanStyle()
+            Error -> SpanStyle(color = Color.Red, fontWeight = FontWeight(15))
+            Special -> SpanStyle(color = Color.Yellow, fontWeight = FontWeight(20))
+        }
+        contentStorage += AnnotatedString(message, spanStyle)
     }
 
     /**
      * Delete all content from the console rendering it clear
      */
     fun clear() {
-        content = ""
+        contentStorage.clear()
     }
 
     /**
@@ -35,6 +95,9 @@ class Console {
         if (!processIsAttached) {
             display(command)
             return
+        }
+        if (isInInterpreterMode) {
+            display(command)
         }
         val process = attachedProcess!!
         val outputStream = process.outputStream
@@ -56,6 +119,7 @@ class Console {
         private set
 
     private var communicationProxyWorker: CommunicationProxyWorker? = null
+    private var isInInterpreterMode: Boolean = false
 
     /**
      * Attach a process to console for user and ide-wide communication
@@ -67,9 +131,11 @@ class Console {
      * from them so that console is not blocked on writes
      * @param process the process to attach to console
      * @param label some name for this process. The user will see it in the gui
+     * @param isInterpreter if true, sends to console will be forcefully printed on screen during this process life
      * @return pipes with which to communicate with the process programmatically
      */
-    fun attachProcess(process: Process, label: String): ProcessCommunicationPipes {
+    fun attachProcess(process: Process, label: String, isInterpreter: Boolean = false): ProcessCommunicationPipes {
+        isInInterpreterMode = isInterpreter
         log("Attaching process $label")
         if (processIsAttached) {
             detachCurrentProcess()
@@ -101,9 +167,10 @@ class Console {
      * Calls [Process.destroy] on current process
      */
     fun detachCurrentProcess() {
+        isInInterpreterMode = false
         val process = attachedProcess
         if (process == null) {
-            log("Error: no attached process")
+            log("Error: no attached process", Error)
         } else {
             log("Detaching process $attachedProcessLabel")
             communicationProxyWorker?.stop()
@@ -113,8 +180,8 @@ class Console {
         }
     }
 
-    private fun log(message: String) {
-        log("Console", message)
+    private fun log(message: String, type: MessageType = Special) {
+        log("Console", message, type)
     }
 }
 
@@ -125,8 +192,8 @@ class Console {
  * Note: so far this is not really safe for short commands, because a process can die before
  * all stdin is read, but as we haven't needed that so far, should be ok
  */
-fun Console.runProcess(process: Process, label: String) {
-    val (stdin, stdout, stderr) = attachProcess(process, label)
+fun Console.runProcess(process: Process, label: String, isInterpreter: Boolean = false) {
+    val (stdin, stdout, stderr) = attachProcess(process, label, isInterpreter)
     listOf(stdin, stdout, stderr).forEach(Closeable::close)
 }
 
@@ -164,15 +231,17 @@ private class CommunicationProxyWorker(private val console: Console,
     private var drainPipes = false
 
     fun work() {
-        thread = safeThreadContinuousTask(::job) {
-            listOf(stdin, stdout, stderr, clientStdin, clientStdout, clientStderr).forEach { stream ->
-                try {
-                    stream.close()
-                } catch (e: IOException) {
-                    console.log("ConsoleProxyWorker Warning", "IOException on closing a stream")
+        thread = thread {
+            safeThreadContinuousTask(::job) {
+                listOf(stdin, stdout, stderr, clientStdin, clientStdout, clientStderr).forEach { stream ->
+                    try {
+                        stream.close()
+                    } catch (e: IOException) {
+                        console.log("ConsoleProxyWorker Warning", "IOException on closing a stream")
+                    }
                 }
             }
-        }.also { it.start() }
+        }
     }
 
     private fun job() {
@@ -187,13 +256,14 @@ private class CommunicationProxyWorker(private val console: Console,
 
     private fun communicate() {
         val communicatingPairs = listOf(
-            clientStdin to stdin,
-            stdout to clientStdout,
-            stderr to clientStderr
+            clientStdin to stdin to Basic,
+            stdout to clientStdout to Basic,
+            stderr to clientStderr to Error
         )
         var closedInputs = 0
-        communicatingPairs.forEach { (input, output) ->
-            if (communicatePipes(input, output)) {
+        communicatingPairs.forEach { (route, flavour) ->
+            val (input, output) = route
+            if (communicatePipes(input, output, flavour)) {
                 closedInputs++
             }
             val totalInputs = 3
@@ -208,8 +278,9 @@ private class CommunicationProxyWorker(private val console: Console,
      * Doesn't report outputStreamWriter closing so that console show everything anyway
      */
     private fun communicatePipes(inputStreamReader: InputStreamReader,
-                                 outputStreamWriter: OutputStreamWriter): Boolean {
-        val batchSize = 300
+                                 outputStreamWriter: OutputStreamWriter,
+                                 consoleWriteFlavour: Console.MessageType): Boolean {
+        val batchSize = 5012
         fun readBatch(): CharArray? {
             val acc = CharArray(batchSize)
             if (inputStreamReader.ready() || drainPipes) {
@@ -222,7 +293,7 @@ private class CommunicationProxyWorker(private val console: Console,
             return CharArray(0)
         }
         val batch = readBatch() ?: return true
-        console.display(String(batch))
+        console.display(String(batch), consoleWriteFlavour)
         try {
             outputStreamWriter.write(batch)
         } catch (_: IOException) { /* ignore output is closed */ }
@@ -251,11 +322,11 @@ fun Console.displayAndSend(command: String) {
  * @param who sender name to be displayed
  * @param message text to log
  */
-fun Console.log(who: String, message: String) {
-    display("[$who]: $message\n")
+fun Console.log(who: String, message: String, messageType: Console.MessageType = Special) {
+    display("[$who]: $message\n", messageType)
 }
 
-private fun safeThreadContinuousTask(task: () -> Unit, onExit: () -> Unit) = Thread {
+private fun safeThreadContinuousTask(task: () -> Unit, onExit: () -> Unit) {
     while (true) {
         try {
             Thread.sleep(100)
@@ -266,7 +337,7 @@ private fun safeThreadContinuousTask(task: () -> Unit, onExit: () -> Unit) = Thr
         } catch (e: InterruptedException) {
             // usual termination
             onExit()
-            return@Thread
+            return
         } catch (anyPipeReadWriteException: IOException) {
             // TODO(Roman) investigate whether this is the best way to do that
             continue
@@ -310,4 +381,15 @@ private fun main() {
 
     // if you need not to actually communicate, do this instead
     console.runProcess(gitStatusProcess, "git status i dont care about")
+
+    // if you want to run a process which is an interpreter (such as python/ghci) and you know
+    // that process does not print USER INPUT to PROCESS OUTPUT, then use this
+    val interpreted = Runtime.getRuntime().exec("python -i")
+    console.runProcess(interpreted, "python", isInterpreter = true)
+    // or console.attachProcess(interpreted, "python", isInterpreter = true)
+    /** now during this process life any user input to console (by [Console.send]) is FORCED
+     * to be printed on user console */
+
+    // stops
+    console.detachCurrentProcess()
 }
