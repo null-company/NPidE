@@ -8,8 +8,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
-import ru.nsu_null.npide.ui.console.Console.AnnotationType.*
+import ru.nsu_null.npide.ui.console.Console.MessageType.*
 import java.io.*
+import kotlin.concurrent.thread
 
 /**
  * Returns copy of its container, so should be somewhat safe
@@ -57,7 +58,7 @@ class Console {
     val content: List<AnnotatedString> get() = contentStorage.get()
     private val contentStorage = MultilineAnnotatedStringStorage()
 
-    enum class AnnotationType {
+    enum class MessageType {
         Basic, Error, Special
     }
 
@@ -67,23 +68,16 @@ class Console {
      *
      * Defaults to usual text with no style
      */
-    fun display(newContent: String, annotationType: AnnotationType = Basic) {
-        if (newContent.isEmpty()) {
+    fun display(message: String, messageType: MessageType = Basic) {
+        if (message.isEmpty()) {
             return
         }
-        val spanStyle: SpanStyle = when(annotationType) {
+        val spanStyle: SpanStyle = when(messageType) {
             Basic -> SpanStyle()
             Error -> SpanStyle(color = Color.Red, fontWeight = FontWeight(15))
             Special -> SpanStyle(color = Color.Yellow, fontWeight = FontWeight(20))
         }
-        contentStorage += AnnotatedString(newContent, spanStyle)
-    }
-
-    /**
-     * todo
-     */
-    fun display(annotatedString: AnnotatedString) {
-        contentStorage += annotatedString
+        contentStorage += AnnotatedString(message, spanStyle)
     }
 
     /**
@@ -179,7 +173,7 @@ class Console {
         }
     }
 
-    private fun log(message: String, type: AnnotationType = Special) {
+    private fun log(message: String, type: MessageType = Special) {
         log("Console", message, type)
     }
 }
@@ -230,15 +224,17 @@ private class CommunicationProxyWorker(private val console: Console,
     private var drainPipes = false
 
     fun work() {
-        thread = safeThreadContinuousTask(::job) {
-            listOf(stdin, stdout, stderr, clientStdin, clientStdout, clientStderr).forEach { stream ->
-                try {
-                    stream.close()
-                } catch (e: IOException) {
-                    console.log("ConsoleProxyWorker Warning", "IOException on closing a stream")
+        thread = thread {
+            safeThreadContinuousTask(::job) {
+                listOf(stdin, stdout, stderr, clientStdin, clientStdout, clientStderr).forEach { stream ->
+                    try {
+                        stream.close()
+                    } catch (e: IOException) {
+                        console.log("ConsoleProxyWorker Warning", "IOException on closing a stream")
+                    }
                 }
             }
-        }.also { it.start() }
+        }
     }
 
     private fun job() {
@@ -276,7 +272,7 @@ private class CommunicationProxyWorker(private val console: Console,
      */
     private fun communicatePipes(inputStreamReader: InputStreamReader,
                                  outputStreamWriter: OutputStreamWriter,
-                                 consoleWriteFlavour: Console.AnnotationType): Boolean {
+                                 consoleWriteFlavour: Console.MessageType): Boolean {
         val batchSize = 5012
         fun readBatch(): CharArray? {
             val acc = CharArray(batchSize)
@@ -319,11 +315,11 @@ fun Console.displayAndSend(command: String) {
  * @param who sender name to be displayed
  * @param message text to log
  */
-fun Console.log(who: String, message: String, annotationType: Console.AnnotationType = Special) {
-    display("[$who]: $message\n", annotationType)
+fun Console.log(who: String, message: String, messageType: Console.MessageType = Special) {
+    display("[$who]: $message\n", messageType)
 }
 
-private fun safeThreadContinuousTask(task: () -> Unit, onExit: () -> Unit) = Thread {
+private fun safeThreadContinuousTask(task: () -> Unit, onExit: () -> Unit) {
     while (true) {
         try {
             Thread.sleep(100)
@@ -334,7 +330,7 @@ private fun safeThreadContinuousTask(task: () -> Unit, onExit: () -> Unit) = Thr
         } catch (e: InterruptedException) {
             // usual termination
             onExit()
-            return@Thread
+            return
         } catch (anyPipeReadWriteException: IOException) {
             // TODO(Roman) investigate whether this is the best way to do that
             continue
