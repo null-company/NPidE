@@ -96,6 +96,9 @@ class Console {
             display(command)
             return
         }
+        if (isInInterpreterMode) {
+            display(command)
+        }
         val process = attachedProcess!!
         val outputStream = process.outputStream
         outputStream.write(command.encodeToByteArray())
@@ -116,6 +119,7 @@ class Console {
         private set
 
     private var communicationProxyWorker: CommunicationProxyWorker? = null
+    private var isInInterpreterMode: Boolean = false
 
     /**
      * Attach a process to console for user and ide-wide communication
@@ -127,9 +131,11 @@ class Console {
      * from them so that console is not blocked on writes
      * @param process the process to attach to console
      * @param label some name for this process. The user will see it in the gui
+     * @param isInterpreter if true, sends to console will be forcefully printed on screen during this process life
      * @return pipes with which to communicate with the process programmatically
      */
-    fun attachProcess(process: Process, label: String): ProcessCommunicationPipes {
+    fun attachProcess(process: Process, label: String, isInterpreter: Boolean = false): ProcessCommunicationPipes {
+        isInInterpreterMode = isInterpreter
         log("Attaching process $label")
         if (processIsAttached) {
             detachCurrentProcess()
@@ -161,6 +167,7 @@ class Console {
      * Calls [Process.destroy] on current process
      */
     fun detachCurrentProcess() {
+        isInInterpreterMode = false
         val process = attachedProcess
         if (process == null) {
             log("Error: no attached process", Error)
@@ -185,8 +192,8 @@ class Console {
  * Note: so far this is not really safe for short commands, because a process can die before
  * all stdin is read, but as we haven't needed that so far, should be ok
  */
-fun Console.runProcess(process: Process, label: String) {
-    val (stdin, stdout, stderr) = attachProcess(process, label)
+fun Console.runProcess(process: Process, label: String, isInterpreter: Boolean = false) {
+    val (stdin, stdout, stderr) = attachProcess(process, label, isInterpreter)
     listOf(stdin, stdout, stderr).forEach(Closeable::close)
 }
 

@@ -155,9 +155,8 @@ fun ConsoleControlPanelView(modifier: Modifier, settings: Settings, console: Con
 private fun IconBar(modifier: Modifier = Modifier, console: Console) {
     val isWindows = remember { "Win" in System.getProperty("os.name") }
     fun launchShell() {
-        val shell = Runtime.getRuntime().let {
-            if (isWindows) it.exec("powershell") else it.exec("bash")
-        }
+        val shell =
+            Runtime.getRuntime().exec(if (isWindows) "powershell" else "bash")
         console.runProcess(shell, "shell")
     }
     @Composable
