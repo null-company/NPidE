@@ -381,4 +381,12 @@ private fun main() {
 
     // if you need not to actually communicate, do this instead
     console.runProcess(gitStatusProcess, "git status i dont care about")
+
+    // if you want to run a process which is an interpreter (such as python/ghci) and you know
+    // that process does not print USER INPUT to PROCESS OUTPUT, then use this
+    val interpreted = Runtime.getRuntime().exec("python -i")
+    console.runProcess(interpreted, "python", isInterpreter = true)
+    // or console.attachProcess(interpreted, "python", isInterpreter = true)
+    /** now during this process life any user input to console (by [Console.send]) is FORCED
+     * to be printed on user console */
 }
