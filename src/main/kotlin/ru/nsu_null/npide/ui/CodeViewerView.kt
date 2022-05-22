@@ -9,7 +9,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicText
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Text
@@ -22,12 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nsu_null.npide.ui.buttonsbar.ButtonsBar
+import ru.nsu_null.npide.ui.console.ClosedConsole
 import ru.nsu_null.npide.ui.console.ConsolePane
 import ru.nsu_null.npide.ui.editor.EditorEmptyView
 import ru.nsu_null.npide.ui.editor.EditorTabsView
@@ -82,8 +81,17 @@ fun CodeViewerView(model: CodeViewer) {
                 } else {
                     EditorEmptyView(Modifier.weight(1f))
                 }
-                Box(Modifier.weight(0.4f)) {
-                    ConsolePane(model.settings, NPIDE.console)
+                var showConsole by remember { mutableStateOf(true) }
+                if (showConsole) {
+                    Divider(Modifier.background(Color.Black).height(1.dp))
+                    Box(Modifier.weight(0.4f)) {
+                        ConsolePane(model.settings, NPIDE.console) { showConsole = false }
+                    }
+                } else {
+                    Divider(Modifier.background(Color.Black).height(1.dp))
+                    Box(Modifier.weight(0.05f)) {
+                        ClosedConsole(model.settings, NPIDE.console) { showConsole = true }
+                    }
                 }
             }
         }
@@ -103,7 +111,7 @@ fun GitBranchTellerView(modifier: Modifier = Modifier) {
             "Git icon", modifier = Modifier.padding(2.dp))
 
         Spacer(Modifier.padding(3.dp))
-        Box(modifier = Modifier.fillMaxSize(), Alignment.BottomStart) {
+        Box(modifier = Modifier, Alignment.BottomStart) {
             Text(currentGitBranch.value, fontSize = 17.sp, textAlign = TextAlign.Center)
         }
     }

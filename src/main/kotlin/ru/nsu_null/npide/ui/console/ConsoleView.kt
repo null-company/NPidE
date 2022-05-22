@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -29,17 +30,40 @@ import ru.nsu_null.npide.platform.VerticalScrollbar
 import ru.nsu_null.npide.ui.GitBranchTellerView
 import ru.nsu_null.npide.ui.common.AppTheme
 import ru.nsu_null.npide.ui.common.Settings
-import ru.nsu_null.npide.ui.console.Console.AnnotationType
 import ru.nsu_null.npide.ui.console.Console.AnnotationType.*
 import ru.nsu_null.npide.ui.npide.NPIDE
+import ru.nsu_null.npide.util.SimpleVerticalSplitter
 
 
 @Preview
 @Composable
-fun ConsolePane(settings: Settings, console: Console) {
+fun ConsolePane(settings: Settings, console: Console, onCloseRequest: () -> Unit) {
     Row(Modifier.fillMaxSize()) {
         ConsoleView(Modifier.weight(0.7f), settings, console)
-        ConsoleControlPanelView(Modifier.weight(0.3f), settings, console)
+        SimpleVerticalSplitter()
+        ConsoleControlPanelView(Modifier.weight(0.3f), settings, console, onCloseRequest)
+    }
+}
+
+@Composable
+fun ClosedConsole(settings: Settings, console: Console, onCloseRequest: () -> Unit) {
+    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        GitBranchTellerView()
+        Row(horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxHeight()) {
+            if (console.processIsAttached) {
+                Icon(Icons.Default.Done, "Process is attached", tint = Color.Green)
+            } else {
+                Icon(Icons.Default.DoNotTouch, "No process attached", tint = Color.Red)
+            }
+            Spacer(Modifier.padding(3.dp))
+            val processMessage = if (!console.processIsAttached)
+                "No process attached" else "Process '${console.attachedProcessLabel}' is attached"
+            Text(processMessage, textAlign = TextAlign.Center)
+        }
+        Icon(Icons.Default.ArrowUpward, "Show console", tint = Color.LightGray,
+            modifier = Modifier.clickable { onCloseRequest() })
     }
 }
 
@@ -101,19 +125,23 @@ fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
 }
 
 @Composable
-fun ConsoleControlPanelView(modifier: Modifier, settings: Settings, console: Console) {
+fun ConsoleControlPanelView(modifier: Modifier, settings: Settings, console: Console, onCloseRequest: () -> Unit) {
     Box(Modifier.fillMaxSize().padding(15.dp).then(modifier)) {
         Column(Modifier.fillMaxSize()) {
-            Row(horizontalArrangement = Arrangement.Start) {
-                val processMessage = if (!console.processIsAttached)
-                    "No process attached" else "Process '${console.attachedProcessLabel}' is attached"
-                if (console.processIsAttached) {
-                    Icon(Icons.Default.Done, "Process is attached", tint = Color.Green)
-                } else {
-                    Icon(Icons.Default.DoNotTouch, "No process attached", tint = Color.Red)
+            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                Row(horizontalArrangement = Arrangement.Start) {
+                    if (console.processIsAttached) {
+                        Icon(Icons.Default.Done, "Process is attached", tint = Color.Green)
+                    } else {
+                        Icon(Icons.Default.DoNotTouch, "No process attached", tint = Color.Red)
+                    }
+                    Spacer(Modifier.padding(3.dp))
+                    val processMessage = if (!console.processIsAttached)
+                        "No process attached" else "Process '${console.attachedProcessLabel}' is attached"
+                    Text(processMessage, textAlign = TextAlign.Center)
                 }
-                Spacer(Modifier.padding(3.dp))
-                Text(processMessage, textAlign = TextAlign.Center)
+                Icon(Icons.Default.ArrowDownward, "Hide console", tint = Color.LightGray,
+                    modifier = Modifier.clickable { onCloseRequest() })
             }
             Divider(Modifier.padding(0.dp, 15.dp))
             Column(Modifier.fillMaxSize()) {
