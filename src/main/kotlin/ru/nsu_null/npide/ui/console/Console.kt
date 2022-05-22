@@ -389,4 +389,7 @@ private fun main() {
     // or console.attachProcess(interpreted, "python", isInterpreter = true)
     /** now during this process life any user input to console (by [Console.send]) is FORCED
      * to be printed on user console */
+
+    // stops
+    console.detachCurrentProcess()
 }
