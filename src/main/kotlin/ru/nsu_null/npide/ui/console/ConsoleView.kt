@@ -81,8 +81,8 @@ fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
             Box(Modifier.height(lineHeight).background(Color.Black.copy(alpha = 0.5f))) {
                 val input = remember(NPIDE.currentProject) { mutableStateOf("") }
                 val onChange = fun(enteredValue: String) {
-                    if (enteredValue.endsWith('\n')) {
-                        console.send(enteredValue)
+                    if ('\n' in enteredValue) {
+                        console.send(enteredValue.filter { it != '\n' } + '\n')
                         input.value = ""
                     } else {
                         input.value = enteredValue
