@@ -21,7 +21,7 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation("org.antlr:antlr4:4.10.1")
     api(compose.materialIconsExtended)
-    implementation("com.charleskorn.kaml:kaml:0.43.0")
+    implementation("com.charleskorn.kaml:kaml:0.44.0")
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("com.fifesoft:rsyntaxtextarea:3.2.0")
     implementation("me.tomassetti.kanvas:kanvas-core:0.2.1")
