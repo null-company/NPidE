@@ -30,9 +30,7 @@ private fun applyConfig(config: ConfigManager.ProjectConfig) {
 }
 
 private fun applyCommonPath(configDialogState: ConfigDialogState, path: String) {
-    configDialogState.projectConfig.buildPath.value = path
-    configDialogState.projectConfig.runPath.value = path
-    configDialogState.projectConfig.debugPath.value = path
+    configDialogState.projectConfig.delegatesConfigPath.value = path
 }
 
 @ExperimentalComposeUiApi
@@ -60,20 +58,9 @@ fun ConfigDialog(isOpen: MutableState<Boolean>) {
 
                 AddAllConfigItem(
                     configurationState,
-                    configurationState.projectConfig.buildPath,
-                    ChooseBuild
+                    configurationState.projectConfig.delegatesConfigPath,
+                    ChooseDelegatesConfig
                 )
-                AddAllConfigItem(
-                    configurationState,
-                    configurationState.projectConfig.runPath,
-                    ChooseRun
-                )
-                AddAllConfigItem(
-                    configurationState,
-                    configurationState.projectConfig.debugPath,
-                    ChooseDebug
-                )
-
                 ProjectConfigForm(configurationState)
                 CurrentlySelectedProjectPathsList(configurationState)
                 GrammarConfigurationForm(configurationState)
@@ -308,18 +295,14 @@ private fun SimpleOutlinedTextFieldSample(labelText: String, valueText: MutableS
 }
 
 private enum class ConfigureProjectAction {
-    ChooseBuild,
-    ChooseRun,
-    ChooseDebug,
+    ChooseDelegatesConfig,
     ChooseGrammar,
     ChooseSyntaxHighlighter,
     ChooseSource;
 
     companion object {
         val actionToConfigParamAsString = mapOf(
-            ChooseBuild to "Build",
-            ChooseRun to "Run",
-            ChooseDebug to "Debug",
+            ChooseDelegatesConfig to "Delegates Config",
             ChooseGrammar to "Grammar",
             ChooseSyntaxHighlighter to "Syntax Highlighter",
             ChooseSource to "Source File Path"
@@ -333,14 +316,8 @@ private fun chooseFile(configButtonState: ConfigureProjectAction, dialogState: C
         showOpenDialog(null)
         if (selectedFile != null) {
             when (configButtonState) {
-                ChooseBuild -> {
-                    dialogState.projectConfig.buildPath.value = selectedFile.toString()
-                }
-                ChooseRun -> {
-                    dialogState.projectConfig.runPath.value = selectedFile.toString()
-                }
-                ChooseDebug -> {
-                    dialogState.projectConfig.debugPath.value = selectedFile.toString()
+                ChooseDelegatesConfig -> {
+                    dialogState.projectConfig.delegatesConfigPath.value = selectedFile.toString()
                 }
                 ChooseGrammar -> {
                     dialogState.selectionState.grammarPath.value = selectedFile.toString()

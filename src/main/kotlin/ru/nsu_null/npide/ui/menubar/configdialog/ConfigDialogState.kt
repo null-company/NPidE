@@ -13,9 +13,7 @@ internal data class CurrentSelectionsState(
 )
 
 internal data class ProjectConfigState(
-    val runPath: MutableState<String>,
-    val buildPath: MutableState<String>,
-    val debugPath: MutableState<String>,
+    val delegatesConfigPath: MutableState<String>,
     val grammarConfigs: MutableState<List<ConfigManager.GrammarConfig>>,
     val projectFilePaths: MutableState<List<String>>
 )
@@ -29,18 +27,14 @@ internal fun getStateByConfig(): ConfigDialogState {
 
     val currentProjectConfig = NPIDE.configManager.currentProjectConfig
 
-    val runPath = currentProjectConfig.run
-    val buildPath = currentProjectConfig.build
-    val debugPath = currentProjectConfig.debug
+    val delegatesConfigPath = currentProjectConfig.pathToDelegatesConfig
     val grammarConfigs = currentProjectConfig.grammarConfigs
     val projectFilePaths = currentProjectConfig.projectFilePaths
 
 
     return ConfigDialogState(
         ProjectConfigState(
-            mutableStateOf(runPath),
-            mutableStateOf(buildPath),
-            mutableStateOf(debugPath),
+            mutableStateOf(delegatesConfigPath),
             mutableStateOf(grammarConfigs),
             mutableStateOf(projectFilePaths)
         ),
@@ -55,9 +49,7 @@ internal fun getStateByConfig(): ConfigDialogState {
 
 internal fun projectConfigByState(configDialogState: ConfigDialogState): ConfigManager.ProjectConfig {
     return ConfigManager.ProjectConfig(
-        configDialogState.projectConfig.buildPath.value,
-        configDialogState.projectConfig.runPath.value,
-        configDialogState.projectConfig.debugPath.value,
+        configDialogState.projectConfig.delegatesConfigPath.value,
         NPIDE.configManager.currentProjectConfig.filePathToDirtyFlag,
         configDialogState.projectConfig.projectFilePaths.value,
         configDialogState.projectConfig.grammarConfigs.value

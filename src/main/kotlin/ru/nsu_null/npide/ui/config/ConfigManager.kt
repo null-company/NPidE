@@ -9,12 +9,11 @@ import java.io.FileInputStream
 import java.nio.file.Paths
 import kotlin.reflect.KProperty
 
-class ConfigManager(private val project: ProjectChooser.Project) {
+class ConfigManager(project: ProjectChooser.Project) {
     private val projectConfigPath: String = project.rootFolder.filepath + "/config.yaml"
-    var currentProjectConfig: AutoUpdatedProjectConfig =
-        AutoUpdatedProjectConfig(
-            ProjectConfig("", "", "", hashMapOf(), listOf(), listOf())
-        )
+    var currentProjectConfig = AutoUpdatedProjectConfig(
+        ProjectConfig("", hashMapOf(), listOf(), listOf())
+    )
         set(value) {
             field = value
             sync()
@@ -39,9 +38,7 @@ class ConfigManager(private val project: ProjectChooser.Project) {
 
     class AutoUpdatedProjectConfig internal constructor(private val configManager: ConfigManager,
                                    projectConfig: ProjectConfig) : ProjectConfig(
-        projectConfig.build,
-        projectConfig.run,
-        projectConfig.debug,
+        projectConfig.pathToDelegatesConfig,
         projectConfig.filePathToDirtyFlag,
         projectConfig.projectFilePaths,
         projectConfig.grammarConfigs
@@ -65,9 +62,7 @@ class ConfigManager(private val project: ProjectChooser.Project) {
             }
         }
 
-        override var build: String by AutoUpdateDelegate(super.build)
-        override var run: String by AutoUpdateDelegate(super.run)
-        override var debug: String by AutoUpdateDelegate(super.debug)
+        override var pathToDelegatesConfig: String by AutoUpdateDelegate(super.pathToDelegatesConfig)
         override var filePathToDirtyFlag: HashMap<String, Boolean> by AutoUpdateDelegate(super.filePathToDirtyFlag)
         override var projectFilePaths: List<String> by AutoUpdateDelegate(super.projectFilePaths)
         override var grammarConfigs: List<GrammarConfig> by AutoUpdateDelegate(super.grammarConfigs)
@@ -78,9 +73,7 @@ class ConfigManager(private val project: ProjectChooser.Project) {
 
     @Serializable
     open class ProjectConfig(
-        open var build: String,
-        open var run: String,
-        open var debug: String,
+        open var pathToDelegatesConfig: String,
         open var filePathToDirtyFlag: HashMap<String, Boolean>,
         open var projectFilePaths: List<String>,
         open var grammarConfigs: List<GrammarConfig>
@@ -88,9 +81,7 @@ class ConfigManager(private val project: ProjectChooser.Project) {
 
     fun ProjectConfig(other: ProjectConfig): ProjectConfig {
         return ProjectConfig(
-            other.build,
-            other.run,
-            other.debug,
+            other.pathToDelegatesConfig,
             other.filePathToDirtyFlag,
             other.projectFilePaths,
             other.grammarConfigs

@@ -5,28 +5,22 @@ import kotlinx.serialization.Serializable
 import ru.nsu_null.npide.ui.npide.NPIDE
 import java.io.FileInputStream
 
-class ConfigParser {
-    private val configStreamBuild = FileInputStream(NPIDE.configManager.currentProjectConfig.build)
-    private val configStreamRun = FileInputStream(NPIDE.configManager.currentProjectConfig.run)
-    private val configStreamDebug = FileInputStream(NPIDE.configManager.currentProjectConfig.debug)
+@Serializable
+data class DelegatesConfig(
+    val build: List<DelegateDescription>,
+    val run: List<DelegateDescription>,
+    val debug: List<DelegateDescription>
+)
 
-    var resultBuild = Yaml.default.decodeFromStream(Config.serializer(), configStreamBuild)
-    var resultRun = Yaml.default.decodeFromStream(Config.serializer(), configStreamRun)
-    var resultDebug = Yaml.default.decodeFromStream(Config.serializer(), configStreamDebug)
+@Serializable
+data class DelegateDescription(
+    val python_file: String,
+    val name: String,
+    val entry_point: String,
+    val ext: String
+)
 
-
-    @Serializable
-    data class Config(
-        val build: List<ConfigInternal>,
-        val run: List<ConfigInternal>,
-        val debug: List<ConfigInternal>
-    )
-
-    @Serializable
-    data class ConfigInternal(
-        val python_file: String,
-        val name: String,
-        val entry_point: String,
-        val ext: String
-    )
+fun parseConfig(): DelegatesConfig {
+    val configStream = FileInputStream(NPIDE.configManager.currentProjectConfig.pathToDelegatesConfig)
+    return Yaml.default.decodeFromStream(DelegatesConfig.serializer(), configStream)
 }

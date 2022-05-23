@@ -1,7 +1,8 @@
 package ru.nsu_null.npide.ui.buttonsbar
 
 import ru.nsu_null.npide.breakpoints.BreakpointStorage
-import ru.nsu_null.npide.ui.config.ConfigParser
+import ru.nsu_null.npide.ui.config.DelegateDescription
+import ru.nsu_null.npide.ui.config.parseConfig
 import ru.nsu_null.npide.ui.console.Console
 import ru.nsu_null.npide.ui.editor.Editors
 import ru.nsu_null.npide.ui.npide.NPIDE
@@ -10,8 +11,6 @@ import java.io.IOException
 import java.lang.Thread.sleep
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
-
-private val parser = ConfigParser()
 
 object DebugRunnableStepFlag : AtomicBoolean(true)
 
@@ -119,7 +118,7 @@ private fun buildCommand(
 
 private fun runWithConfig(editors: Editors,
                   console: Console,
-                  config: List<ConfigParser.ConfigInternal>): Boolean {
+                  config: List<DelegateDescription>): Boolean {
     try {
         for (i in 0 until config.count()) {
             val command = buildCommand(
@@ -142,7 +141,7 @@ private fun runWithConfig(editors: Editors,
     }
 }
 
-private fun debugWithConfig(editors: Editors, console: Console, config: List<ConfigParser.ConfigInternal>) {
+private fun debugWithConfig(editors: Editors, console: Console, config: List<DelegateDescription>) {
     try {
         for (i in 0 until config.count()) {
             val command = buildCommand(
@@ -165,7 +164,7 @@ private fun debugWithConfig(editors: Editors, console: Console, config: List<Con
 
 private fun buildWithConfig(editors: Editors,
                     console: Console,
-                    config: List<ConfigParser.ConfigInternal>): Boolean {
+                    config: List<DelegateDescription>): Boolean {
     try {
         for (i in 0 until config.count()) {
             var bpStr = ""
@@ -206,14 +205,14 @@ private fun buildWithConfig(editors: Editors,
 
 fun build(editors: Editors, console: Console) {
     // TODO fix dirty flag checking
-    buildWithConfig(editors, console, parser.resultBuild.build)
+    buildWithConfig(editors, console, parseConfig().build)
 }
 
 fun run(editors: Editors, console: Console) {
     build(editors, console)
-    runWithConfig(editors, console, parser.resultRun.run)
+    runWithConfig(editors, console, parseConfig().run)
 }
 
 fun debug(editors: Editors, console: Console) {
-    debugWithConfig(editors, console, parser.resultDebug.debug)
+    debugWithConfig(editors, console, parseConfig().debug)
 }
