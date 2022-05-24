@@ -85,7 +85,8 @@ fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
                 }
 
                 LazyColumn(
-                    state = scrollState
+                    state = scrollState,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     items(lines.size) { index ->
                         Box(Modifier.height(lineHeight)) {
