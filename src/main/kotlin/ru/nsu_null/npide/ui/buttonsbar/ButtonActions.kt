@@ -22,7 +22,7 @@ fun debugRun(console: Console, command: List<String>) {
         null,
         dir
     )
-    var acc = ""
+    val acc = StringBuilder("")
     val inputStreamReader = process.inputStream.reader(Charsets.UTF_8)
     val errorStreamReader = process.errorStream.reader(Charsets.UTF_8)
     val writer = process.outputStream.writer(Charsets.UTF_8)
@@ -32,14 +32,14 @@ fun debugRun(console: Console, command: List<String>) {
             val newChar = inputStreamReader.read()
             if (newChar == -1)
                 break
-            acc += Char(newChar)
+            acc.append(Char(newChar))
         }
 
         while (errorStreamReader.ready()) {
             val newChar = inputStreamReader.read()
             if (newChar == -1)
                 break
-            acc += Char(newChar)
+            acc.append(Char(newChar))
         }
     }
 
@@ -47,11 +47,11 @@ fun debugRun(console: Console, command: List<String>) {
         sleep(100)
 
         readAndAccumulate()
+        console.display(acc.toString())
+        acc.clear()
 
         if (DebugRunnableStepFlag.get()) {
             DebugRunnableStepFlag.set(false)
-            console.display(acc)
-            acc = ""
             try {
                 writer.write("s\n")
                 writer.flush()
@@ -66,7 +66,7 @@ fun debugRun(console: Console, command: List<String>) {
         }
     }
     readAndAccumulate()
-    console.display(acc)
+    console.display(acc.toString())
 }
 
 lateinit var DebugThread: Thread
@@ -78,15 +78,19 @@ private fun runCommand(arguments: List<String>, console: Console): Boolean {
 
     val process = Runtime.getRuntime().exec(argumentsArr, null, dir)
 
-    process.inputStream.reader(Charsets.UTF_8).use {
-        val s = it.readText()
-        console.display(s)
+    val result = process.onExit().thenApply { p ->
+        p.inputStream.reader(Charsets.UTF_8).use {
+            val s = it.readText()
+            console.display(s)
+        }
+        p.errorStream.reader(Charsets.UTF_8).use {
+            val s = it.readText()
+            console.display(s)
+        }
+        p.exitValue() == 0
     }
-    process.errorStream.reader(Charsets.UTF_8).use {
-        val s = it.readText()
-        console.display(s)
-    }
-    return process.exitValue() == 0
+
+    return result.get()
 }
 
 private fun buildCommand(
@@ -97,23 +101,23 @@ private fun buildCommand(
     files: List<String>,
     entry_point: String,
     ext: String,
-    bpStr: String = "0"
+    bpStr: String = ""
 ): List<String> {
     return listOf<String>()+ "python"+
         python_file +
-        "-f"+
-        flag+
-        "-n"+
-        name+
-        "-d"+
-        root_folder+
-        "-p"+
-        files+
-        "-e"+
-        entry_point+
-        "-ext"+
-        ext+
-        "-b"+
+        "-f" +
+        flag +
+        "-n" +
+        name +
+        "-d" +
+        root_folder +
+        "-p" +
+        files +
+        "-e" +
+        entry_point +
+        "-ext" +
+        ext +
+        (if (bpStr.isNotEmpty()) "-b" else "") +
         bpStr
 }
 
@@ -180,7 +184,7 @@ private fun buildWithConfig(editors: Editors,
                 bpStr += "; "
             }
             bpStr =
-                if (bpStr.isEmpty()) "0"
+                if (bpStr.isEmpty()) ""
                 else bpStr.subSequence(0, bpStr.length - 2).toString()
             val command =  buildCommand(
                 config[i].python_file,
