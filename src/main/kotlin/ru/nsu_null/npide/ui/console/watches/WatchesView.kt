@@ -54,7 +54,6 @@ fun WatchesView(
                 val lastLinesN = 2
                 val lastLines = console.content.takeLast(lastLinesN).map { it.text }.reduceRight(String::plus)
 
-                println(watchesRegex.findAll(lastLines).count())
                 val res = watchesRegex.findAll(lastLines).map { it.value }.reduceOrNull { acc, s -> "$acc,$s" }
 
                 Box(
