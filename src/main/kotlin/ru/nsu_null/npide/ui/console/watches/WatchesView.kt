@@ -36,14 +36,16 @@ fun WatchesView(
                     }
                     Spacer(Modifier.padding(3.dp))
                     val processMessage = if (!console.processIsAttached)
-                        "No process attached" else "Process '${console.attachedProcessLabel}' is attached"
+                        "No process attached" else "Running '${console.attachedProcessLabel}'"
                     Text(processMessage, textAlign = TextAlign.Center)
                 }
-                Icon(Icons.Default.Settings, "Switch to control panel", tint = Color.LightGray,
-                    modifier = Modifier.clickable { onControlPanelSwitchRequest() })
-                Spacer(Modifier.padding(3.dp))
-                Icon(Icons.Default.ArrowDownward, "Hide console", tint = Color.LightGray,
-                    modifier = Modifier.clickable { onCloseRequest() })
+                Row(horizontalArrangement = Arrangement.End) {
+                    Icon(Icons.Default.Settings, "Switch to control panel", tint = Color.LightGray,
+                        modifier = Modifier.clickable { onControlPanelSwitchRequest() })
+                    Spacer(Modifier.padding(3.dp))
+                    Icon(Icons.Default.ArrowDownward, "Hide console", tint = Color.LightGray,
+                        modifier = Modifier.clickable { onCloseRequest() })
+                }
             }
             Divider(Modifier.padding(0.dp, 15.dp))
             Column(Modifier.fillMaxSize()) {
