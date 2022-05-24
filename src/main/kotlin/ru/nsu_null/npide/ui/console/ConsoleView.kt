@@ -14,7 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,23 +30,42 @@ import ru.nsu_null.npide.ui.GitBranchTellerView
 import ru.nsu_null.npide.ui.common.AppTheme
 import ru.nsu_null.npide.ui.common.Settings
 import ru.nsu_null.npide.ui.console.Console.MessageType.*
+import ru.nsu_null.npide.ui.console.watches.WatchesView
 import ru.nsu_null.npide.ui.npide.NPIDE
 import ru.nsu_null.npide.util.SimpleVerticalSplitter
 
+private enum class ConsolePaneState {
+    ControlPanel,
+    Watches
+}
 
 @Preview
 @Composable
 fun ConsolePane(settings: Settings, console: Console, onCloseRequest: () -> Unit) {
+    var paneState by remember { mutableStateOf(ConsolePaneState.ControlPanel) }
+
     Row(Modifier.fillMaxSize()) {
         ConsoleView(Modifier.weight(0.7f), settings, console)
         SimpleVerticalSplitter()
-        ConsoleControlPanelView(Modifier.weight(0.3f), settings, console, onCloseRequest)
+        when (paneState) {
+            ConsolePaneState.ControlPanel -> {
+                ConsoleControlPanelView(Modifier.weight(0.3f), settings, console, { paneState =
+                    ConsolePaneState.Watches
+                }, onCloseRequest)
+            }
+            ConsolePaneState.Watches -> {
+                WatchesView(Modifier.weight(0.3f), console, { paneState = ConsolePaneState.ControlPanel }, onCloseRequest)
+            }
+        }
+
     }
 }
 
 @Composable
 fun ClosedConsole(settings: Settings, console: Console, onCloseRequest: () -> Unit) {
-    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically) {
         GitBranchTellerView()
         Row(horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
@@ -124,7 +143,13 @@ fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
 }
 
 @Composable
-fun ConsoleControlPanelView(modifier: Modifier, settings: Settings, console: Console, onCloseRequest: () -> Unit) {
+fun ConsoleControlPanelView(
+    modifier: Modifier,
+    settings: Settings,
+    console: Console,
+    onWatchSwitchRequest: () -> Unit,
+    onCloseRequest: () -> Unit
+) {
     Box(Modifier.fillMaxSize().padding(15.dp).then(modifier)) {
         Column(Modifier.fillMaxSize()) {
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
@@ -139,6 +164,9 @@ fun ConsoleControlPanelView(modifier: Modifier, settings: Settings, console: Con
                         "No process attached" else "Process '${console.attachedProcessLabel}' is attached"
                     Text(processMessage, textAlign = TextAlign.Center)
                 }
+                Icon(Icons.Default.Watch, "Switch to watches", tint = Color.LightGray,
+                    modifier = Modifier.clickable { onWatchSwitchRequest() })
+                Spacer(Modifier.padding(3.dp))
                 Icon(Icons.Default.ArrowDownward, "Hide console", tint = Color.LightGray,
                     modifier = Modifier.clickable { onCloseRequest() })
             }
