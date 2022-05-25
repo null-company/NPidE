@@ -18,7 +18,7 @@ import kotlin.concurrent.thread
  */
 private class MultilineAnnotatedStringStorage {
     private val storageLines = mutableStateListOf<AnnotatedString>()
-    private var unfinishedLeftovers = AnnotatedString("")
+    private var unfinishedLeftovers by mutableStateOf(AnnotatedString(""))
     // TODO come up with a more effective solution. this could be a bottleneck
     fun add(newContent: AnnotatedString) {
         if (newContent.isEmpty()) {
