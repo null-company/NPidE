@@ -1,4 +1,4 @@
-package ru.nsu_null.npide.ide
+package ru.nsu_null.npide.ide.codeviewer
 
 import ru.nsu_null.npide.ide.common.Settings
 import ru.nsu_null.npide.ide.editor.Editors

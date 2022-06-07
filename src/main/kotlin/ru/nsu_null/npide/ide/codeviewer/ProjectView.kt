@@ -1,4 +1,4 @@
-package ru.nsu_null.npide.ide
+package ru.nsu_null.npide.ide.codeviewer
 
 import androidx.compose.desktop.DesktopMaterialTheme
 import androidx.compose.foundation.ExperimentalFoundationApi

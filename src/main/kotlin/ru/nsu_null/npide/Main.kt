@@ -12,7 +12,7 @@ import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
-import ru.nsu_null.npide.ide.ProjectView
+import ru.nsu_null.npide.ide.codeviewer.ProjectView
 import ru.nsu_null.npide.ide.menubar.CustomMenuBar
 import ru.nsu_null.npide.ide.npide.NPIDE
 import ru.nsu_null.npide.ide.npide.NPIDE.State.CHOOSING_PROJECT

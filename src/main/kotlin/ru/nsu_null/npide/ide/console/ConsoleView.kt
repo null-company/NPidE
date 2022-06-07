@@ -26,7 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ru.nsu_null.npide.ide.platform.VerticalScrollbar
-import ru.nsu_null.npide.ide.GitBranchTellerView
+import ru.nsu_null.npide.ide.codeviewer.GitBranchTellerView
 import ru.nsu_null.npide.ide.common.AppTheme
 import ru.nsu_null.npide.ide.common.Settings
 import ru.nsu_null.npide.ide.console.Console.MessageType.*
