@@ -12,10 +12,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,41 +22,65 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import ru.nsu_null.npide.ide.platform.VerticalScrollbar
 import ru.nsu_null.npide.ide.codeviewer.GitBranchTellerView
 import ru.nsu_null.npide.ide.common.AppTheme
 import ru.nsu_null.npide.ide.common.Settings
-import ru.nsu_null.npide.ide.console.Console.MessageType.*
+import ru.nsu_null.npide.ide.console.Console.MessageType.Special
+import ru.nsu_null.npide.ide.console.watches.WatchesView
 import ru.nsu_null.npide.ide.npide.NPIDE
+import ru.nsu_null.npide.ide.platform.VerticalScrollbar
 import ru.nsu_null.npide.ide.util.SimpleVerticalSplitter
 
+private enum class ConsolePaneState {
+    ControlPanel,
+    Watches
+}
 
 @Preview
 @Composable
 fun ConsolePane(settings: Settings, console: Console, onCloseRequest: () -> Unit) {
+    var paneState by remember { mutableStateOf(ConsolePaneState.ControlPanel) }
+
     Row(Modifier.fillMaxSize()) {
         ConsoleView(Modifier.weight(0.7f), settings, console)
         SimpleVerticalSplitter()
-        ConsoleControlPanelView(Modifier.weight(0.3f), settings, console, onCloseRequest)
+        when (paneState) {
+            ConsolePaneState.ControlPanel -> {
+                ConsoleControlPanelView(Modifier.weight(0.3f), settings, console, { paneState =
+                    ConsolePaneState.Watches
+                }, onCloseRequest)
+            }
+            ConsolePaneState.Watches -> {
+                WatchesView(Modifier.weight(0.3f), console, { paneState = ConsolePaneState.ControlPanel }, onCloseRequest)
+            }
+        }
+
     }
 }
 
 @Composable
+fun processStatusView(console: Console) {
+    if (console.processIsAttached) {
+        Icon(Icons.Default.Done, "Process is attached", tint = Color.Green)
+    } else {
+        Icon(Icons.Default.DoNotTouch, "No process attached", tint = Color.Red)
+    }
+    Spacer(Modifier.padding(3.dp))
+    val processMessage = if (!console.processIsAttached)
+        "No process attached" else "Process '${console.attachedProcessLabel}' is attached"
+    Text(processMessage, textAlign = TextAlign.Center)
+}
+
+@Composable
 fun ClosedConsole(settings: Settings, console: Console, onCloseRequest: () -> Unit) {
-    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically) {
         GitBranchTellerView()
         Row(horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxHeight()) {
-            if (console.processIsAttached) {
-                Icon(Icons.Default.Done, "Process is attached", tint = Color.Green)
-            } else {
-                Icon(Icons.Default.DoNotTouch, "No process attached", tint = Color.Red)
-            }
-            Spacer(Modifier.padding(3.dp))
-            val processMessage = if (!console.processIsAttached)
-                "No process attached" else "Process '${console.attachedProcessLabel}' is attached"
-            Text(processMessage, textAlign = TextAlign.Center)
+            processStatusView(console)
         }
         Icon(Icons.Default.ArrowUpward, "Show console", tint = Color.LightGray,
             modifier = Modifier.clickable { onCloseRequest() })
@@ -125,23 +146,26 @@ fun ConsoleView(modifier: Modifier, settings: Settings, console: Console) {
 }
 
 @Composable
-fun ConsoleControlPanelView(modifier: Modifier, settings: Settings, console: Console, onCloseRequest: () -> Unit) {
+fun ConsoleControlPanelView(
+    modifier: Modifier,
+    settings: Settings,
+    console: Console,
+    onWatchSwitchRequest: () -> Unit,
+    onCloseRequest: () -> Unit
+) {
     Box(Modifier.fillMaxSize().padding(15.dp).then(modifier)) {
         Column(Modifier.fillMaxSize()) {
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 Row(horizontalArrangement = Arrangement.Start) {
-                    if (console.processIsAttached) {
-                        Icon(Icons.Default.Done, "Process is attached", tint = Color.Green)
-                    } else {
-                        Icon(Icons.Default.DoNotTouch, "No process attached", tint = Color.Red)
-                    }
-                    Spacer(Modifier.padding(3.dp))
-                    val processMessage = if (!console.processIsAttached)
-                        "No process attached" else "Process '${console.attachedProcessLabel}' is attached"
-                    Text(processMessage, textAlign = TextAlign.Center)
+                    processStatusView(console)
                 }
-                Icon(Icons.Default.ArrowDownward, "Hide console", tint = Color.LightGray,
-                    modifier = Modifier.clickable { onCloseRequest() })
+                Row(horizontalArrangement = Arrangement.End) {
+                    Icon(Icons.Default.Watch, "Switch to watches", tint = Color.LightGray,
+                        modifier = Modifier.clickable { onWatchSwitchRequest() })
+                    Spacer(Modifier.padding(3.dp))
+                    Icon(Icons.Default.ArrowDownward, "Hide console", tint = Color.LightGray,
+                        modifier = Modifier.clickable { onCloseRequest() })
+                }
             }
             Divider(Modifier.padding(0.dp, 15.dp))
             Column(Modifier.fillMaxSize()) {
