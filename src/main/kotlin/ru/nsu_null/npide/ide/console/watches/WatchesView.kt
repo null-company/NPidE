@@ -1,4 +1,4 @@
-package ru.nsu_null.npide.ui.console.watches
+package ru.nsu_null.npide.ide.console.watches
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,9 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import ru.nsu_null.npide.ui.GitBranchTellerView
-import ru.nsu_null.npide.ui.common.AppTheme
-import ru.nsu_null.npide.ui.console.Console
+import ru.nsu_null.npide.ide.codeviewer.GitBranchTellerView
+import ru.nsu_null.npide.ide.common.AppTheme
+import ru.nsu_null.npide.ide.console.Console
+import ru.nsu_null.npide.ide.console.processStatusView
 
 @Composable
 fun WatchesView(
@@ -29,15 +30,7 @@ fun WatchesView(
             Row(horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()) {
                 Row(horizontalArrangement = Arrangement.Start) {
-                    if (console.processIsAttached) {
-                        Icon(Icons.Default.Done, "Process is attached", tint = Color.Green)
-                    } else {
-                        Icon(Icons.Default.DoNotTouch, "No process attached", tint = Color.Red)
-                    }
-                    Spacer(Modifier.padding(3.dp))
-                    val processMessage = if (!console.processIsAttached)
-                        "No process attached" else "Running '${console.attachedProcessLabel}'"
-                    Text(processMessage, textAlign = TextAlign.Center)
+                    processStatusView(console)
                 }
                 Row(horizontalArrangement = Arrangement.End) {
                     Icon(Icons.Default.Settings, "Switch to control panel", tint = Color.LightGray,

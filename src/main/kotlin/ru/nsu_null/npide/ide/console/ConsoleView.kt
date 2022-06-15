@@ -26,10 +26,10 @@ import ru.nsu_null.npide.ide.codeviewer.GitBranchTellerView
 import ru.nsu_null.npide.ide.common.AppTheme
 import ru.nsu_null.npide.ide.common.Settings
 import ru.nsu_null.npide.ide.console.Console.MessageType.Special
+import ru.nsu_null.npide.ide.console.watches.WatchesView
 import ru.nsu_null.npide.ide.npide.NPIDE
 import ru.nsu_null.npide.ide.platform.VerticalScrollbar
 import ru.nsu_null.npide.ide.util.SimpleVerticalSplitter
-import ru.nsu_null.npide.ui.console.watches.WatchesView
 
 private enum class ConsolePaneState {
     ControlPanel,
@@ -59,6 +59,19 @@ fun ConsolePane(settings: Settings, console: Console, onCloseRequest: () -> Unit
 }
 
 @Composable
+fun processStatusView(console: Console) {
+    if (console.processIsAttached) {
+        Icon(Icons.Default.Done, "Process is attached", tint = Color.Green)
+    } else {
+        Icon(Icons.Default.DoNotTouch, "No process attached", tint = Color.Red)
+    }
+    Spacer(Modifier.padding(3.dp))
+    val processMessage = if (!console.processIsAttached)
+        "No process attached" else "Process '${console.attachedProcessLabel}' is attached"
+    Text(processMessage, textAlign = TextAlign.Center)
+}
+
+@Composable
 fun ClosedConsole(settings: Settings, console: Console, onCloseRequest: () -> Unit) {
     Row(horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxWidth(),
@@ -67,15 +80,7 @@ fun ClosedConsole(settings: Settings, console: Console, onCloseRequest: () -> Un
         Row(horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxHeight()) {
-            if (console.processIsAttached) {
-                Icon(Icons.Default.Done, "Process is attached", tint = Color.Green)
-            } else {
-                Icon(Icons.Default.DoNotTouch, "No process attached", tint = Color.Red)
-            }
-            Spacer(Modifier.padding(3.dp))
-            val processMessage = if (!console.processIsAttached)
-                "No process attached" else "Process '${console.attachedProcessLabel}' is attached"
-            Text(processMessage, textAlign = TextAlign.Center)
+            processStatusView(console)
         }
         Icon(Icons.Default.ArrowUpward, "Show console", tint = Color.LightGray,
             modifier = Modifier.clickable { onCloseRequest() })
@@ -152,15 +157,7 @@ fun ConsoleControlPanelView(
         Column(Modifier.fillMaxSize()) {
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 Row(horizontalArrangement = Arrangement.Start) {
-                    if (console.processIsAttached) {
-                        Icon(Icons.Default.Done, "Process is attached", tint = Color.Green)
-                    } else {
-                        Icon(Icons.Default.DoNotTouch, "No process attached", tint = Color.Red)
-                    }
-                    Spacer(Modifier.padding(3.dp))
-                    val processMessage = if (!console.processIsAttached)
-                        "No process attached" else "Running '${console.attachedProcessLabel}'"
-                    Text(processMessage, textAlign = TextAlign.Center)
+                    processStatusView(console)
                 }
                 Row(horizontalArrangement = Arrangement.End) {
                     Icon(Icons.Default.Watch, "Switch to watches", tint = Color.LightGray,
