@@ -12,12 +12,12 @@ import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
-import ru.nsu_null.npide.ui.ProjectView
-import ru.nsu_null.npide.ui.menubar.CustomMenuBar
-import ru.nsu_null.npide.ui.npide.NPIDE
-import ru.nsu_null.npide.ui.npide.NPIDE.State.CHOOSING_PROJECT
-import ru.nsu_null.npide.ui.npide.NPIDE.State.IN_PROJECT
-import ru.nsu_null.npide.ui.projectchooser.ProjectChooserView
+import ru.nsu_null.npide.ide.codeviewer.ProjectView
+import ru.nsu_null.npide.ide.menubar.CustomMenuBar
+import ru.nsu_null.npide.ide.npide.NPIDE
+import ru.nsu_null.npide.ide.npide.NPIDE.State.CHOOSING_PROJECT
+import ru.nsu_null.npide.ide.npide.NPIDE.State.IN_PROJECT
+import ru.nsu_null.npide.ide.projectchooser.ProjectChooserView
 
 val icon = BitmapPainter(useResource("npide.png", ::loadImageBitmap))
 const val npideTitle = "NPidE"

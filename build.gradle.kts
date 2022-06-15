@@ -28,6 +28,15 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10")
 }
 
+tasks.jar {
+    manifest.attributes["Main-Class"] = "ru.nsu_null.npide.MainKt"
+    val dependencies = configurations
+        .runtimeClasspath
+        .get()
+        .map(::zipTree) // OR .map { zipTree(it) }
+    from(dependencies)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "11"
 }
