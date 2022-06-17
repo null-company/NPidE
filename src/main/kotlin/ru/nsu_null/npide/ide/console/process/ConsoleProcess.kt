@@ -1,4 +1,4 @@
-package ru.nsu_null.npide.ide.console
+package ru.nsu_null.npide.ide.console.process
 
 import java.io.InputStream
 import java.io.OutputStream

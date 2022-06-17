@@ -9,6 +9,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import ru.nsu_null.npide.ide.console.Console.MessageType.*
+import ru.nsu_null.npide.ide.console.process.ConsoleProcess
+import ru.nsu_null.npide.ide.console.process.RealConsoleProcess
 import java.io.*
 import kotlin.concurrent.thread
 
