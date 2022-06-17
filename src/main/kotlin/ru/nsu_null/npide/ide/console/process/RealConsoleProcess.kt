@@ -26,7 +26,5 @@ class RealConsoleProcess (
         process.destroy()
     }
 
-    override fun exitValue(): Int {
-        return process.exitValue();
-    }
+    override val exitValue: Int = process.exitValue()
 }

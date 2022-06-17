@@ -4,7 +4,7 @@ import java.io.InputStream
 import java.io.OutputStream
 
 /**
- *  Represents an entity that can be attached to [Console]
+ *  Represents an entity that can be attached to [ru.nsu_null.npide.ide.console.Console]
  */
 interface ConsoleProcess {
 
@@ -44,6 +44,7 @@ interface ConsoleProcess {
      * Returns the exit code of the process
      *
      * Exit code 0 means the execution was successful
+     * @throws [IllegalThreadStateException] if the process has not yet terminated
      */
-    fun exitValue(): Int
+    val exitValue: Int
 }
