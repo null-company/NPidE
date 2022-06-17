@@ -13,13 +13,20 @@ class RealConsoleProcess (
     private val process: Process
 ): ConsoleProcess {
 
-    override val outputStream: InputStream = BufferedInputStream(process.inputStream)
+    override val outputStream: OutputStream = BufferedOutputStream(process.outputStream)
 
-    override val inputStream: OutputStream = BufferedOutputStream(process.outputStream)
+    override val inputStream: InputStream = BufferedInputStream(process.inputStream)
 
     override val errorStream: InputStream = BufferedInputStream(process.errorStream)
 
+    override val isAlive: Boolean
+        get() = process.isAlive
+
     override fun destroy() {
         process.destroy()
+    }
+
+    override fun exitValue(): Int {
+        return process.exitValue();
     }
 }

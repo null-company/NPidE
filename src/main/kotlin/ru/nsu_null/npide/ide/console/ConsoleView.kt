@@ -158,7 +158,7 @@ private fun IconBar(modifier: Modifier = Modifier, console: Console) {
     fun launchShell() {
         val shell =
             Runtime.getRuntime().exec(if (isWindows) "powershell" else "bash")
-        console.runProcess(shell, "shell")
+        console.runProcess(RealConsoleProcess(shell), "shell")
     }
     @Composable
     fun IconsSpacer() {
