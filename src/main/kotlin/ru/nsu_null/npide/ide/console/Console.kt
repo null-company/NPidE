@@ -9,6 +9,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import ru.nsu_null.npide.ide.console.Console.MessageType.*
+import ru.nsu_null.npide.ide.console.process.ConsoleProcess
+import ru.nsu_null.npide.ide.console.process.RealConsoleProcess
 import java.io.*
 import kotlin.concurrent.thread
 
@@ -105,7 +107,7 @@ class Console {
         outputStream.flush()
     }
 
-    private var attachedProcess: Process? by mutableStateOf(null)
+    private var attachedProcess: ConsoleProcess? by mutableStateOf(null)
 
     /**
      * Label of the attached process, if such process exists, null otherwise
@@ -134,7 +136,7 @@ class Console {
      * @param isInterpreter if true, sends to console will be forcefully printed on screen during this process life
      * @return pipes with which to communicate with the process programmatically
      */
-    fun attachProcess(process: Process, label: String, isInterpreter: Boolean = false): ProcessCommunicationPipes {
+    fun attachProcess(process: ConsoleProcess, label: String, isInterpreter: Boolean = false): ProcessCommunicationPipes {
         isInInterpreterMode = isInterpreter
         log("Attaching process $label")
         if (processIsAttached) {
@@ -192,7 +194,7 @@ class Console {
  * Note: so far this is not really safe for short commands, because a process can die before
  * all stdin is read, but as we haven't needed that so far, should be ok
  */
-fun Console.runProcess(process: Process, label: String, isInterpreter: Boolean = false) {
+fun Console.runProcess(process: ConsoleProcess, label: String, isInterpreter: Boolean = false) {
     val (stdin, stdout, stderr) = attachProcess(process, label, isInterpreter)
     listOf(stdin, stdout, stderr).forEach(Closeable::close)
 }
@@ -215,7 +217,7 @@ private data class ConsoleProxyPipes(val stdin: InputStream,
  * @param processStreams streams with which communication with the process happens
  */
 private class CommunicationProxyWorker(private val console: Console,
-                                       private val watchedProcess: Process,
+                                       private val watchedProcess: ConsoleProcess,
                                        clientPipes: ConsoleProxyPipes,
                                        processStreams: ProcessCommunicationPipes) {
     val stdin = processStreams.stdin.writer()
@@ -353,7 +355,7 @@ private fun main() {
     val console = Console()
 
     // Create a process
-    val gitStatusProcess = Runtime.getRuntime().exec(arrayOf("git", "status"))
+    val gitStatusProcess = RealConsoleProcess(Runtime.getRuntime().exec(arrayOf("git", "status")))
 
     // Immediately attach it. If some sneaky-beaky like action is needed, perform it before attaching
     // But the user won't see any action in the console then
@@ -384,7 +386,7 @@ private fun main() {
 
     // if you want to run a process which is an interpreter (such as python/ghci) and you know
     // that process does not print USER INPUT to PROCESS OUTPUT, then use this
-    val interpreted = Runtime.getRuntime().exec("python -i")
+    val interpreted = RealConsoleProcess(Runtime.getRuntime().exec("python -i"))
     console.runProcess(interpreted, "python", isInterpreter = true)
     // or console.attachProcess(interpreted, "python", isInterpreter = true)
     /** now during this process life any user input to console (by [Console.send]) is FORCED

@@ -16,8 +16,11 @@ repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
-
 dependencies {
+    // TODO test this on windows
+    // https://mvnrepository.com/artifact/org.jetbrains.skiko/skiko-awt
+    implementation("org.jetbrains.skiko:skiko-awt:0.7.22")
+
     implementation(compose.desktop.currentOs)
     implementation("org.antlr:antlr4:4.10.1")
     api(compose.materialIconsExtended)
