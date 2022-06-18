@@ -172,11 +172,12 @@ private fun buildWithConfig(editors: Editors,
                     config: List<ConfigParser.ConfigInternal>): Boolean {
     try {
         for (i in 0 until config.count()) {
+            val bps = NPIDE.breakpointStorage
             var bpStr = ""
-            for (key in BreakpointStorage.map.keys) {
+            for (key in bps.map.keys) {
                 bpStr += key
                 bpStr += ":: "
-                for (bp in BreakpointStorage.map[key]!!) {
+                for (bp in bps.map[key]!!) {
                     bpStr += bp
                     bpStr += ", "
                 }

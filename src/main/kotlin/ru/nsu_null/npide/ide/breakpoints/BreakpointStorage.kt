@@ -4,22 +4,23 @@ import com.charleskorn.kaml.EmptyYamlDocumentException
 import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
+import ru.nsu_null.npide.ide.projectchooser.ProjectChooser
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 
 @Serializable
-object BreakpointStorage {
+class BreakpointStorage(
+    private val project: ProjectChooser.Project
+) {
+    val path = project.rootFolder.filepath + "/" + ".npide/breakpoints.yml"
+    var map: HashMap<String, HashSet<Int>> = loadBreakpoints()
 
     @Serializable
     data class BreakpointStorageYaml(
         val map: HashMap<String, HashSet<Int>> = hashMapOf()
     )
-
-
-    const val bpPath = "breakpoints.yml"
-    var map: HashMap<String, HashSet<Int>> = loadBreakpoints()
 
     fun addBreakpoint(path: String, line: Int) {
         if (!map.containsKey(path)) {
@@ -35,20 +36,21 @@ object BreakpointStorage {
     }
 
     fun loadBreakpoints(): HashMap<String, HashSet<Int>> {
-        if (File(bpPath).exists()) {
-            val inputStream = FileInputStream(bpPath)
-            map = try {
+        return if (File(path).exists()) {
+            val inputStream = FileInputStream(path)
+            val m = try {
                 Yaml.default.decodeFromStream(BreakpointStorageYaml.serializer(), inputStream).map
             } catch (e: EmptyYamlDocumentException) {
                 hashMapOf()
             }
             inputStream.close()
-        } else map = hashMapOf()
-        return map
+            m
+        } else hashMapOf()
     }
 
     fun storeBreakpoints() {
-        val fileOutputStream = FileOutputStream(bpPath)
+        File(path).createNewFile()
+        val fileOutputStream = FileOutputStream(path)
         val writer = OutputStreamWriter(fileOutputStream)
         writer.write(Yaml.default.encodeToString(BreakpointStorageYaml(map)))
         writer.close()

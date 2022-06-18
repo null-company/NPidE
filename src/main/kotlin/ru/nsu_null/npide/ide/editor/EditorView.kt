@@ -20,6 +20,7 @@ import org.fife.ui.rtextarea.RTextScrollPane
 import ru.nsu_null.npide.ide.breakpoints.BreakpointStorage
 import ru.nsu_null.npide.ide.common.AppTheme
 import ru.nsu_null.npide.ide.common.Settings
+import ru.nsu_null.npide.ide.npide.NPIDE
 import ru.nsu_null.npide.ide.util.loadableScoped
 import javax.swing.BoxLayout
 import javax.swing.JPanel
@@ -39,8 +40,8 @@ fun EditorView(model: Editor, settings: Settings) = key(model) {
                 if (fileContents != null) {
                     Box {
                         CodeEditor(model.rtEditor, fileContents!!, Modifier.fillMaxSize())
-                        if (BreakpointStorage.map.containsKey(model.filePath)) {
-                            for (line in BreakpointStorage.map[model.filePath]!!) {
+                        if (NPIDE.breakpointStorage.map.containsKey(model.filePath)) {
+                            for (line in NPIDE.breakpointStorage.map[model.filePath]!!) {
                                 model.rtEditor.textArea.addLineHighlight(line, model.breakpointHighlightColor)
                             }
                         }

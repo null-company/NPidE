@@ -95,22 +95,21 @@ class Editor(
             }
         })
 
-        BreakpointStorage.loadBreakpoints()
-
         class BreakpointAction : AbstractAction() {
+            private val bps = NPIDE.breakpointStorage
             override fun actionPerformed(e: ActionEvent?) {
-                if (BreakpointStorage.map[filePath]?.contains(scrollPane.textArea.caretLineNumber) == true) {
-                    BreakpointStorage.removeBreakpoint(filePath, scrollPane.textArea.caretLineNumber)
+                if (bps.map[filePath]?.contains(scrollPane.textArea.caretLineNumber) == true) {
+                    bps.removeBreakpoint(filePath, scrollPane.textArea.caretLineNumber)
                     scrollPane.textArea.removeLineHighlight(scrollPane.textArea.caretLineNumber)
                     scrollPane.textArea.removeAllLineHighlights()
-                    for (line in BreakpointStorage.map[filePath]!!) {
+                    for (line in bps.map[filePath]!!) {
                         scrollPane.textArea.addLineHighlight(line, breakpointHighlightColor)
                     }
                 } else {
                     scrollPane.textArea.addLineHighlight(scrollPane.textArea.caretLineNumber, breakpointHighlightColor)
-                    BreakpointStorage.addBreakpoint(filePath, scrollPane.textArea.caretLineNumber)
+                    bps.addBreakpoint(filePath, scrollPane.textArea.caretLineNumber)
                 }
-                BreakpointStorage.storeBreakpoints()
+                bps.storeBreakpoints()
             }
         }
         scrollPane.textArea.actionMap.put("breakpointAction", BreakpointAction())
