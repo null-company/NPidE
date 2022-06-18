@@ -138,8 +138,6 @@ class BuilderDelegatorStrategy : RealProcessBackedStrategy(), BuilderStrategy {
         dirtyFlags: DirtyFlags,
         logger: Logger
     ) {
-        println("hello hello :)")
-        return
         fun logError(message: String) = logger.log(name, message, Console.MessageType.Error)
         val executableName = extraConfiguration["executable"]
             ?: throw IllegalArgumentException("extra configuration did not provide an executable")
