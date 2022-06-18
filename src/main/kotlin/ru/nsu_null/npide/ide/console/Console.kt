@@ -328,6 +328,8 @@ fun Console.log(who: String, message: String, messageType: Console.MessageType =
     display("[$who]: $message\n", messageType)
 }
 
+fun Console.logError(who: String, message: String) = log(who, message, Error)
+
 private fun safeThreadContinuousTask(task: () -> Unit, onExit: () -> Unit) {
     while (true) {
         try {

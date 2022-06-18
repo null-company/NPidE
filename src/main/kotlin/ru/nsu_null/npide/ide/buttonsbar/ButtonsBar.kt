@@ -31,15 +31,15 @@ fun ButtonsBar(settings: Settings, editors: Editors, console: Console) = Box(
 ) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
 
-        ButtonsBarButton("Build") { build(editors, console) }
+        ButtonsBarButton("Build") { build() }
 
-        ButtonsBarButton("Run") { run(editors, console) }
+        ButtonsBarButton("Run") { run() }
 
-        ButtonsBarButton("Debug") { debug(editors, console) }
+        ButtonsBarButton("Debug") { debug() }
 
         ButtonsBarButton("Save") { editors.active!!.writeContents(editors.active!!.content) }
 
-        ButtonsBarButton("Step") { DebugRunnableStepFlag.set(true) }
+        ButtonsBarButton("Step") { step() }
 
     }
 }

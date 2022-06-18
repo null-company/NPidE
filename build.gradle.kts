@@ -29,6 +29,8 @@ dependencies {
     implementation("com.fifesoft:rsyntaxtextarea:3.2.0")
     implementation("me.tomassetti.kanvas:kanvas-core:0.2.1")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10")
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-reflect
+    runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:1.6.10")
 }
 
 tasks.jar {

@@ -1,7 +1,6 @@
 package ru.nsu_null.npide.ide.console.process
 
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
+import ru.nsu_null.npide.ide.util.MethodDelegator
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -13,18 +12,15 @@ class RealConsoleProcess (
     private val process: Process
 ): ConsoleProcess {
 
-    override val outputStream: OutputStream = BufferedOutputStream(process.outputStream)
+    override val outputStream: OutputStream by process::outputStream
 
-    override val inputStream: InputStream = BufferedInputStream(process.inputStream)
+    override val inputStream: InputStream by process::inputStream
 
-    override val errorStream: InputStream = BufferedInputStream(process.errorStream)
+    override val errorStream: InputStream by process::errorStream
 
-    override val isAlive: Boolean
-        get() = process.isAlive
+    override val isAlive: Boolean by MethodDelegator(process::isAlive)
 
-    override fun destroy() {
-        process.destroy()
-    }
+    override fun destroy() = process.destroy()
 
-    override val exitValue: Int = process.exitValue()
+    override val exitValue: Int by MethodDelegator(process::exitValue)
 }

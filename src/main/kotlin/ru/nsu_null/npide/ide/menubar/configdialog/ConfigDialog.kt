@@ -2,10 +2,7 @@ package ru.nsu_null.npide.ide.menubar.configdialog
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
@@ -19,20 +16,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowSize
 import androidx.compose.ui.window.rememberDialogState
-import ru.nsu_null.npide.ide.config.ConfigManager
+import ru.nsu_null.npide.ide.config.AutoUpdatedProjectConfig
+import ru.nsu_null.npide.ide.config.ProjectConfig
 import ru.nsu_null.npide.ide.menubar.configdialog.ConfigureProjectAction.*
 import ru.nsu_null.npide.ide.menubar.configdialog.ConfigureProjectAction.Companion.actionToConfigParamAsString
 import ru.nsu_null.npide.ide.npide.NPIDE
 import javax.swing.JFileChooser
 
-private fun applyConfig(config: ConfigManager.ProjectConfig) {
-    NPIDE.configManager.currentProjectConfig = NPIDE.configManager.AutoUpdatedProjectConfig(config)
-}
-
-private fun applyCommonPath(configDialogState: ConfigDialogState, path: String) {
-    configDialogState.projectConfig.buildPath.value = path
-    configDialogState.projectConfig.runPath.value = path
-    configDialogState.projectConfig.debugPath.value = path
+private fun applyConfig(config: ProjectConfig) {
+    NPIDE.configManager.currentProjectConfig = AutoUpdatedProjectConfig.forCurrentConfigManager(config)
 }
 
 @ExperimentalComposeUiApi
@@ -58,26 +50,21 @@ fun ConfigDialog(isOpen: MutableState<Boolean>) {
             Column {
                 ApplyConfigButton(isOpen, configurationState)
 
-                AddAllConfigItem(
-                    configurationState,
-                    configurationState.projectConfig.buildPath,
-                    ChooseBuild
+                SimpleConfigTextInputItem(
+                    configurationState.projectConfig.projectName
                 )
-                AddAllConfigItem(
-                    configurationState,
-                    configurationState.projectConfig.runPath,
-                    ChooseRun
+                SimpleConfigTextInputItem(
+                    configurationState.projectConfig.entryPoint
                 )
-                AddAllConfigItem(
+                SimpleConfigFileChosenItem(
                     configurationState,
-                    configurationState.projectConfig.debugPath,
-                    ChooseDebug
+                    configurationState.projectConfig.languageDistribution,
+                    ChooseLanguageDistribution
                 )
 
                 ProjectConfigForm(configurationState)
                 CurrentlySelectedProjectPathsList(configurationState)
-                GrammarConfigurationForm(configurationState)
-                CurrentlySelectedGrammarsList(configurationState)
+                GrammarConfigurationView(configurationState)
             }
         }
 
@@ -87,27 +74,9 @@ fun ConfigDialog(isOpen: MutableState<Boolean>) {
     }
 }
 
-
 @ExperimentalComposeUiApi
 @Composable
-private fun AddAllConfigItem(
-    configurationState: ConfigDialogState,
-    configField: MutableState<String>,
-    action: ConfigureProjectAction
-) {
-    SimpleConfigItem(configurationState, configField, action) {
-        Button(
-            onClick = { applyCommonPath(configurationState, configField.value) },
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Text("Apply to all")
-        }
-    }
-}
-
-@ExperimentalComposeUiApi
-@Composable
-private fun SimpleConfigItem(
+private fun SimpleConfigFileChosenItem(
     configurationState: ConfigDialogState,
     configField: MutableState<String>,
     action: ConfigureProjectAction,
@@ -124,6 +93,19 @@ private fun SimpleConfigItem(
             Text("...")
         }
         afterChooseFileButton?.invoke(this)
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun SimpleConfigTextInputItem(
+    configField: MutableState<String>,
+) {
+    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        TextField(
+            configField.value,
+            onValueChange = { configField.value = it }
+        )
     }
 }
 
@@ -145,14 +127,14 @@ private fun ApplyConfigButton(isOpen: MutableState<Boolean>, configurationState:
 private fun AddProjectFileConfigButton(configurationState: ConfigDialogState) {
 
     fun selectionIsReady(): Boolean {
-        return (configurationState.selectionState.projectFilePath.value.isNotBlank())
+        return (configurationState.selection.newProjectFile.value.isNotBlank())
     }
 
     Button(
         onClick = {
             if (selectionIsReady()) {
-                configurationState.projectConfig.projectFilePaths.value +=
-                    (configurationState.selectionState.projectFilePath.value)
+                configurationState.projectConfig.projectFiles.value +=
+                    (configurationState.selection.newProjectFile.value)
             }
         },
         modifier = Modifier.padding(20.dp)
@@ -163,11 +145,11 @@ private fun AddProjectFileConfigButton(configurationState: ConfigDialogState) {
 
 @Composable
 private fun CurrentlySelectedProjectPathsList(configurationState: ConfigDialogState) {
-    for (value in configurationState.projectConfig.projectFilePaths.value) {
+    for (value in configurationState.projectConfig.projectFiles.value) {
         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextBox("$value")
+            TextBox(value)
             Button(
-                onClick = { configurationState.projectConfig.projectFilePaths.value -= value }
+                onClick = { configurationState.projectConfig.projectFiles.value -= value }
             ) {
                 Text("Delete")
             }
@@ -180,7 +162,7 @@ private fun CurrentlySelectedProjectPathsList(configurationState: ConfigDialogSt
 
 @ExperimentalComposeUiApi
 @Composable
-private fun ProjectConfigForm(configurationState: ConfigDialogState, ) {
+private fun ProjectConfigForm(configurationState: ConfigDialogState) {
     Box(
         modifier = Modifier
             .padding(end = 12.dp, bottom = 12.dp)
@@ -194,86 +176,45 @@ private fun ProjectConfigForm(configurationState: ConfigDialogState, ) {
         )
 
         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            SimpleConfigItem(
+            SimpleConfigFileChosenItem(
                 configurationState,
-                configurationState.selectionState.projectFilePath,
+                configurationState.selection.newProjectFile,
                 ChooseSource
             )
             AddProjectFileConfigButton(configurationState)
         }
     }
 }
-@Composable
-private fun CurrentlySelectedGrammarsList(configurationState: ConfigDialogState) {
-    for (value in configurationState.projectConfig.grammarConfigs.value) {
-        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextBox("$value")
-            Button(
-                onClick = { configurationState.projectConfig.grammarConfigs.value -= value }
-            ) {
-                Text("Delete")
-            }
-            Spacer(modifier = Modifier.height(5.dp))
-        }
-    }
-}
-
 @ExperimentalComposeUiApi
 @Composable
-private fun GrammarConfigurationForm(configurationState: ConfigDialogState) {
+private fun GrammarConfigurationView(configurationState: ConfigDialogState) {
     Box(
         modifier = Modifier
             .padding(end = 12.dp, bottom = 12.dp)
             .background(color = Color(0, 0, 0, 20))
 
     ) {
+        val grammarConfigs = NPIDE.configManager.currentLanguageDistributionInfo.grammarConfigs
         Text(
-            "Configuration of Grammar:",
+            "Grammar configs:",
             modifier = Modifier.padding(10.dp),
             fontWeight = FontWeight.Bold
         )
 
-        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            SimpleOutlinedTextFieldSample(
-                "Extension of grammar",
-                configurationState.selectionState.grammarExtension
-            )
-            Column(modifier = Modifier.padding(40.dp)) {
-                SimpleConfigItem(
-                    configurationState,
-                    configurationState.selectionState.grammarPath,
-                    ChooseGrammar
-                )
-                SimpleConfigItem(
-                    configurationState,
-                    configurationState.selectionState.highlighterPath,
-                    ChooseSyntaxHighlighter
-                )
-                AddGrammarConfigButton(configurationState)
+        for (grammarConfig in grammarConfigs) {
+            Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                TextBox("Extension of grammar:")
+                TextBox(grammarConfig.sourceFileExtension)
+                Column(modifier = Modifier.padding(40.dp)) {
+                    TextBox(
+                        grammarConfig.grammar
+                    )
+                    TextBox(
+                        grammarConfig.syntaxHighlighter
+                    )
+                }
             }
         }
-    }
-}
-
-@Composable
-private fun AddGrammarConfigButton(configurationState: ConfigDialogState) {
-
-    fun selectionIsReady(): Boolean {
-        return (configurationState.selectionState.grammarExtension.value.isNotBlank() &&
-                configurationState.selectionState.grammarPath.value.isNotBlank() &&
-                configurationState.selectionState.highlighterPath.value.isNotBlank())
-    }
-
-    Button(
-        onClick = {
-            if (selectionIsReady()) {
-                configurationState.projectConfig.grammarConfigs.value +=
-                    GrammarConfig(configurationState)
-            }
-        },
-        modifier = Modifier.padding(20.dp)
-    ) {
-        Text("Add grammar config")
     }
 }
 
@@ -308,21 +249,13 @@ private fun SimpleOutlinedTextFieldSample(labelText: String, valueText: MutableS
 }
 
 private enum class ConfigureProjectAction {
-    ChooseBuild,
-    ChooseRun,
-    ChooseDebug,
-    ChooseGrammar,
-    ChooseSyntaxHighlighter,
+    ChooseLanguageDistribution,
     ChooseSource;
 
     companion object {
         val actionToConfigParamAsString = mapOf(
-            ChooseBuild to "Build",
-            ChooseRun to "Run",
-            ChooseDebug to "Debug",
-            ChooseGrammar to "Grammar",
-            ChooseSyntaxHighlighter to "Syntax Highlighter",
-            ChooseSource to "Source File Path"
+            ChooseSource to "Source file path",
+            ChooseLanguageDistribution to "Language distribution file path"
         )
     }
 }
@@ -332,24 +265,13 @@ private fun chooseFile(configButtonState: ConfigureProjectAction, dialogState: C
     JFileChooser(NPIDE.currentProject!!.rootFolder.filepath).apply {
         showOpenDialog(null)
         if (selectedFile != null) {
+            val chooseResult = selectedFile.toString()
             when (configButtonState) {
-                ChooseBuild -> {
-                    dialogState.projectConfig.buildPath.value = selectedFile.toString()
+                ChooseSource -> {
+                    dialogState.selection.newProjectFile.value += chooseResult
                 }
-                ChooseRun -> {
-                    dialogState.projectConfig.runPath.value = selectedFile.toString()
-                }
-                ChooseDebug -> {
-                    dialogState.projectConfig.debugPath.value = selectedFile.toString()
-                }
-                ChooseGrammar -> {
-                    dialogState.selectionState.grammarPath.value = selectedFile.toString()
-                }
-                ChooseSyntaxHighlighter -> {
-                    dialogState.selectionState.highlighterPath.value = selectedFile.toString()
-                }
-                ChooseSource ->{
-                    dialogState.selectionState.projectFilePath.value = selectedFile.toString()
+                ChooseLanguageDistribution -> {
+                    dialogState.selection.languageDistribution.value = chooseResult
                 }
             }
         }
