@@ -23,7 +23,7 @@ class DirtyFlagsStorage internal constructor(private val storagePath: String) {
     }
 
     private fun load() {
-        if (File(storagePath).exists()) {
+        if (!File(storagePath).exists()) {
             store()
         }
         storage = Yaml.default.decodeFromStream(
