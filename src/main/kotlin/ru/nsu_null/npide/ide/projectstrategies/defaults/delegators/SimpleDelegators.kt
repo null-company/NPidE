@@ -14,6 +14,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty1
 
 private fun buildCommand(
     executableName: String,
@@ -67,11 +69,21 @@ private const val DEBUG_COMMAND = "debug"
 abstract class RealProcessBackedStrategy : ConsoleProcess {
     protected lateinit var workerProcess: RealConsoleProcess
 
-    override val outputStream: OutputStream by workerProcess::outputStream
-    override val inputStream: InputStream by workerProcess::inputStream
-    override val errorStream: InputStream by workerProcess::errorStream
-    override val isAlive: Boolean by workerProcess::isAlive
-    override val exitValue: Int by workerProcess::exitValue
+    inner class LazyDelegate<T>(private val workerProperty: KProperty1<RealConsoleProcess, T>) {
+        operator fun getValue(
+            realProcessBackedStrategy: RealProcessBackedStrategy,
+            property: KProperty<*>
+        ): T {
+            @Suppress("UNCHECKED_CAST")
+            return property.getter.call(workerProcess) as T
+        }
+    }
+
+    override val outputStream: OutputStream by LazyDelegate(RealConsoleProcess::outputStream)
+    override val inputStream: InputStream by LazyDelegate(RealConsoleProcess::inputStream)
+    override val errorStream: InputStream by LazyDelegate(RealConsoleProcess::errorStream)
+    override val isAlive: Boolean by LazyDelegate(RealConsoleProcess::isAlive)
+    override val exitValue: Int by LazyDelegate(RealConsoleProcess::exitValue)
     override fun destroy() = workerProcess.destroy()
 }
 
@@ -126,6 +138,8 @@ class BuilderDelegatorStrategy : RealProcessBackedStrategy(), BuilderStrategy {
         dirtyFlags: DirtyFlags,
         logger: Logger
     ) {
+        println("hello hello :)")
+        return
         fun logError(message: String) = logger.log(name, message, Console.MessageType.Error)
         val executableName = extraConfiguration["executable"]
             ?: throw IllegalArgumentException("extra configuration did not provide an executable")

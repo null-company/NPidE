@@ -14,6 +14,8 @@ import ru.nsu_null.npide.ide.projectstrategies.DebuggerStrategy
 import ru.nsu_null.npide.ide.projectstrategies.ProjectStrategyContext
 import ru.nsu_null.npide.ide.projectstrategies.RunnerStrategy
 import ru.nsu_null.npide.ide.storage.ProjectStorage
+import java.io.File
+import java.net.URLClassLoader
 
 object NPIDE {
     var state: State by mutableStateOf(CHOOSING_PROJECT)
@@ -44,7 +46,25 @@ object NPIDE {
     }
 
     private fun loadProjectWorkers() {
-        TODO("Not yet implemented")
+        val languageDistributionDir = File(configManager.currentProjectConfig.languageDistribution)
+        builder = instantiateStrategy(
+            "ru.nsu_null.npide.ide.projectstrategies.defaults.delegators.BuilderDelegatorStrategy",
+            languageDistributionDir
+        )
+        runner = instantiateStrategy(
+            "ru.nsu_null.npide.ide.projectstrategies.defaults.delegators.RunnerDelegatorStrategy",
+            languageDistributionDir
+        )
+        debugger = instantiateStrategy(
+            "ru.nsu_null.npide.ide.projectstrategies.defaults.delegators.DebuggerDelegatorStrategy",
+            languageDistributionDir
+        )
+    }
+
+    private inline fun <reified T> instantiateStrategy(className: String, searchDir: File): T {
+        val cl = URLClassLoader(arrayOf(searchDir.toURI().toURL()))
+        val strategyClass = cl.loadClass(className)
+        return strategyClass.getConstructor().newInstance() as T
     }
 
     fun openChooseProject() {
