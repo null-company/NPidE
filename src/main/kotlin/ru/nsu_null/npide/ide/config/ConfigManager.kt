@@ -47,6 +47,9 @@ class ConfigManager(project: ProjectChooser.Project) {
     }
 
     private fun updateLanguageSystem() {
+        if (currentLanguageDistributionInfo == null) {
+            return
+        }
         for (lexerPath in currentLanguageDistributionInfo.grammarConfigs.map { it.grammar }) {
             generateLexerParserFiles(
                 Paths.get(lexerPath)
