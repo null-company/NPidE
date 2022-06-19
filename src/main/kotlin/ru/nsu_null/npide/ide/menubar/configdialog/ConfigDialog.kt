@@ -51,15 +51,17 @@ fun ConfigDialog(isOpen: MutableState<Boolean>) {
                 ApplyConfigButton(isOpen, configurationState)
 
                 SimpleConfigTextInputItem(
-                    configurationState.projectConfig.projectName
+                    configurationState.projectConfig.projectName,
+                    "Project name"
                 )
                 SimpleConfigTextInputItem(
-                    configurationState.projectConfig.entryPoint
+                    configurationState.projectConfig.entryPoint,
+                    "Project entry point / main class"
                 )
                 SimpleConfigFileChosenItem(
                     configurationState,
                     configurationState.projectConfig.languageDistribution,
-                    ChooseLanguageDistribution
+                    ChooseLanguageDistribution,
                 )
 
                 ProjectConfigForm(configurationState)
@@ -85,7 +87,7 @@ private fun SimpleConfigFileChosenItem(
     Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
         val configPropertyName = actionToConfigParamAsString[action]!!
         Text("Configuration of $configPropertyName:")
-        SimpleOutlinedTextFieldSample("$configPropertyName Path", configField)
+        SimpleOutlinedTextFieldSample("$configPropertyName path", configField)
         Button(
             onClick = { chooseFile(action, configurationState) },
             modifier = Modifier.padding(20.dp)
@@ -96,12 +98,13 @@ private fun SimpleConfigFileChosenItem(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SimpleConfigTextInputItem(
     configField: MutableState<String>,
+    fieldName: String
 ) {
     Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        TextBox(fieldName)
         TextField(
             configField.value,
             onValueChange = { configField.value = it }
@@ -196,7 +199,7 @@ private fun GrammarConfigurationView(configurationState: ConfigDialogState) {
     ) {
         val grammarConfigs = NPIDE.configManager.currentLanguageDistributionInfo.grammarConfigs
         Text(
-            "Grammar configs:",
+            "Grammar configs loaded from language distribution:",
             modifier = Modifier.padding(10.dp),
             fontWeight = FontWeight.Bold
         )
@@ -254,8 +257,8 @@ private enum class ConfigureProjectAction {
 
     companion object {
         val actionToConfigParamAsString = mapOf(
-            ChooseSource to "Source file path",
-            ChooseLanguageDistribution to "Language distribution file path"
+            ChooseSource to "Source file",
+            ChooseLanguageDistribution to "Language distribution file"
         )
     }
 }
