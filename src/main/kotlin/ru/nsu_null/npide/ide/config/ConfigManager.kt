@@ -68,6 +68,7 @@ class ConfigManager(project: ProjectChooser.Project) {
     }
 
     private fun updateLanguageSystem() {
+        @Suppress("SENSELESS_COMPARISON") // TODO fix initialization order
         if (currentLanguageDistributionInfo == null) {
             return
         }
