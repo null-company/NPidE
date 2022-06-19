@@ -39,6 +39,7 @@ object NPIDE {
         currentProject = project
         console = Console()
         configManager = ConfigManager(project)
+        configManager.sync()
         projectStorage = ProjectStorage(project)
         loadProjectWorkers()
         state = IN_PROJECT

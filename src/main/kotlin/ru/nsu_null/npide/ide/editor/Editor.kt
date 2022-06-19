@@ -21,10 +21,12 @@ import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 import java.io.FileNotFoundException
+import java.nio.file.Paths
 import javax.swing.AbstractAction
 import javax.swing.KeyStroke
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
+import kotlin.io.path.div
 
 
 class Editor(
@@ -63,15 +65,21 @@ class Editor(
             val grammarConfig = NPIDE.configManager.findGrammarConfigByExtension(fileExtension)
 
             try {
+                val highlighterPath = Paths.get(NPIDE.currentProject!!.rootFolder.filepath) /
+                        Paths.get(NPIDE.configManager.currentProjectConfig.languageDistribution).parent /
+                        Paths.get(grammarConfig.syntaxHighlighter)
                 val languageSupport = CustomLanguageSupport(
-                    TokenHighlighter(readFile(grammarConfig.syntaxHighlighter)),
+                    TokenHighlighter(readFile(highlighterPath.toString())),
                     lexerClass.getField("VOCABULARY").get(null) as Vocabulary,
                     lexerClass
                 )
                 (textArea.document as RSyntaxDocument).setSyntaxStyle(AntlrTokenMaker(languageSupport.antlrLexerFactory))
                 textArea.syntaxScheme = languageSupport.syntaxScheme
             } catch (e: FileNotFoundException) {
-                NPIDE.console.logError("Editor", "Syntax highlighting file was not found (namely, ${grammarConfig.syntaxHighlighter})")
+                NPIDE.console.logError(
+                    "Editor",
+                    "Syntax highlighting file was not found (namely, ${grammarConfig.syntaxHighlighter})"
+                )
             }
 
         } catch (ignored: NoSuchElementException) {
