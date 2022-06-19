@@ -16,8 +16,8 @@ object LanguageManagerProvider : ConfigDependent {
     }
 
     override fun syncToConfig() {
-        extensionToLanguageManager = NPIDE.configManager.currentProjectConfig
-            .grammarConfigs.map { it.ext to G4LanguageManager(it.ext) }.toMap()
+        extensionToLanguageManager = NPIDE.configManager.currentLanguageDistributionInfo
+            .grammarConfigs.associate { it.sourceFileExtension to G4LanguageManager(it.sourceFileExtension) }
     }
 
     fun getLanguageManager(extension: String): G4LanguageManager {
@@ -30,7 +30,7 @@ object LanguageManagerProvider : ConfigDependent {
 }
 
 object ProjectSymbolProvider : ConfigDependent {
-    internal lateinit var languageManagerToProjectSymbolManager: Map<G4LanguageManager, ProjectSymbolManager>
+    private lateinit var languageManagerToProjectSymbolManager: Map<G4LanguageManager, ProjectSymbolManager>
 
     private fun ProjectSymbolManager.addFileIfNotWatched(filePath: String) {
         if (!hasFile(filePath)) {
@@ -41,7 +41,7 @@ object ProjectSymbolProvider : ConfigDependent {
     init {
         syncToConfig()
         for (projectSymbolManager in languageManagerToProjectSymbolManager.values) {
-            for (projectFilePath in NPIDE.configManager.currentProjectConfig.projectFilePaths) {
+            for (projectFilePath in NPIDE.configManager.currentProjectConfig.projectFiles) {
                 projectSymbolManager.addFileIfNotWatched(projectFilePath)
             }
         }
@@ -49,7 +49,7 @@ object ProjectSymbolProvider : ConfigDependent {
 
     override fun syncToConfig() {
         languageManagerToProjectSymbolManager = LanguageManagerProvider.extensionToLanguageManager
-            .values.map { it to ProjectSymbolManager(it) }.toMap()
+            .values.associateWith { ProjectSymbolManager(it) }
     }
 
     fun getProjectSymbolManager(languageManager: G4LanguageManager): ProjectSymbolManager {
@@ -59,5 +59,4 @@ object ProjectSymbolProvider : ConfigDependent {
             }
         }
     }
-
 }
