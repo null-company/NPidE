@@ -14,7 +14,6 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 
@@ -26,7 +25,6 @@ private fun buildCommand(
     projectRoot: String,
     projectFiles: List<String>,
     entryPoint: String,
-    ext: String,
     breakPoints: BreakPoints
 ): List<String> {
     var breakPointsAsString = ""
@@ -50,7 +48,6 @@ private fun buildCommand(
         "-d", projectRoot,
         "-p", projectFiles.joinToString(" "),
         "-e", entryPoint,
-        "-ext", ext,
         (if (breakPointsAsString.isNotEmpty()) "-b" else ""), breakPointsAsString)
 }
 
@@ -114,7 +111,6 @@ class RunnerDelegatorStrategy : RealProcessBackedStrategy(), RunnerStrategy {
                 projectRoot = strategyContext.projectRoot,
                 projectFiles = strategyContext.projectFiles,
                 entryPoint = strategyContext.entryPoint,
-                ext = "",
                 breakPoints = mutableMapOf()
             )
             workerProcess = RealConsoleProcess(runCommand(command))
@@ -153,7 +149,6 @@ class BuilderDelegatorStrategy : RealProcessBackedStrategy(), BuilderStrategy {
                 projectRoot = strategyContext.projectRoot,
                 projectFiles = strategyContext.projectFiles,
                 entryPoint = strategyContext.entryPoint,
-                ext = "",
                 breakPoints = breakPoints
             )
             workerProcess = RealConsoleProcess(runCommand(command))
@@ -205,7 +200,6 @@ class DebuggerDelegatorStrategy : RealProcessBackedStrategy(), DebuggerStrategy 
                 projectRoot = strategyContext.projectRoot,
                 projectFiles = strategyContext.projectFiles,
                 entryPoint = strategyContext.entryPoint,
-                ext = "",
                 breakPoints = breakPoints
             )
             workerProcess = RealConsoleProcess(debugRun(command))
