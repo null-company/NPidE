@@ -6,6 +6,8 @@ import androidx.compose.runtime.setValue
 import ru.nsu_null.npide.ide.config.ConfigManager
 import ru.nsu_null.npide.ide.console.Console
 import ru.nsu_null.npide.ide.console.ConsoleLogger
+import ru.nsu_null.npide.ide.console.log
+import ru.nsu_null.npide.ide.console.runProcess
 import ru.nsu_null.npide.ide.npide.NPIDE.State.CHOOSING_PROJECT
 import ru.nsu_null.npide.ide.npide.NPIDE.State.IN_PROJECT
 import ru.nsu_null.npide.ide.projectchooser.ProjectChooser.Project
@@ -78,25 +80,35 @@ object NPIDE {
         val breakPoints = projectStorage.breakpointStorage.breakPoints
         val dirtyFlags = projectStorage.dirtyFlagsStorage.dirtyFlags
         val consoleLogger = ConsoleLogger(console)
-        builder.build(
-            enableDebugInfo,
-            context,
-            buildStrategyInfo.extraConfiguration,
-            breakPoints,
-            dirtyFlags,
-            consoleLogger
-        )
+        try {
+            builder.build(
+                enableDebugInfo,
+                context,
+                buildStrategyInfo.extraConfiguration,
+                breakPoints,
+                dirtyFlags,
+                consoleLogger
+            )
+            console.runProcess(builder, "build")
+        } catch (e: Exception) {
+            logError(e.stackTraceToString())
+        }
     }
 
     fun runCurrentProject() {
         val context = ProjectStrategyContext.fromProjectConfig(configManager.currentProjectConfig)
         val buildStrategyInfo = configManager.currentLanguageDistributionInfo.buildStrategy
         val consoleLogger = ConsoleLogger(console)
-        runner.run(
-            context,
-            buildStrategyInfo.extraConfiguration,
-            consoleLogger
-        )
+        try {
+            runner.run(
+                context,
+                buildStrategyInfo.extraConfiguration,
+                consoleLogger
+            )
+            console.runProcess(runner, "run")
+        } catch (e: Exception) {
+            logError(e.stackTraceToString())
+        }
     }
 
     fun debugCurrentProject() {
@@ -104,11 +116,23 @@ object NPIDE {
         val buildStrategyInfo = configManager.currentLanguageDistributionInfo.buildStrategy
         val breakPoints = projectStorage.breakpointStorage.breakPoints
         val consoleLogger = ConsoleLogger(console)
-        debugger.debug(
-            context,
-            buildStrategyInfo.extraConfiguration,
-            breakPoints,
-            consoleLogger
-        )
+        try {
+            debugger.debug(
+                context,
+                buildStrategyInfo.extraConfiguration,
+                breakPoints,
+                consoleLogger
+            )
+            console.runProcess(debugger, "debug")
+        } catch (e: Exception) {
+            logError(e.stackTraceToString())
+        }
     }
 }
+
+private fun NPIDE.log(message: String, messageType: Console.MessageType) {
+    val npideName = "NPIDE"
+    console.log(npideName, message, messageType)
+}
+
+private fun NPIDE.logError(message: String) = log(message, Console.MessageType.Error)
