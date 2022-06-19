@@ -21,6 +21,7 @@ import kotlin.io.path.div
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 import kotlinx.serialization.json.Json
+import ru.nsu_null.npide.ide.console.log
 
 private fun buildCommand(
     executableName: String,
@@ -218,18 +219,23 @@ class DebuggerDelegatorStrategy : RealProcessBackedStrategy(), DebuggerStrategy 
 
     override fun sendGeneralCommand(command: String) {
         workerProcess.outputStream.writer().write(command)
+        workerProcess.outputStream.flush()
     }
 
     override fun step() {
         val stepMessage = extraParameters["step"]
             ?: throw IllegalArgumentException("extra configuration did not provide step command")
-        workerProcess.outputStream.writer().write(stepMessage)
+        workerProcess.outputStream.write((stepMessage + "\n").encodeToByteArray())
+        workerProcess.outputStream.flush()
+        NPIDE.console.log(name, stepMessage, Console.MessageType.Basic)
     }
 
     override fun cont() {
         val continueMessage = extraParameters["continue"]
             ?: throw IllegalArgumentException("extra configuration did not provide continue command")
-        workerProcess.outputStream.writer().write(continueMessage)
+        workerProcess.outputStream.write((continueMessage + "\n").encodeToByteArray())
+        workerProcess.outputStream.flush()
+        NPIDE.console.log(name, continueMessage, Console.MessageType.Basic)
     }
 
     override fun getWatches(): Map<String, String> {

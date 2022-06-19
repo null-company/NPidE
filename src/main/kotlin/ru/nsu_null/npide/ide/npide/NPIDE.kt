@@ -109,12 +109,12 @@ object NPIDE {
 
     fun runCurrentProject() {
         val context = ProjectStrategyContext.fromProjectConfig(configManager.currentProjectConfig)
-        val buildStrategyInfo = configManager.currentLanguageDistributionInfo.buildStrategy
+        val runStrategyInfo = configManager.currentLanguageDistributionInfo.runStrategy
         val consoleLogger = ConsoleLogger(console)
         try {
             runner.run(
                 context,
-                buildStrategyInfo.extraParameters,
+                runStrategyInfo.extraParameters,
                 consoleLogger
             )
             console.runProcess(runner, "run")
@@ -126,13 +126,13 @@ object NPIDE {
 
     fun debugCurrentProject() {
         val context = ProjectStrategyContext.fromProjectConfig(configManager.currentProjectConfig)
-        val buildStrategyInfo = configManager.currentLanguageDistributionInfo.buildStrategy
+        val debugStrategyInfo = configManager.currentLanguageDistributionInfo.debugStrategy
         val breakPoints = projectStorage.breakpointStorage.breakPoints
         val consoleLogger = ConsoleLogger(console)
         try {
             debugger.debug(
                 context,
-                buildStrategyInfo.extraParameters,
+                debugStrategyInfo.extraParameters,
                 breakPoints,
                 consoleLogger
             )
