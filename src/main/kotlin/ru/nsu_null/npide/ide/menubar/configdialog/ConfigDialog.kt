@@ -2,6 +2,7 @@ package ru.nsu_null.npide.ide.menubar.configdialog
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -9,13 +10,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.WindowSize
 import androidx.compose.ui.window.rememberDialogState
+import org.jetbrains.skia.shaper.Shaper
+import ru.nsu_null.npide.ide.common.AppTheme
 import ru.nsu_null.npide.ide.config.AutoUpdatedProjectConfig
 import ru.nsu_null.npide.ide.config.ProjectConfig
 import ru.nsu_null.npide.ide.menubar.configdialog.ConfigureProjectAction.*
@@ -27,6 +33,9 @@ private fun applyConfig(config: ProjectConfig) {
     NPIDE.configManager.currentProjectConfig = AutoUpdatedProjectConfig.forCurrentConfigManager(config)
 }
 
+private val textColor = AppTheme.colors.textDark
+private val backgroundColor = AppTheme.colors.backgroundDark
+
 @ExperimentalComposeUiApi
 @Composable
 fun ConfigDialog(isOpen: MutableState<Boolean>) {
@@ -36,7 +45,7 @@ fun ConfigDialog(isOpen: MutableState<Boolean>) {
         onCloseRequest = { isOpen.value = false },
         title = "Configuration of project",
         resizable = false,
-        state = rememberDialogState(size = WindowSize(1280.dp, 720.dp))
+        state = rememberDialogState(size = DpSize(1280.dp, 720.dp))
     ) {
 
         val configurationState = remember { getStateByConfig() }
@@ -45,28 +54,39 @@ fun ConfigDialog(isOpen: MutableState<Boolean>) {
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(stateVertical)
-                .padding(end = 12.dp, bottom = 12.dp)
+                .background(color = backgroundColor)
         ) {
             Column {
-                ApplyConfigButton(isOpen, configurationState)
+                Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)){
+                    GeneralConfigItem("Project name: ", 52.dp) {
+                        ConfigInputItem(
+                            configurationState.projectConfig.projectName
+                        )
+                    }
+                    GeneralConfigItem("Project entry point / main class: ", 52.dp) {
+                        ConfigInputItem(
+                            configurationState.projectConfig.entryPoint
+                        )
+                    }
 
-                SimpleConfigTextInputItem(
-                    configurationState.projectConfig.projectName,
-                    "Project name"
-                )
-                SimpleConfigTextInputItem(
-                    configurationState.projectConfig.entryPoint,
-                    "Project entry point / main class"
-                )
-                SimpleConfigFileChosenItem(
-                    configurationState,
-                    configurationState.projectConfig.languageDistribution,
-                    ChooseLanguageDistribution,
-                )
+                    SimpleConfigFileChosenItem(
+                        configurationState,
+                        configurationState.projectConfig.languageDistribution,
+                        ChooseLanguageDistribution,
+                    )
 
-                ProjectConfigForm(configurationState)
-                CurrentlySelectedProjectPathsList(configurationState)
-                GrammarConfigurationView(configurationState)
+                    SimpleConfigFileChosenItem(
+                        configurationState,
+                        configurationState.selection.newProjectFile,
+                        ChooseSource
+                    ) {
+                        AddProjectFileConfigButton(configurationState)
+                    }
+
+                    CurrentlySelectedProjectPathsList(configurationState)
+                    GrammarConfigurationView(configurationState)
+                    ApplyConfigButton(isOpen, configurationState)
+                }
             }
         }
 
@@ -74,6 +94,37 @@ fun ConfigDialog(isOpen: MutableState<Boolean>) {
             adapter = rememberScrollbarAdapter(stateVertical)
         )
     }
+}
+@ExperimentalComposeUiApi
+@Composable
+private fun GeneralConfigItem(
+    text: String,
+    height: Dp = 52.dp,
+    composable: (@Composable @ExtensionFunctionType BoxScope.() -> Unit)
+) {
+    Row(
+        modifier = Modifier.height(height)
+            .background(color = Color(0, 0, 0, 40))
+            .padding(start=10.dp)
+    ) {
+        Box(
+            modifier = Modifier.height(height)
+                .width(400.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(text, color = textColor)
+        }
+        Box(
+            modifier = Modifier.height(height),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            composable.invoke(this)
+        }
+
+    }
+    Row(
+        modifier = Modifier.height(4.dp)
+    ) { }
 }
 
 @ExperimentalComposeUiApi
@@ -84,32 +135,32 @@ private fun SimpleConfigFileChosenItem(
     action: ConfigureProjectAction,
     afterChooseFileButton: (@Composable @ExtensionFunctionType RowScope.() -> Unit)? = null
 ) {
-    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        val configPropertyName = actionToConfigParamAsString[action]!!
-        Text("Configuration of $configPropertyName:")
-        SimpleOutlinedTextFieldSample("$configPropertyName path", configField)
-        Button(
-            onClick = { chooseFile(action, configurationState) },
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Text("...")
+    val configPropertyName = actionToConfigParamAsString[action]!!
+    GeneralConfigItem("Configuration of $configPropertyName:", 100.dp) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SimpleOutlinedTextFieldSample("$configPropertyName path", configField)
+            Button(
+                onClick = { chooseFile(action, configurationState) },
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .requiredWidth(60.dp),
+            ) {
+                Text("...", style = TextStyle(color = textColor))
+            }
+            afterChooseFileButton?.invoke(this)
         }
-        afterChooseFileButton?.invoke(this)
     }
 }
 
 @Composable
-private fun SimpleConfigTextInputItem(
-    configField: MutableState<String>,
-    fieldName: String
+private fun ConfigInputItem(
+    configField: MutableState<String>
 ) {
-    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        TextBox(fieldName)
-        TextField(
-            configField.value,
-            onValueChange = { configField.value = it }
-        )
-    }
+    TextField(
+        configField.value,
+        onValueChange = { configField.value = it },
+        textStyle = TextStyle(color = textColor),
+    )
 }
 
 @Composable
@@ -119,9 +170,8 @@ private fun ApplyConfigButton(isOpen: MutableState<Boolean>, configurationState:
             applyConfig(projectConfigByState(configurationState))
             isOpen.value = false
         },
-        modifier = Modifier.padding(20.dp)
     ) {
-        Text("Apply config")
+        Text("Apply config", style = TextStyle(color = textColor))
     }
 }
 
@@ -140,54 +190,38 @@ private fun AddProjectFileConfigButton(configurationState: ConfigDialogState) {
                     (configurationState.selection.newProjectFile.value)
             }
         },
-        modifier = Modifier.padding(20.dp)
+        modifier = Modifier.padding(20.dp).requiredWidth(200.dp)
     ) {
-        Text("Add project file source path")
+        Text("Add project file source path", style = TextStyle(color = textColor))
     }
 }
 
 @Composable
 private fun CurrentlySelectedProjectPathsList(configurationState: ConfigDialogState) {
-    for (value in configurationState.projectConfig.projectFiles.value) {
-        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextBox(value)
-            Button(
-                onClick = { configurationState.projectConfig.projectFiles.value -= value }
-            ) {
-                Text("Delete")
-            }
-            Spacer(modifier = Modifier.height(5.dp))
-        }
-    }
-}
-
-
-
-@ExperimentalComposeUiApi
-@Composable
-private fun ProjectConfigForm(configurationState: ConfigDialogState) {
-    Box(
-        modifier = Modifier
-            .padding(end = 12.dp, bottom = 12.dp)
-            .background(color = Color(0, 0, 0, 20))
-
+    Column(
+        modifier = Modifier.border(
+            width = 2.dp,
+            color = Color(0xAAFFFFFF))
     ) {
-        Text(
-            "Project sources:",
-            modifier = Modifier.padding(10.dp),
-            fontWeight = FontWeight.Bold
-        )
-
-        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            SimpleConfigFileChosenItem(
-                configurationState,
-                configurationState.selection.newProjectFile,
-                ChooseSource
-            )
-            AddProjectFileConfigButton(configurationState)
+        for (value in configurationState.projectConfig.projectFiles.value) {
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 40.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(Modifier.width(400.dp)) {
+                    TextBox(value)
+                }
+                Button(
+                    onClick = { configurationState.projectConfig.projectFiles.value -= value }
+                ) {
+                    Text("Delete", style = TextStyle(color = textColor))
+                }
+            }
         }
     }
 }
+
 @ExperimentalComposeUiApi
 @Composable
 private fun GrammarConfigurationView(configurationState: ConfigDialogState) {
@@ -198,23 +232,27 @@ private fun GrammarConfigurationView(configurationState: ConfigDialogState) {
 
     ) {
         val grammarConfigs = NPIDE.configManager.currentLanguageDistributionInfo.grammarConfigs
-        Text(
-            "Grammar configs loaded from language distribution:",
-            modifier = Modifier.padding(10.dp),
-            fontWeight = FontWeight.Bold
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "Grammar configs loaded from language distribution:",
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 40.dp),
+                fontWeight = FontWeight.Bold,
+                style = TextStyle(color = textColor)
+            )
 
-        for (grammarConfig in grammarConfigs) {
-            Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                TextBox("Extension of grammar:")
-                TextBox(grammarConfig.sourceFileExtension)
-                Column(modifier = Modifier.padding(40.dp)) {
-                    TextBox(
-                        grammarConfig.grammar
-                    )
-                    TextBox(
-                        grammarConfig.syntaxHighlighter
-                    )
+            Column {
+                for (grammarConfig in grammarConfigs) {
+                    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        TextBox(grammarConfig.sourceFileExtension)
+                        Column(modifier = Modifier.padding(8.dp)) {
+                            TextBox(
+                                grammarConfig.grammar
+                            )
+                            TextBox(
+                                grammarConfig.syntaxHighlighter
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -225,30 +263,31 @@ private fun GrammarConfigurationView(configurationState: ConfigDialogState) {
 private fun TextBox(text: String = "Item") {
     Box(
         modifier = Modifier.height(52.dp)
-            .width((text.length * 6).dp + 40.dp)
             .background(color = Color(0, 0, 0, 20))
-            .padding(start = 10.dp),
+            .padding(horizontal = 16.dp),
         contentAlignment = Alignment.CenterStart
     ) {
-        Text(text = text)
+        Text(text = text, style = TextStyle(color = textColor))
     }
 }
 
 @ExperimentalComposeUiApi
 @Composable
 private fun SimpleOutlinedTextFieldSample(labelText: String, valueText: MutableState<String>) {
-    OutlinedTextField(
-        value = valueText.value,
-        onValueChange = { valueText.value = it },
-        label = { Text(labelText, fontWeight = FontWeight.Bold, color = Color.Black) },
-        textStyle = TextStyle(color = Color.Black, fontWeight = FontWeight.Bold),
-        modifier = Modifier.padding(20.dp),
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedBorderColor = Color.Black,
-            unfocusedBorderColor = Color.Black,
-            backgroundColor = Color.White
+    Box(modifier = Modifier.width(400.dp)){
+        OutlinedTextField(
+            value = valueText.value,
+            onValueChange = { valueText.value = it },
+            label = { Text(labelText, fontWeight = FontWeight.Bold, color = textColor) },
+            textStyle = TextStyle(color = textColor, fontWeight = FontWeight.Bold),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.White,
+                unfocusedBorderColor = Color.White,
+                backgroundColor = backgroundColor
+            ),
+            singleLine = true
         )
-    )
+    }
 }
 
 private enum class ConfigureProjectAction {

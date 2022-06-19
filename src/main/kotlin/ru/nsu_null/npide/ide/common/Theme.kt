@@ -13,6 +13,7 @@ object AppTheme {
         val backgroundDark: Color = Color(0xFF2B2B2B),
         val backgroundMedium: Color = Color(0xFF3C3F41),
         val backgroundLight: Color = Color(0xFF4E5254),
+        val textDark: Color = Color(0xFFD0D0D0),
 
         val material: androidx.compose.material.Colors = darkColors(
             background = backgroundDark,
