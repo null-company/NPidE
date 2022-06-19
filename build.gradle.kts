@@ -3,9 +3,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 
 plugins {
-    kotlin("jvm") version "1.5.21"
-    id("org.jetbrains.compose") version "1.0.0-alpha3"
-    kotlin("plugin.serialization") version "1.5.21"
+    kotlin("jvm") version "1.6.10"
+    id("org.jetbrains.compose") version "1.1.1"
+    kotlin("plugin.serialization") version "1.6.10"
 }
 
 group = "ru.nsu_null"
@@ -19,15 +19,24 @@ repositories {
 
 dependencies {
     implementation(compose.desktop.currentOs)
-    implementation("org.antlr:antlr4:4.9")
+    implementation("org.antlr:antlr4:4.10.1")
     api(compose.materialIconsExtended)
-    implementation("com.charleskorn.kaml:kaml:0.37.0")
-    implementation("com.google.code.gson:gson:2.8.9")
-    implementation("com.fifesoft:rsyntaxtextarea:3.1.3")
+    implementation("com.charleskorn.kaml:kaml:0.44.0")
+    implementation("com.google.code.gson:gson:2.9.0")
+    implementation("com.fifesoft:rsyntaxtextarea:3.2.0")
     implementation("me.tomassetti.kanvas:kanvas-core:0.2.1")
-    implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10")
 }
 
+tasks.jar {
+    manifest.attributes["Main-Class"] = "ru.nsu_null.npide.MainKt"
+    val dependencies = configurations
+        .runtimeClasspath
+        .get()
+        .map(::zipTree) // OR .map { zipTree(it) }
+    from(dependencies)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "11"
 }

@@ -44,7 +44,7 @@ def main():
     breakpoints = dbg_dict['breakpoints']
     line_byte_map = dbg_dict['line_byte_map']
     sects = dbg_dict['sects']
-    print('CDM8 Emulator, running: ', filename)
+    print('CDM8 Emulator, debugging: ', filename)
     cdm8 = CDM8Emu()
 
     with open(filename) as file:

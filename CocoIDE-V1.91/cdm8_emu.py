@@ -412,7 +412,7 @@ class CDM8Emu():
 
             if ss == 3:
                 if args.v3:  # ldsp
-                    self.egs[Rd] = self.SP[stackPage]
+                    self.regs[Rd] = self.SP[stackPage]
                 else:
                     if stsel == 0 or stsel == 1:
                         imop = self.memory[self.curPage][0][(self.PC + 1 + 256) % 256]
@@ -631,6 +631,7 @@ def EP(s, term=True):
 
 class FauxArgs:
     def __init__(self):
+        self.v3 = True
         self.arch = 'vn'
         self.trace = False
 
