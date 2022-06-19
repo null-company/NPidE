@@ -29,7 +29,9 @@ object NPIDE {
     lateinit var configManager: ConfigManager
     lateinit var projectStorage: ProjectStorage
 
+    @Suppress("MemberVisibilityCanBePrivate")
     lateinit var builder: BuilderStrategy
+    @Suppress("MemberVisibilityCanBePrivate")
     lateinit var runner: RunnerStrategy
     lateinit var debugger: DebuggerStrategy
 
@@ -46,18 +48,20 @@ object NPIDE {
 
     private fun loadProjectWorkers() {
         val languageDistributionDir = File(configManager.currentProjectConfig.languageDistribution)
-        builder = instantiateStrategy(
-            "ru.nsu_null.npide.ide.projectstrategies.defaults.delegators.BuilderDelegatorStrategy",
-            languageDistributionDir
-        )
-        runner = instantiateStrategy(
-            "ru.nsu_null.npide.ide.projectstrategies.defaults.delegators.RunnerDelegatorStrategy",
-            languageDistributionDir
-        )
-        debugger = instantiateStrategy(
-            "ru.nsu_null.npide.ide.projectstrategies.defaults.delegators.DebuggerDelegatorStrategy",
-            languageDistributionDir
-        )
+        with(configManager.currentLanguageDistributionInfo) {
+            builder = instantiateStrategy(
+                buildStrategy.strategyClass,
+                languageDistributionDir
+            )
+            runner = instantiateStrategy(
+                runStrategy.strategyClass,
+                languageDistributionDir
+            )
+            debugger = instantiateStrategy(
+                debugStrategy.strategyClass,
+                languageDistributionDir
+            )
+        }
     }
 
     private inline fun <reified T> instantiateStrategy(className: String, searchDir: File): T {
