@@ -34,6 +34,9 @@ class ConfigManager(project: ProjectChooser.Project) {
         loadLanguageDistributionInfo()
 
     private fun loadLanguageDistributionInfo(): LanguageDistributionInfo {
+        if (currentProjectConfig.languageDistribution.isBlank()) {
+            return StubLanguageDistributionInfo()
+        }
         val projectRoot = Path.of(NPIDE.currentProject!!.rootFolder.filepath)
 
         if (currentProjectConfig.languageDistribution.trim().isEmpty()) {
