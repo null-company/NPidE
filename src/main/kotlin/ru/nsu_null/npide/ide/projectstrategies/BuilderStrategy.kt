@@ -10,7 +10,7 @@ interface BuilderStrategy: ConsoleProcess {
      * Builds current project
      * @param enableDebugInfo true iff should build with debugging info
      * @param strategyContext contains information about the project,
-     * @param extraConfiguration key-value configuration provided in the language distribution
+     * @param extraParameters key-value configuration provided in the language distribution
      * @param breakPoints which are used to generate debug info
      * @param dirtyFlags maps file name to its 'dirtiness'
      * @param logger a [Logger] which can be used to log events or report errors
@@ -18,7 +18,7 @@ interface BuilderStrategy: ConsoleProcess {
     fun build(
         enableDebugInfo: Boolean,
         strategyContext: ProjectStrategyContext,
-        extraConfiguration: ExtraConfiguration,
+        extraParameters: ExtraParameters,
         breakPoints: BreakPoints,
         dirtyFlags: DirtyFlags,
         logger: Logger

@@ -14,13 +14,13 @@ interface DebuggerStrategy: ConsoleProcess {
     /**
      * Builds current project
      * @param strategyContext contains information about the project,
-     * @param extraConfiguration key-value configuration provided in the language distribution
+     * @param extraParameters key-value configuration provided in the language distribution
      * @param breakPoints which are used to generate debug info
      * @param logger a [Logger] which can be used to log events or report errors
      */
     fun debug(
         strategyContext: ProjectStrategyContext,
-        extraConfiguration: ExtraConfiguration,
+        extraParameters: ExtraParameters,
         breakPoints: BreakPoints,
         logger: Logger
     )

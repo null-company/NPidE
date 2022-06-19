@@ -95,12 +95,12 @@ class RunnerDelegatorStrategy : RealProcessBackedStrategy(), RunnerStrategy {
     val name = "RunnerDelegatorStrategy"
 
     override fun run(strategyContext: ProjectStrategyContext,
-                     extraConfiguration: ExtraConfiguration,
+                     extraParameters: ExtraParameters,
                      logger: Logger) {
         fun logError(message: String) = logger.log(name, message, Console.MessageType.Error)
-        val executableName = extraConfiguration["executable"]
+        val executableName = extraParameters["executable"]
             ?: throw IllegalArgumentException("extra configuration did not provide an executable")
-        val scriptPath = extraConfiguration["script"]
+        val scriptPath = extraParameters["script"]
             ?: throw IllegalArgumentException("extra configuration did not provide a script to launch")
         try {
             val command = buildCommand(
@@ -130,15 +130,15 @@ class BuilderDelegatorStrategy : RealProcessBackedStrategy(), BuilderStrategy {
     override fun build(
         enableDebugInfo: Boolean,
         strategyContext: ProjectStrategyContext,
-        extraConfiguration: ExtraConfiguration,
+        extraParameters: ExtraParameters,
         breakPoints: BreakPoints,
         dirtyFlags: DirtyFlags,
         logger: Logger
     ) {
         fun logError(message: String) = logger.log(name, message, Console.MessageType.Error)
-        val executableName = extraConfiguration["executable"]
+        val executableName = extraParameters["executable"]
             ?: throw IllegalArgumentException("extra configuration did not provide an executable")
-        val scriptPath = extraConfiguration["script"]
+        val scriptPath = extraParameters["script"]
             ?: throw IllegalArgumentException("extra configuration did not provide a script to launch")
         try {
             val command = buildCommand(
@@ -175,21 +175,21 @@ class DebuggerDelegatorStrategy : RealProcessBackedStrategy(), DebuggerStrategy 
 
     val name = "DebuggerDelegateStrategy"
 
-    private lateinit var extraConfiguration: ExtraConfiguration
+    private lateinit var extraParameters: ExtraParameters
     private lateinit var strategyContext: ProjectStrategyContext
 
     override fun debug(
         strategyContext: ProjectStrategyContext,
-        extraConfiguration: ExtraConfiguration,
+        extraParameters: ExtraParameters,
         breakPoints: BreakPoints,
         logger: Logger
     ) {
         fun logError(message: String) = logger.log(name, message, Console.MessageType.Error)
-        val executableName = extraConfiguration["executable"]
+        val executableName = extraParameters["executable"]
             ?: throw IllegalArgumentException("extra configuration did not provide an executable")
-        val scriptPath = extraConfiguration["script"]
+        val scriptPath = extraParameters["script"]
             ?: throw IllegalArgumentException("extra configuration did not provide a script to launch")
-        this.extraConfiguration = extraConfiguration
+        this.extraParameters = extraParameters
         this.strategyContext = strategyContext
         try {
             val command = buildCommand(
@@ -223,13 +223,13 @@ class DebuggerDelegatorStrategy : RealProcessBackedStrategy(), DebuggerStrategy 
     }
 
     override fun step() {
-        val stepMessage = extraConfiguration["step"]
+        val stepMessage = extraParameters["step"]
             ?: throw IllegalArgumentException("extra configuration did not provide step command")
         workerProcess.outputStream.writer().write(stepMessage)
     }
 
     override fun cont() {
-        val continueMessage = extraConfiguration["continue"]
+        val continueMessage = extraParameters["continue"]
             ?: throw IllegalArgumentException("extra configuration did not provide continue command")
         workerProcess.outputStream.writer().write(continueMessage)
     }
@@ -239,7 +239,7 @@ class DebuggerDelegatorStrategy : RealProcessBackedStrategy(), DebuggerStrategy 
     }
 
     override fun getWatchesAsString(): String {
-        val watchesStringMessage = extraConfiguration["watches-string"]
+        val watchesStringMessage = extraParameters["watches-string"]
             ?: throw IllegalArgumentException("extra configuration did not provide watches-string command")
         workerProcess.outputStream.writer().write(watchesStringMessage)
         return "unimplemented" // todo

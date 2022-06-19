@@ -23,4 +23,4 @@ data class ProjectStrategyContext internal constructor(
     }
 }
 
-typealias ExtraConfiguration = Map<String, String>
+typealias ExtraParameters = Map<String, String>

@@ -81,7 +81,7 @@ object NPIDE {
             builder.build(
                 enableDebugInfo,
                 context,
-                buildStrategyInfo.extraConfiguration,
+                buildStrategyInfo.extraParameters,
                 breakPoints,
                 dirtyFlags,
                 consoleLogger
@@ -99,7 +99,7 @@ object NPIDE {
         try {
             runner.run(
                 context,
-                buildStrategyInfo.extraConfiguration,
+                buildStrategyInfo.extraParameters,
                 consoleLogger
             )
             console.runProcess(runner, "run")
@@ -116,7 +116,7 @@ object NPIDE {
         try {
             debugger.debug(
                 context,
-                buildStrategyInfo.extraConfiguration,
+                buildStrategyInfo.extraParameters,
                 breakPoints,
                 consoleLogger
             )
