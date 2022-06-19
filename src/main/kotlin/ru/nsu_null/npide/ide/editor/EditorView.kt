@@ -20,10 +20,12 @@ import org.fife.ui.rtextarea.RTextScrollPane
 import ru.nsu_null.npide.ide.storage.BreakpointStorage
 import ru.nsu_null.npide.ide.common.AppTheme
 import ru.nsu_null.npide.ide.common.Settings
+import ru.nsu_null.npide.ide.console.logError
 import ru.nsu_null.npide.ide.npide.NPIDE
 import ru.nsu_null.npide.ide.util.loadableScoped
 import javax.swing.BoxLayout
 import javax.swing.JPanel
+import javax.swing.text.BadLocationException
 import kotlin.text.Regex.Companion.fromLiteral
 
 @Composable
@@ -42,8 +44,13 @@ fun EditorView(model: Editor, settings: Settings) = key(model) {
                         CodeEditor(model.rtEditor, fileContents!!, Modifier.fillMaxSize())
                         val breakPointsStorage = NPIDE.projectStorage.breakpointStorage
                         if (breakPointsStorage.breakPoints.containsKey(model.filePath)) {
-                            for (line in breakPointsStorage[model.filePath]) {
-                                model.rtEditor.textArea.addLineHighlight(line, model.breakpointHighlightColor)
+                            try {
+                                for (line in breakPointsStorage[model.filePath]) {
+                                    model.rtEditor.textArea.addLineHighlight(line, model.breakpointHighlightColor)
+                                }
+                            } catch (e: BadLocationException) {
+                                NPIDE.console.logError("Breakpoints", "Breakpoints seem to be incorrect/corrupted, clearing them for this file: ${model.filePath}")
+                                breakPointsStorage.breakPoints[model.filePath]?.clear()
                             }
                         }
                         Box(

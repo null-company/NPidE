@@ -1,5 +1,6 @@
 package ru.nsu_null.npide.ide.projectstrategies.defaults.delegators
 
+import kotlinx.serialization.encodeToString
 import ru.nsu_null.npide.ide.console.Console
 import ru.nsu_null.npide.ide.console.Logger
 import ru.nsu_null.npide.ide.console.process.ConsoleProcess
@@ -19,6 +20,7 @@ import kotlin.io.path.absolutePathString
 import kotlin.io.path.div
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
+import kotlinx.serialization.json.Json
 
 private fun buildCommand(
     executableName: String,
@@ -30,20 +32,6 @@ private fun buildCommand(
     entryPoint: String,
     breakPoints: BreakPoints
 ): List<String> {
-    var breakPointsAsString = ""
-    for (key in breakPoints.keys) {
-        breakPointsAsString += key
-        breakPointsAsString += ":: "
-        for (bp in breakPoints[key]!!) {
-            breakPointsAsString += bp
-            breakPointsAsString += ", "
-        }
-        breakPointsAsString = breakPointsAsString.subSequence(0, breakPointsAsString.length - 2).toString()
-        breakPointsAsString += "; "
-    }
-    breakPointsAsString =
-        if (breakPointsAsString.isEmpty()) ""
-        else breakPointsAsString.subSequence(0, breakPointsAsString.length - 2).toString()
     return listOf(
         executableName, scriptToLaunch,
         "-f", mode,
@@ -51,7 +39,7 @@ private fun buildCommand(
         "-d", projectRoot,
         "-p", projectFiles.joinToString(" "),
         "-e", entryPoint,
-        (if (breakPointsAsString.isNotEmpty()) "-b" else ""), breakPointsAsString
+        "-b", Json.encodeToString(breakPoints)
     )
 }
 
