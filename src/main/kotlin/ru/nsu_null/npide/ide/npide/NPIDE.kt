@@ -50,6 +50,15 @@ object NPIDE {
     private fun loadProjectWorkers() {
         val languageDistributionDir = File(configManager.currentProjectConfig.languageDistribution)
         with(configManager.currentLanguageDistributionInfo) {
+            if (listOf(
+                    buildStrategy.strategyClass,
+                    runStrategy.strategyClass,
+                    debugStrategy.strategyClass
+                ).any { it.isBlank() }
+            ) {
+                logError("Could not load workers, some worker is not defined")
+                return
+            }
             builder = instantiateStrategy(
                 buildStrategy.strategyClass,
                 languageDistributionDir
