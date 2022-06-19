@@ -25,13 +25,13 @@ class ConfigManager(project: ProjectChooser.Project) {
             sync()
         }
 
-
     init {
         loadProjectConfig()
     }
 
     val currentLanguageDistributionInfo: LanguageDistributionInfo =
         loadLanguageDistributionInfo()
+
 
     private fun loadLanguageDistributionInfo(): LanguageDistributionInfo {
         if (currentProjectConfig.languageDistribution.isBlank()) {
@@ -73,6 +73,8 @@ class ConfigManager(project: ProjectChooser.Project) {
         }
         for (lexerPath in currentLanguageDistributionInfo.grammarConfigs.map { it.grammar }) {
             generateLexerParserFiles(
+                Paths.get(NPIDE.currentProject!!.rootFolder.filepath)/
+                Paths.get(NPIDE.configManager.currentProjectConfig.languageDistribution).parent /
                 Paths.get(lexerPath)
             )
         }
@@ -94,6 +96,8 @@ class ConfigManager(project: ProjectChooser.Project) {
         val configStream = FileInputStream(projectConfigPath)
         val result = Yaml.default.decodeFromStream(ProjectConfig.serializer(), configStream)
         currentProjectConfig = AutoUpdatedProjectConfig(this, result)
+
+
     }
 
     fun isProjectFile(filePath: String): Boolean = filePath in currentProjectConfig.projectFiles
