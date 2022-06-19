@@ -8,7 +8,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxDocument
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea
 import org.fife.ui.rtextarea.RTextScrollPane
 import readFile
-import ru.nsu_null.npide.ide.breakpoints.BreakpointStorage
+import ru.nsu_null.npide.ide.console.logError
 import ru.nsu_null.npide.parser.compose_support.CustomLanguageSupport
 import ru.nsu_null.npide.parser.compose_support.TokenHighlighter
 import ru.nsu_null.npide.parser.generator.G4LanguageManager
@@ -20,6 +20,7 @@ import java.awt.Color
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
+import java.io.FileNotFoundException
 import javax.swing.AbstractAction
 import javax.swing.KeyStroke
 import javax.swing.event.DocumentEvent
@@ -32,7 +33,7 @@ class Editor(
     val writeContents: (content: String) -> Unit,
     languageManager: G4LanguageManager?,
 ) {
-    val fileExtension = java.io.File(filePath).extension
+    private val fileExtension = java.io.File(filePath).extension
     lateinit var gotoHandler: (String, Int) -> Unit
     private val isProjectFile: Boolean = NPIDE.configManager.isProjectFile(filePath)
     private lateinit var doneLoadingCallback: () -> Unit
@@ -61,13 +62,18 @@ class Editor(
 
             val grammarConfig = NPIDE.configManager.findGrammarConfigByExtension(fileExtension)
 
-            val languageSupport = CustomLanguageSupport(
-                TokenHighlighter(readFile(grammarConfig.syntaxHighlighter)),
-                lexerClass.getField("VOCABULARY").get(null) as Vocabulary,
-                lexerClass
-            )
-            (textArea.document as RSyntaxDocument).setSyntaxStyle(AntlrTokenMaker(languageSupport.antlrLexerFactory))
-            textArea.syntaxScheme = languageSupport.syntaxScheme
+            try {
+                val languageSupport = CustomLanguageSupport(
+                    TokenHighlighter(readFile(grammarConfig.syntaxHighlighter)),
+                    lexerClass.getField("VOCABULARY").get(null) as Vocabulary,
+                    lexerClass
+                )
+                (textArea.document as RSyntaxDocument).setSyntaxStyle(AntlrTokenMaker(languageSupport.antlrLexerFactory))
+                textArea.syntaxScheme = languageSupport.syntaxScheme
+            } catch (e: FileNotFoundException) {
+                NPIDE.console.logError("Editor", "Syntax highlighting file was not found (namely, ${grammarConfig.syntaxHighlighter})")
+            }
+
         } catch (ignored: NoSuchElementException) {
 
         } catch (ignored: NullPointerException) {
@@ -95,22 +101,21 @@ class Editor(
             }
         })
 
-        BreakpointStorage.loadBreakpoints()
-
         class BreakpointAction : AbstractAction() {
             override fun actionPerformed(e: ActionEvent?) {
-                if (BreakpointStorage.map[filePath]?.contains(scrollPane.textArea.caretLineNumber) == true) {
-                    BreakpointStorage.removeBreakpoint(filePath, scrollPane.textArea.caretLineNumber)
+                val breakpointStorage = NPIDE.projectStorage.breakpointStorage
+                if (breakpointStorage[filePath].contains(scrollPane.textArea.caretLineNumber)) {
+                    breakpointStorage.removeBreakpoint(filePath, scrollPane.textArea.caretLineNumber)
                     scrollPane.textArea.removeLineHighlight(scrollPane.textArea.caretLineNumber)
                     scrollPane.textArea.removeAllLineHighlights()
-                    for (line in BreakpointStorage.map[filePath]!!) {
+                    for (line in breakpointStorage[filePath]) {
                         scrollPane.textArea.addLineHighlight(line, breakpointHighlightColor)
                     }
                 } else {
                     scrollPane.textArea.addLineHighlight(scrollPane.textArea.caretLineNumber, breakpointHighlightColor)
-                    BreakpointStorage.addBreakpoint(filePath, scrollPane.textArea.caretLineNumber)
+                    breakpointStorage.addBreakpoint(filePath, scrollPane.textArea.caretLineNumber)
                 }
-                BreakpointStorage.storeBreakpoints()
+                breakpointStorage.storeBreakpoints()
             }
         }
         scrollPane.textArea.actionMap.put("breakpointAction", BreakpointAction())
@@ -123,7 +128,7 @@ class Editor(
                 SingleCallbackDocumentListenerAfterAWrite {
                     content = rtEditor.textArea.text
                     if (isProjectFile) {
-                        NPIDE.configManager.setFileDirtiness(filePath, true)
+                        NPIDE.projectStorage.dirtyFlagsStorage[filePath] = true
                     }
                 }
             )
@@ -182,8 +187,6 @@ class Editor(
         rtEditor.textArea.caret.dot = position
         rtEditor.textArea.caretPosition = position
     }
-
-    val isCode = filePath.endsWith(".kt", ignoreCase = true)
 }
 
 fun Editor(

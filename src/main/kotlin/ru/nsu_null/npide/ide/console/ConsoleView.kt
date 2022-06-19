@@ -30,6 +30,7 @@ import ru.nsu_null.npide.ide.codeviewer.GitBranchTellerView
 import ru.nsu_null.npide.ide.common.AppTheme
 import ru.nsu_null.npide.ide.common.Settings
 import ru.nsu_null.npide.ide.console.Console.MessageType.*
+import ru.nsu_null.npide.ide.console.process.RealConsoleProcess
 import ru.nsu_null.npide.ide.npide.NPIDE
 import ru.nsu_null.npide.ide.util.SimpleVerticalSplitter
 
@@ -158,7 +159,7 @@ private fun IconBar(modifier: Modifier = Modifier, console: Console) {
     fun launchShell() {
         val shell =
             Runtime.getRuntime().exec(if (isWindows) "powershell" else "bash")
-        console.runProcess(shell, "shell")
+        console.runProcess(RealConsoleProcess(shell), "shell")
     }
     @Composable
     fun IconsSpacer() {
