@@ -10,7 +10,7 @@ class G4LanguageManager(
     val languageName: String
 ) {
     companion object {
-        var baseDir = "./src/main/java"
+        var baseDir = "./tmp_antlr_generated_sources"
     }
 
     private val classNameToClass = HashMap<String, Class<*>>()
@@ -18,16 +18,28 @@ class G4LanguageManager(
         if (classNameToClass.containsKey(className)) {
             return classNameToClass[className]!!
         }
-        val file = File(Paths.get(baseDir, languageName).toString())
+        val file = File(Paths.get(baseDir).toString())
         val url: URL = file.toURI().toURL()
         val urlClassLoader = URLClassLoader.newInstance(
             arrayOf(
                 url
             ), Lexer::class.java.classLoader
         )
-        val clazz = urlClassLoader.loadClass("${languageName}${className}")
-        classNameToClass[className] = clazz
-        return clazz
+        try {
+            val clazz = urlClassLoader.loadClass("${languageName}${className}");
+            classNameToClass[className] = clazz
+            return clazz
+        } catch (e: ClassNotFoundException) {
+            val newClassName = if (className == "Parser") {
+                "";
+            } else {
+                "_" + className.lowercase();
+            }
+
+            val clazz = urlClassLoader.loadClass("${languageName}${newClassName}");
+            classNameToClass[className] = clazz
+            return clazz
+        }
     }
 
     fun loadLexerClass(): Class<*> {
@@ -45,7 +57,7 @@ class G4LanguageManager(
     fun loadParserSubclass(subclassName: String): Class<*>? {
         val ParserClass = loadParserClass()
         for (clazz in ParserClass.declaredClasses) {
-            if (clazz.name == "${languageName}Parser$${subclassName}") {
+            if (clazz.name == "${languageName}Parser$${subclassName}" || clazz.name == "${languageName}$${subclassName}") {
                 return clazz
             }
         }

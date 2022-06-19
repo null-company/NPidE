@@ -1,0 +1,96 @@
+{
+  "rules": [
+    {
+      "color": "#85C1E9",
+      "instructions": [
+        "FUNC_NAME"
+      ]
+    },
+    {
+      "color": "#FFFFFF",
+      "instructions": [
+        "SYMBOL"
+      ]
+    },
+    {
+      "color": "#DCDCDC",
+      "instructions": [
+        "OPEN_BRACKET",
+        "CLOSE_BRACKET"
+      ]
+    },
+    {
+      "color": "#CCE5FF",
+      "instructions": [
+        "OPEN_SQUARE_BRACKET",
+        "CLOSE_SQUARE_BRACKET",
+        "OPEN_CURSIVE_BRACKET",
+        "CLOSE_CURSIVE_BRACKET",
+        "OPEN_SET_BRACKET"
+      ]
+    },
+    {
+      "color": "#FFCCCC",
+      "instructions": [
+        "INT",
+        "ID_USAGE"
+      ]
+    },
+    {
+      "color": "#87CEFA",
+      "instructions": [
+        "FLOAT",
+        "BOOLEAN"
+      ]
+    },
+    {
+      "color": "#C0C0C0",
+      "instructions": [
+        "TRASH"
+      ]
+    },
+    {
+      "color": "#FF3399",
+      "instructions": [
+        "SINGLE_QUOTE",
+        "BACK_TICK",
+        "TILDA",
+        "TILDA_AT",
+        "CARET",
+        "AT",
+        "NUMBER_SIGN",
+        "NUMBER_OPEN_BRACKET",
+        "NUMBER_CARET",
+        "NUMBER_QUOTE",
+        "NUMBER_PLUS",
+        "NUMBER_UNDERSCORE",
+        "COLON"
+      ]
+    },
+    {
+      "color": "#873600",
+      "instructions": [
+        "PARAM_NAME",
+        "NS_SYMBOL"
+      ]
+    },
+    {
+      "color": "#98FB98",
+      "instructions": [
+        "STRING"
+      ]
+    },
+    {
+      "color": "#FF99CC",
+      "instructions": [
+        "DEFN"
+      ]
+    },
+    {
+      "color": "#FF7F50",
+      "instructions": [
+        "ID"
+      ]
+    }
+  ]
+}
