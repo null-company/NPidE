@@ -5,14 +5,14 @@ import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 
-val outputBaseDirectory: Path = Paths.get("src/main/java")
+val outputBaseDirectory: Path = Paths.get(G4LanguageManager.baseDir)
 
 fun generateLexerParserFiles(grammarPath: Path) {
     val filename = grammarPath.fileName
     val outputDir = Paths.get(
         Paths.get("").toAbsolutePath().toString(),
         outputBaseDirectory.toString(),
-        removeExt(filename.toString())
+//        removeExt(filename.toString())
     )
     println("Provided grammar path is: $grammarPath")
     val lexerPath = Paths.get(
@@ -39,6 +39,7 @@ fun generateLexerParserFiles(grammarPath: Path) {
     val args: Array<String> = arrayOf(targetParserPath.toAbsolutePath().toString(), "-o", outputDir.toString())
     val antlr = Tool(args)
     antlr.processGrammarsOnCommandLine()
+    compileGeneratedClasses(outputBaseDirectory.toString());
 }
 
 fun removeExt(str: String): String {

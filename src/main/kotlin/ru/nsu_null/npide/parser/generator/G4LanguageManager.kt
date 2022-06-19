@@ -10,7 +10,7 @@ class G4LanguageManager(
     val languageName: String
 ) {
     companion object {
-        var baseDir = "./src/main/java"
+        var baseDir = "./tmp_antlr_generated_sources"
     }
 
     private val classNameToClass = HashMap<String, Class<*>>()
@@ -18,7 +18,7 @@ class G4LanguageManager(
         if (classNameToClass.containsKey(className)) {
             return classNameToClass[className]!!
         }
-        val file = File(Paths.get(baseDir, languageName).toString())
+        val file = File(Paths.get(baseDir).toString())
         val url: URL = file.toURI().toURL()
         val urlClassLoader = URLClassLoader.newInstance(
             arrayOf(
