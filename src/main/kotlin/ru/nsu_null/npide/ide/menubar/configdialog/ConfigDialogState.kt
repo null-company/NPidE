@@ -22,7 +22,6 @@ internal data class ConfigDialogState(
 
 internal data class SelectionState(
     val newProjectFile: MutableState<String>,
-    val languageDistribution: MutableState<String>
 )
 
 internal fun getStateByConfig(): ConfigDialogState {
@@ -39,7 +38,6 @@ internal fun getStateByConfig(): ConfigDialogState {
             ),
             SelectionState(
                 mutableStateOf(""),
-                mutableStateOf("")
             ),
         )
     }

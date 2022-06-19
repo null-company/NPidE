@@ -274,7 +274,7 @@ private fun chooseFile(configButtonState: ConfigureProjectAction, dialogState: C
                     dialogState.selection.newProjectFile.value += chooseResult
                 }
                 ChooseLanguageDistribution -> {
-                    dialogState.selection.languageDistribution.value = chooseResult
+                    dialogState.projectConfig.languageDistribution.value = chooseResult
                 }
             }
         }
