@@ -1,0 +1,14 @@
+buildStrategy:
+    strategyClass: "ru.nsu_null.npide.ide.projectstrategies.defaults.delegators.BuilderDelegatorStrategy"
+    extraParameters: {executable: "python", script: "clojure_script.py"}
+runStrategy:
+    strategyClass: "ru.nsu_null.npide.ide.projectstrategies.defaults.delegators.RunnerDelegatorStrategy"
+    extraParameters: {executable: "python", script: "clojure_script.py"}
+debugStrategy:
+    strategyClass: "ru.nsu_null.npide.ide.projectstrategies.defaults.delegators.DebuggerDelegatorStrategy"
+    extraParameters: {executable: "python", script: "clojure_script.py"}
+grammarConfigs:
+    - sourceFileExtension: "clj"
+      grammar: "grammar/clj.g4"
+      syntaxHighlighter: "syntaxHighlighter/colors.json"
+  
