@@ -136,7 +136,10 @@ class Console {
      * @param isInterpreter if true, sends to console will be forcefully printed on screen during this process life
      * @return pipes with which to communicate with the process programmatically
      */
-    fun attachProcess(process: ConsoleProcess, label: String, isInterpreter: Boolean = false): ProcessCommunicationPipes {
+    fun attachProcess(process: ConsoleProcess,
+                      label: String,
+                      isInterpreter: Boolean = false
+    ): ProcessCommunicationPipes {
         isInInterpreterMode = isInterpreter
         log("Attaching process $label")
         if (processIsAttached) {
