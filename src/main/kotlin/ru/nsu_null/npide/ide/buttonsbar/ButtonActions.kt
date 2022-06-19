@@ -13,6 +13,7 @@ fun run() {
 }
 
 fun debug() {
+    NPIDE.buildCurrentProject(enableDebugInfo = true)
     NPIDE.debugCurrentProject()
 }
 
