@@ -37,7 +37,10 @@ class ConfigManager(project: ProjectChooser.Project) {
         val projectRoot = Path.of(NPIDE.currentProject!!.rootFolder.filepath)
         val languageDistributionConfig = projectRoot / Path.of(currentProjectConfig.languageDistribution)
         if (!languageDistributionConfig.exists()) {
-            NPIDE.console.logError("ConfigManager", "Could not find language distribution: file missing")
+            NPIDE.console.logError(
+                "ConfigManager",
+                "Could not find language distribution: file $languageDistributionConfig missing"
+            )
             return StubLanguageDistributionInfo()
         }
         return Yaml.default.decodeFromStream(
