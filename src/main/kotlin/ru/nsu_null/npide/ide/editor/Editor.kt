@@ -8,6 +8,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxDocument
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea
 import org.fife.ui.rtextarea.RTextScrollPane
 import readFile
+import ru.nsu_null.npide.ide.console.logError
 import ru.nsu_null.npide.parser.compose_support.CustomLanguageSupport
 import ru.nsu_null.npide.parser.compose_support.TokenHighlighter
 import ru.nsu_null.npide.parser.generator.G4LanguageManager
@@ -19,6 +20,7 @@ import java.awt.Color
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
+import java.io.FileNotFoundException
 import javax.swing.AbstractAction
 import javax.swing.KeyStroke
 import javax.swing.event.DocumentEvent
@@ -60,13 +62,18 @@ class Editor(
 
             val grammarConfig = NPIDE.configManager.findGrammarConfigByExtension(fileExtension)
 
-            val languageSupport = CustomLanguageSupport(
-                TokenHighlighter(readFile(grammarConfig.syntaxHighlighter)),
-                lexerClass.getField("VOCABULARY").get(null) as Vocabulary,
-                lexerClass
-            )
-            (textArea.document as RSyntaxDocument).setSyntaxStyle(AntlrTokenMaker(languageSupport.antlrLexerFactory))
-            textArea.syntaxScheme = languageSupport.syntaxScheme
+            try {
+                val languageSupport = CustomLanguageSupport(
+                    TokenHighlighter(readFile(grammarConfig.syntaxHighlighter)),
+                    lexerClass.getField("VOCABULARY").get(null) as Vocabulary,
+                    lexerClass
+                )
+                (textArea.document as RSyntaxDocument).setSyntaxStyle(AntlrTokenMaker(languageSupport.antlrLexerFactory))
+                textArea.syntaxScheme = languageSupport.syntaxScheme
+            } catch (e: FileNotFoundException) {
+                NPIDE.console.logError("Editor", "Syntax highlighting file was not found (namely, ${grammarConfig.syntaxHighlighter})")
+            }
+
         } catch (ignored: NoSuchElementException) {
 
         } catch (ignored: NullPointerException) {

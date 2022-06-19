@@ -76,7 +76,7 @@ class Console {
         }
         val spanStyle: SpanStyle = when(messageType) {
             Basic -> SpanStyle()
-            Error -> SpanStyle(color = Color.Red, fontWeight = FontWeight(15))
+            Error -> SpanStyle(color = Color.Red, fontWeight = FontWeight(40))
             Special -> SpanStyle(color = Color.Yellow, fontWeight = FontWeight(20))
         }
         contentStorage += AnnotatedString(message, spanStyle)
