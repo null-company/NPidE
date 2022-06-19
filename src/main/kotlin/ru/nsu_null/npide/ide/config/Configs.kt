@@ -1,7 +1,7 @@
 package ru.nsu_null.npide.ide.config
 
 import kotlinx.serialization.Serializable
-import ru.nsu_null.npide.ide.projectstrategies.ExtraConfiguration
+import ru.nsu_null.npide.ide.projectstrategies.ExtraParameters
 
 @Serializable
 open class ProjectConfig(
@@ -22,7 +22,7 @@ data class LanguageDistributionInfo(
 @Serializable
 data class StrategyInfo(
     val strategyClass: String,
-    val extraConfiguration: ExtraConfiguration
+    val extraParameters: ExtraParameters
 )
 
 @Suppress("FunctionName")

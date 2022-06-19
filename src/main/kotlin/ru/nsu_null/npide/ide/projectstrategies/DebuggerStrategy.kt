@@ -5,16 +5,22 @@ import ru.nsu_null.npide.ide.console.process.ConsoleProcess
 import ru.nsu_null.npide.ide.storage.BreakPoints
 
 interface DebuggerStrategy: ConsoleProcess {
+
+    /**
+     * This set should describe what this debugger is able to do
+     */
+    val abilities: Set<DebuggerAbility>
+
     /**
      * Builds current project
      * @param strategyContext contains information about the project,
-     * @param extraConfiguration key-value configuration provided in the language distribution
+     * @param extraParameters key-value configuration provided in the language distribution
      * @param breakPoints which are used to generate debug info
      * @param logger a [Logger] which can be used to log events or report errors
      */
     fun debug(
         strategyContext: ProjectStrategyContext,
-        extraConfiguration: ExtraConfiguration,
+        extraParameters: ExtraParameters,
         breakPoints: BreakPoints,
         logger: Logger
     )

@@ -11,10 +11,7 @@ import ru.nsu_null.npide.ide.console.runProcess
 import ru.nsu_null.npide.ide.npide.NPIDE.State.CHOOSING_PROJECT
 import ru.nsu_null.npide.ide.npide.NPIDE.State.IN_PROJECT
 import ru.nsu_null.npide.ide.projectchooser.ProjectChooser.Project
-import ru.nsu_null.npide.ide.projectstrategies.BuilderStrategy
-import ru.nsu_null.npide.ide.projectstrategies.DebuggerStrategy
-import ru.nsu_null.npide.ide.projectstrategies.ProjectStrategyContext
-import ru.nsu_null.npide.ide.projectstrategies.RunnerStrategy
+import ru.nsu_null.npide.ide.projectstrategies.*
 import ru.nsu_null.npide.ide.storage.ProjectStorage
 import java.io.File
 import java.net.URLClassLoader
@@ -84,7 +81,7 @@ object NPIDE {
             builder.build(
                 enableDebugInfo,
                 context,
-                buildStrategyInfo.extraConfiguration,
+                buildStrategyInfo.extraParameters,
                 breakPoints,
                 dirtyFlags,
                 consoleLogger
@@ -92,6 +89,7 @@ object NPIDE {
             console.runProcess(builder, "build")
         } catch (e: Exception) {
             logError(e.stackTraceToString())
+            e.printStackTrace()
         }
     }
 
@@ -102,12 +100,13 @@ object NPIDE {
         try {
             runner.run(
                 context,
-                buildStrategyInfo.extraConfiguration,
+                buildStrategyInfo.extraParameters,
                 consoleLogger
             )
             console.runProcess(runner, "run")
         } catch (e: Exception) {
             logError(e.stackTraceToString())
+            e.printStackTrace()
         }
     }
 
@@ -119,13 +118,38 @@ object NPIDE {
         try {
             debugger.debug(
                 context,
-                buildStrategyInfo.extraConfiguration,
+                buildStrategyInfo.extraParameters,
                 breakPoints,
                 consoleLogger
             )
             console.runProcess(debugger, "debug")
         } catch (e: Exception) {
             logError(e.stackTraceToString())
+            e.printStackTrace()
+        }
+    }
+
+    fun debuggerStep() {
+        if (DebuggerAbility.Step !in debugger.abilities) {
+            throw IllegalStateException("impossible to call step, debugger can not do that")
+        }
+        try {
+            debugger.step()
+        } catch (e: Exception) {
+            logError(e.stackTraceToString())
+            e.printStackTrace()
+        }
+    }
+
+    fun debuggerContinue() {
+        if (DebuggerAbility.Continue !in debugger.abilities) {
+            throw IllegalStateException("impossible to call continue, debugger can not do that")
+        }
+        try {
+            debugger.cont()
+        } catch (e: Exception) {
+            logError(e.stackTraceToString())
+            e.printStackTrace()
         }
     }
 }

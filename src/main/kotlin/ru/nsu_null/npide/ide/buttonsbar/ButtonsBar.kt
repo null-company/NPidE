@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.sp
 import ru.nsu_null.npide.ide.common.Settings
 import ru.nsu_null.npide.ide.console.Console
 import ru.nsu_null.npide.ide.editor.Editors
+import ru.nsu_null.npide.ide.npide.NPIDE
+import ru.nsu_null.npide.ide.projectstrategies.DebuggerAbility
 
 private val MinFontSize = 6.sp
 private val MaxFontSize = 40.sp
@@ -39,8 +41,44 @@ fun ButtonsBar(settings: Settings, editors: Editors, console: Console) = Box(
 
         ButtonsBarButton("Save") { editors.active!!.writeContents(editors.active!!.content) }
 
-        ButtonsBarButton("Step") { step() }
+        ButtonsBarDebugButton("Step", DebuggerAbility.Step) { step() }
 
+        ButtonsBarDebugButton("Continue", DebuggerAbility.Continue) { cont() }
+
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun RowScope.ButtonsBarDebugButton(name: String, ability: DebuggerAbility, onClick: () -> Unit) {
+    var active by remember { mutableStateOf(false) }
+    val enabled = ability in NPIDE.debugger.abilities
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        contentPadding = PaddingValues(),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = if (active) LocalContentColor.current.copy(alpha = 0.20f) else LocalContentColor.current),
+        modifier = Modifier.align(Alignment.CenterVertically)
+            .align(Alignment.CenterVertically)
+            .clipToBounds()
+            .pointerMoveFilter(
+                onEnter = {
+                    active = true
+                    true
+                },
+                onExit = {
+                    active = false
+                    true
+                }
+            )
+    ) {
+        Text(
+            text = name,
+            color = LocalContentColor.current.copy(alpha = 0.60f),
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 12.sp
+        )
     }
 }
 

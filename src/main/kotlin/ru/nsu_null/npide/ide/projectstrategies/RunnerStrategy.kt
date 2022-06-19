@@ -7,12 +7,12 @@ interface RunnerStrategy: ConsoleProcess {
     /**
      * Runs the already built project
      * @param strategyContext contains information about the project,
-     * @param extraConfiguration key-value configuration provided in the language distribution
+     * @param extraParameters key-value configuration provided in the language distribution
      * @param logger a [Logger] which can be used to log events or report errors
      */
     fun run(
         strategyContext: ProjectStrategyContext,
-        extraConfiguration: ExtraConfiguration,
+        extraParameters: ExtraParameters,
         logger: Logger
     )
 }

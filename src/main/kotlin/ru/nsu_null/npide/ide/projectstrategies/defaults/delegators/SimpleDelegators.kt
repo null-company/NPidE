@@ -7,13 +7,16 @@ import ru.nsu_null.npide.ide.console.process.RealConsoleProcess
 import ru.nsu_null.npide.ide.npide.NPIDE
 import ru.nsu_null.npide.ide.platform.toJavaFile
 import ru.nsu_null.npide.ide.projectstrategies.*
+import ru.nsu_null.npide.ide.projectstrategies.DebuggerAbility.*
 import ru.nsu_null.npide.ide.storage.BreakPoints
 import ru.nsu_null.npide.ide.storage.DirtyFlags
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.util.concurrent.atomic.AtomicBoolean
+import java.nio.file.Path
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.div
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 
@@ -25,7 +28,6 @@ private fun buildCommand(
     projectRoot: String,
     projectFiles: List<String>,
     entryPoint: String,
-    ext: String,
     breakPoints: BreakPoints
 ): List<String> {
     var breakPointsAsString = ""
@@ -49,8 +51,8 @@ private fun buildCommand(
         "-d", projectRoot,
         "-p", projectFiles.joinToString(" "),
         "-e", entryPoint,
-        "-ext", ext,
-        (if (breakPointsAsString.isNotEmpty()) "-b" else ""), breakPointsAsString)
+        (if (breakPointsAsString.isNotEmpty()) "-b" else ""), breakPointsAsString
+    )
 }
 
 private fun runCommand(arguments: List<String>): Process {
@@ -75,7 +77,7 @@ abstract class RealProcessBackedStrategy : ConsoleProcess {
             property: KProperty<*>
         ): T {
             @Suppress("UNCHECKED_CAST")
-            return property.getter.call(workerProcess) as T
+            return workerProperty.get(workerProcess)
         }
     }
 
@@ -97,23 +99,24 @@ class RunnerDelegatorStrategy : RealProcessBackedStrategy(), RunnerStrategy {
     val name = "RunnerDelegatorStrategy"
 
     override fun run(strategyContext: ProjectStrategyContext,
-                     extraConfiguration: ExtraConfiguration,
+                     extraParameters: ExtraParameters,
                      logger: Logger) {
         fun logError(message: String) = logger.log(name, message, Console.MessageType.Error)
-        val executableName = extraConfiguration["executable"]
+        val executableName = extraParameters["executable"]
             ?: throw IllegalArgumentException("extra configuration did not provide an executable")
-        val scriptPath = extraConfiguration["script"]
+        val scriptPathRelative = extraParameters["script"]
             ?: throw IllegalArgumentException("extra configuration did not provide a script to launch")
+        val scriptPath =
+            (Path.of(strategyContext.languageDistributionPath).parent / Path.of(scriptPathRelative)).toRealPath()
         try {
             val command = buildCommand(
                 executableName = executableName,
-                scriptToLaunch = scriptPath,
+                scriptToLaunch = scriptPath.absolutePathString(),
                 mode = RUN_COMMAND,
                 projectName = strategyContext.projectName,
                 projectRoot = strategyContext.projectRoot,
                 projectFiles = strategyContext.projectFiles,
                 entryPoint = strategyContext.entryPoint,
-                ext = "",
                 breakPoints = mutableMapOf()
             )
             workerProcess = RealConsoleProcess(runCommand(command))
@@ -133,26 +136,27 @@ class BuilderDelegatorStrategy : RealProcessBackedStrategy(), BuilderStrategy {
     override fun build(
         enableDebugInfo: Boolean,
         strategyContext: ProjectStrategyContext,
-        extraConfiguration: ExtraConfiguration,
+        extraParameters: ExtraParameters,
         breakPoints: BreakPoints,
         dirtyFlags: DirtyFlags,
         logger: Logger
     ) {
         fun logError(message: String) = logger.log(name, message, Console.MessageType.Error)
-        val executableName = extraConfiguration["executable"]
+        val executableName = extraParameters["executable"]
             ?: throw IllegalArgumentException("extra configuration did not provide an executable")
-        val scriptPath = extraConfiguration["script"]
+        val scriptPathRelative = extraParameters["script"]
             ?: throw IllegalArgumentException("extra configuration did not provide a script to launch")
+        val scriptPath =
+            (Path.of(strategyContext.languageDistributionPath).parent / Path.of(scriptPathRelative)).toRealPath()
         try {
             val command = buildCommand(
                 executableName = executableName,
-                scriptToLaunch = scriptPath,
+                scriptToLaunch = scriptPath.absolutePathString(),
                 mode = BUILD_COMMAND,
                 projectName = strategyContext.projectName,
                 projectRoot = strategyContext.projectRoot,
                 projectFiles = strategyContext.projectFiles,
                 entryPoint = strategyContext.entryPoint,
-                ext = "",
                 breakPoints = breakPoints
             )
             workerProcess = RealConsoleProcess(runCommand(command))
@@ -168,39 +172,44 @@ class BuilderDelegatorStrategy : RealProcessBackedStrategy(), BuilderStrategy {
  *  - a script path, which will be executed by the executable, named "script"
  *  - step command, "step"
  *  - continue command, "continue"
- *  - watches command for map, "watches-map"
  *  - watches command for string, "watches-string"
  */
 class DebuggerDelegatorStrategy : RealProcessBackedStrategy(), DebuggerStrategy {
+
+    // does not support WatchesMap
+    override val abilities: Set<DebuggerAbility> = setOf(
+        Step, WatchesString, Continue
+    )
+
     val name = "DebuggerDelegateStrategy"
 
-    private lateinit var extraConfiguration: ExtraConfiguration
+    private lateinit var extraParameters: ExtraParameters
     private lateinit var strategyContext: ProjectStrategyContext
-    private val debugRunnableStepFlag = AtomicBoolean(true)
 
     override fun debug(
         strategyContext: ProjectStrategyContext,
-        extraConfiguration: ExtraConfiguration,
+        extraParameters: ExtraParameters,
         breakPoints: BreakPoints,
         logger: Logger
     ) {
         fun logError(message: String) = logger.log(name, message, Console.MessageType.Error)
-        val executableName = extraConfiguration["executable"]
+        val executableName = extraParameters["executable"]
             ?: throw IllegalArgumentException("extra configuration did not provide an executable")
-        val scriptPath = extraConfiguration["script"]
+        val scriptPathRelative = extraParameters["script"]
             ?: throw IllegalArgumentException("extra configuration did not provide a script to launch")
-        this.extraConfiguration = extraConfiguration
+        val scriptPath =
+            (Path.of(strategyContext.languageDistributionPath).parent / Path.of(scriptPathRelative)).toRealPath()
+        this.extraParameters = extraParameters
         this.strategyContext = strategyContext
         try {
             val command = buildCommand(
                 executableName = executableName,
-                scriptToLaunch = scriptPath,
+                scriptToLaunch = scriptPath.absolutePathString(),
                 mode = DEBUG_COMMAND,
                 projectName = strategyContext.projectName,
                 projectRoot = strategyContext.projectRoot,
                 projectFiles = strategyContext.projectFiles,
                 entryPoint = strategyContext.entryPoint,
-                ext = "",
                 breakPoints = breakPoints
             )
             workerProcess = RealConsoleProcess(debugRun(command))
@@ -224,26 +233,23 @@ class DebuggerDelegatorStrategy : RealProcessBackedStrategy(), DebuggerStrategy 
     }
 
     override fun step() {
-        val stepMessage = extraConfiguration["step"]
+        val stepMessage = extraParameters["step"]
             ?: throw IllegalArgumentException("extra configuration did not provide step command")
         workerProcess.outputStream.writer().write(stepMessage)
     }
 
     override fun cont() {
-        val continueMessage = extraConfiguration["continue"]
+        val continueMessage = extraParameters["continue"]
             ?: throw IllegalArgumentException("extra configuration did not provide continue command")
         workerProcess.outputStream.writer().write(continueMessage)
     }
 
     override fun getWatches(): Map<String, String> {
-        val watchesMapMessage = extraConfiguration["watches-map"]
-            ?: throw IllegalArgumentException("extra configuration did not provide watches-map command")
-        workerProcess.outputStream.writer().write(watchesMapMessage)
-        return mapOf("unimplemented" to ":C") // todo
+        throw UnsupportedOperationException()
     }
 
     override fun getWatchesAsString(): String {
-        val watchesStringMessage = extraConfiguration["watches-string"]
+        val watchesStringMessage = extraParameters["watches-string"]
             ?: throw IllegalArgumentException("extra configuration did not provide watches-string command")
         workerProcess.outputStream.writer().write(watchesStringMessage)
         return "unimplemented" // todo
