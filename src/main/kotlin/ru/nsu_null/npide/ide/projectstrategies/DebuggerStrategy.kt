@@ -5,6 +5,12 @@ import ru.nsu_null.npide.ide.console.process.ConsoleProcess
 import ru.nsu_null.npide.ide.storage.BreakPoints
 
 interface DebuggerStrategy: ConsoleProcess {
+
+    /**
+     * This set should describe what this debugger is able to do
+     */
+    val abilities: Set<DebuggerAbility>
+
     /**
      * Builds current project
      * @param strategyContext contains information about the project,

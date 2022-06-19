@@ -17,5 +17,9 @@ fun debug() {
 }
 
 fun step() {
-    NPIDE.debugger.step()
+    NPIDE.debuggerStep()
+}
+
+fun cont() {
+    NPIDE.debuggerContinue()
 }

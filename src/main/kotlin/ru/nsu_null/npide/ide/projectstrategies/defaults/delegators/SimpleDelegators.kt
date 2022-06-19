@@ -7,6 +7,7 @@ import ru.nsu_null.npide.ide.console.process.RealConsoleProcess
 import ru.nsu_null.npide.ide.npide.NPIDE
 import ru.nsu_null.npide.ide.platform.toJavaFile
 import ru.nsu_null.npide.ide.projectstrategies.*
+import ru.nsu_null.npide.ide.projectstrategies.DebuggerAbility.*
 import ru.nsu_null.npide.ide.storage.BreakPoints
 import ru.nsu_null.npide.ide.storage.DirtyFlags
 import java.io.File
@@ -168,15 +169,19 @@ class BuilderDelegatorStrategy : RealProcessBackedStrategy(), BuilderStrategy {
  *  - a script path, which will be executed by the executable, named "script"
  *  - step command, "step"
  *  - continue command, "continue"
- *  - watches command for map, "watches-map"
  *  - watches command for string, "watches-string"
  */
 class DebuggerDelegatorStrategy : RealProcessBackedStrategy(), DebuggerStrategy {
+
+    // does not support WatchesMap
+    override val abilities: Set<DebuggerAbility> = setOf(
+        Step, WatchesString, Continue
+    )
+
     val name = "DebuggerDelegateStrategy"
 
     private lateinit var extraConfiguration: ExtraConfiguration
     private lateinit var strategyContext: ProjectStrategyContext
-    private val debugRunnableStepFlag = AtomicBoolean(true)
 
     override fun debug(
         strategyContext: ProjectStrategyContext,
@@ -236,10 +241,7 @@ class DebuggerDelegatorStrategy : RealProcessBackedStrategy(), DebuggerStrategy 
     }
 
     override fun getWatches(): Map<String, String> {
-        val watchesMapMessage = extraConfiguration["watches-map"]
-            ?: throw IllegalArgumentException("extra configuration did not provide watches-map command")
-        workerProcess.outputStream.writer().write(watchesMapMessage)
-        return mapOf("unimplemented" to ":C") // todo
+        throw UnsupportedOperationException()
     }
 
     override fun getWatchesAsString(): String {
