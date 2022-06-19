@@ -7,7 +7,11 @@ import ru.nsu_null.npide.ide.projectchooser.ProjectChooser
 import ru.nsu_null.npide.parser.generator.generateLexerParserFiles
 import java.io.File
 import java.io.FileInputStream
+import java.nio.file.Path
 import java.nio.file.Paths
+import kotlin.io.path.div
+import kotlin.io.path.exists
+import kotlin.io.path.inputStream
 
 class ConfigManager(project: ProjectChooser.Project) {
     private val projectConfigPath: String = project.rootFolder.filepath + "/config.yaml"
@@ -30,7 +34,8 @@ class ConfigManager(project: ProjectChooser.Project) {
         loadLanguageDistributionInfo()
 
     private fun loadLanguageDistributionInfo(): LanguageDistributionInfo {
-        val languageDistributionConfig = File(currentProjectConfig.languageDistribution)
+        val projectRoot = Path.of(NPIDE.currentProject!!.rootFolder.filepath)
+        val languageDistributionConfig = projectRoot / Path.of(currentProjectConfig.languageDistribution)
         if (!languageDistributionConfig.exists()) {
             NPIDE.console.logError("ConfigManager", "Could not find language distribution: file missing")
             return StubLanguageDistributionInfo()

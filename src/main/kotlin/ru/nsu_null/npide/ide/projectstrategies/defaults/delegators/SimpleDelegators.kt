@@ -14,6 +14,9 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.nio.file.Path
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.div
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 
@@ -48,7 +51,8 @@ private fun buildCommand(
         "-d", projectRoot,
         "-p", projectFiles.joinToString(" "),
         "-e", entryPoint,
-        (if (breakPointsAsString.isNotEmpty()) "-b" else ""), breakPointsAsString)
+        (if (breakPointsAsString.isNotEmpty()) "-b" else ""), breakPointsAsString
+    )
 }
 
 private fun runCommand(arguments: List<String>): Process {
@@ -73,7 +77,7 @@ abstract class RealProcessBackedStrategy : ConsoleProcess {
             property: KProperty<*>
         ): T {
             @Suppress("UNCHECKED_CAST")
-            return property.getter.call(workerProcess) as T
+            return workerProperty.get(workerProcess)
         }
     }
 
@@ -100,12 +104,14 @@ class RunnerDelegatorStrategy : RealProcessBackedStrategy(), RunnerStrategy {
         fun logError(message: String) = logger.log(name, message, Console.MessageType.Error)
         val executableName = extraParameters["executable"]
             ?: throw IllegalArgumentException("extra configuration did not provide an executable")
-        val scriptPath = extraParameters["script"]
+        val scriptPathRelative = extraParameters["script"]
             ?: throw IllegalArgumentException("extra configuration did not provide a script to launch")
+        val scriptPath =
+            (Path.of(strategyContext.languageDistributionPath).parent / Path.of(scriptPathRelative)).toRealPath()
         try {
             val command = buildCommand(
                 executableName = executableName,
-                scriptToLaunch = scriptPath,
+                scriptToLaunch = scriptPath.absolutePathString(),
                 mode = RUN_COMMAND,
                 projectName = strategyContext.projectName,
                 projectRoot = strategyContext.projectRoot,
@@ -138,12 +144,14 @@ class BuilderDelegatorStrategy : RealProcessBackedStrategy(), BuilderStrategy {
         fun logError(message: String) = logger.log(name, message, Console.MessageType.Error)
         val executableName = extraParameters["executable"]
             ?: throw IllegalArgumentException("extra configuration did not provide an executable")
-        val scriptPath = extraParameters["script"]
+        val scriptPathRelative = extraParameters["script"]
             ?: throw IllegalArgumentException("extra configuration did not provide a script to launch")
+        val scriptPath =
+            (Path.of(strategyContext.languageDistributionPath).parent / Path.of(scriptPathRelative)).toRealPath()
         try {
             val command = buildCommand(
                 executableName = executableName,
-                scriptToLaunch = scriptPath,
+                scriptToLaunch = scriptPath.absolutePathString(),
                 mode = BUILD_COMMAND,
                 projectName = strategyContext.projectName,
                 projectRoot = strategyContext.projectRoot,
@@ -187,14 +195,16 @@ class DebuggerDelegatorStrategy : RealProcessBackedStrategy(), DebuggerStrategy 
         fun logError(message: String) = logger.log(name, message, Console.MessageType.Error)
         val executableName = extraParameters["executable"]
             ?: throw IllegalArgumentException("extra configuration did not provide an executable")
-        val scriptPath = extraParameters["script"]
+        val scriptPathRelative = extraParameters["script"]
             ?: throw IllegalArgumentException("extra configuration did not provide a script to launch")
+        val scriptPath =
+            (Path.of(strategyContext.languageDistributionPath).parent / Path.of(scriptPathRelative)).toRealPath()
         this.extraParameters = extraParameters
         this.strategyContext = strategyContext
         try {
             val command = buildCommand(
                 executableName = executableName,
-                scriptToLaunch = scriptPath,
+                scriptToLaunch = scriptPath.absolutePathString(),
                 mode = DEBUG_COMMAND,
                 projectName = strategyContext.projectName,
                 projectRoot = strategyContext.projectRoot,

@@ -89,6 +89,7 @@ object NPIDE {
             console.runProcess(builder, "build")
         } catch (e: Exception) {
             logError(e.stackTraceToString())
+            e.printStackTrace()
         }
     }
 
@@ -105,6 +106,7 @@ object NPIDE {
             console.runProcess(runner, "run")
         } catch (e: Exception) {
             logError(e.stackTraceToString())
+            e.printStackTrace()
         }
     }
 
@@ -123,6 +125,7 @@ object NPIDE {
             console.runProcess(debugger, "debug")
         } catch (e: Exception) {
             logError(e.stackTraceToString())
+            e.printStackTrace()
         }
     }
 
@@ -134,6 +137,7 @@ object NPIDE {
             debugger.step()
         } catch (e: Exception) {
             logError(e.stackTraceToString())
+            e.printStackTrace()
         }
     }
 
@@ -145,6 +149,7 @@ object NPIDE {
             debugger.cont()
         } catch (e: Exception) {
             logError(e.stackTraceToString())
+            e.printStackTrace()
         }
     }
 }
