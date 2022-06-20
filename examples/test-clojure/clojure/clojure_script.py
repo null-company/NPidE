@@ -27,6 +27,7 @@ def check_arguments(project_dir, files, entry_point):
     return
 
 def check_lein():
+    return
     subprocess.run(["lein version"], stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr, shell=True)
     if not sys.stdout and sys.stderr:
         raise Exception(f"Leiningen does not exist!")
