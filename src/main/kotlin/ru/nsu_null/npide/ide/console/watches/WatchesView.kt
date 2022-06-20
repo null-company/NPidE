@@ -17,6 +17,7 @@ import ru.nsu_null.npide.ide.codeviewer.GitBranchTellerView
 import ru.nsu_null.npide.ide.common.AppTheme
 import ru.nsu_null.npide.ide.console.Console
 import ru.nsu_null.npide.ide.console.processStatusView
+import ru.nsu_null.npide.parseLocals
 
 @Composable
 fun WatchesView(
@@ -42,12 +43,18 @@ fun WatchesView(
             }
             Divider(Modifier.padding(0.dp, 15.dp))
             Column(Modifier.fillMaxSize()) {
-                val watchesRegex = Regex("([^= ]*)=([^= ]*)")
+//                val watchesRegex = Regex("([^= ]*)=([^= ]*)")
 
-                val lastLinesN = 2
+                val lastLinesN = 3
                 val lastLines = console.content.takeLast(lastLinesN).map { it.text }.reduceRight(String::plus)
 
-                val res = watchesRegex.findAll(lastLines).map { it.value }.reduceOrNull { acc, s -> "$acc,$s" }
+//                val res = watchesRegex.findAll(lastLines).map { it.value }.reduceOrNull { acc, s -> "$acc,$s" }
+
+                val vars = try {
+                    parseLocals(lastLines)
+                } catch (e: Exception) {
+                    mapOf()
+                }
 
                 Box(
                     Modifier
@@ -55,7 +62,9 @@ fun WatchesView(
                         .fillMaxWidth()
                         .background(AppTheme.colors.backgroundDark.copy(alpha = 0.5f))
                 ) {
-                    Text(res ?: "N/a", modifier = Modifier.padding(3.dp))
+                    for ((k, v) in vars) {
+                        Text("$k = $v", modifier = Modifier.padding(3.dp))
+                    }
                 }
                 Spacer(Modifier.padding(2.dp))
                 GitBranchTellerView(Modifier.weight(0.2f))
