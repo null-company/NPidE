@@ -6,7 +6,7 @@ runStrategy:
     extraParameters: {executable: "python", script: "clojure_script.py"}
 debugStrategy:
     strategyClass: "ru.nsu_null.npide.ide.projectstrategies.defaults.delegators.DebuggerDelegatorStrategy"
-    extraParameters: {executable: "python", script: "clojure_script.py"}
+    extraParameters: {executable: "python", script: "clojure_script.py", "continue":"(c)"}
 grammarConfigs:
     - sourceFileExtension: "clj"
       grammar: "grammar/clj.g4"
