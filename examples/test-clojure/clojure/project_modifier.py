@@ -1,19 +1,10 @@
 import shutil
 import os.path
 import clojure_bp_modifier
-
+import json
 
 def parse_bps(bps_str):
-    breakpoints_str = bps_str
-    breakpoint_files = breakpoints_str.split(';')
-    breakpoint_map = {}
-    for i in breakpoint_files:
-        if '::' not in i:
-            continue
-        bp_file, bp_list_str = i.split('::')
-        bp_file: str
-        breakpoint_map[bp_file.rstrip()] = [int(j) for j in bp_list_str.split(',')]
-    return breakpoint_map
+    return json.loads(bps_str)
 
 
 def change_bps_paths(bps, project_dir):
