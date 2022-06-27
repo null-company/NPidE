@@ -20,16 +20,17 @@
     </a>
 </p>
 <p align="center">
-  <a href="#❔-why-npide">Why NPidE?</a> •
-  <a href="#📙-supported-languages">Supported languages</a> •
-  <a href="#⚙️-installation">Installation</a> •
-  <a href="#🔢-functionality">Functionality</a> •
-  <a href="#➕-how-to-add-new-language">How to add new language?</a> •
-  <a href="#🔧-architecture">Architecture</a> •
-  <a href="#⚖️-license">License</a> •
-  <a href="#📕-authors">Authors</a> •
-  <a href="#🏥-support">Support</a> •
-  <a href="#📆-plans">Plans</a>
+  <a href="#-why-npide">Why NPidE?</a> •
+  <a href="#-supported-languages">Supported languages</a> •
+  <a href="#%EF%B8%8F-installation">Installation</a> •
+  <a href="#-how-to-create-project-and-buildrundebug-it">How to create project and build/run/debug it</a> •
+  <a href="#-functionality">Functionality</a> •
+  <a href="#-how-to-add-new-language">How to add new language?</a> •
+  <a href="#-architecture">Architecture</a> •
+  <a href="#%EF%B8%8F-license">License</a> •
+  <a href="#-authors">Authors</a> •
+  <a href="#-support">Support</a> •
+  <a href="#-plans">Plans</a>
 
 </p>
 
@@ -39,9 +40,12 @@ The main feature of this IDE is its customizability. You can add supported langu
 # 📙 Supported languages
 ![AssemblyScript](https://img.shields.io/static/v1?style=for-the-badge&message=Cocas%20Assembly&color=007AAC&logo=AssemblyScript&logoColor=FFFFFF&label=)
 ![Clojure](https://img.shields.io/static/v1?style=for-the-badge&message=Clojure&color=5881D8&logo=Clojure&logoColor=FFFFFF&label=)
+
+You can look at the languages in [this repo](https://github.com/nsu-null/npide-langs)
+
 # ⚙️ Installation
 
-1. Clone repository
+1. Clone repository OR you can just download NPidE from [release page](https://github.com/nsu-null/NPidE/releases)
     ```console
     git clone https://github.com/nsu-null/NPidE
     ```
@@ -53,8 +57,15 @@ The main feature of this IDE is its customizability. You can add supported langu
    ```console
    java -jar path/to/NPidE-<version>.jar
    ```
+   
+# 🏭 How to create project and build/run/debug it
 
-  OR you can just download NPidE fron release page
+1. Open NPidE then click the button "Add new project" and choose project directory
+2. Download language package from [repo](https://github.com/nsu-null/npide-langs) and locate it(recommend to place it in the root of the project)
+3. Click the buttons "Menu" -> "Config" and write project name, choose configuration file of language - LanguageDistributionInfo.yaml and choose grammar and syntax highlighting files
+4. Write your code in our IDE(you can create/remove/rename/.. directories, files)
+5. Again click the buttons "Menu" -> "Config" and write entry point/main class and add all the project files
+6. Now you can close it and click the buttons "Build"/"Run"/"Debug" create breakpoints ans so on
 
 # 🔢 Functionality
 * Create/remove projects
@@ -68,7 +79,14 @@ The main feature of this IDE is its customizability. You can add supported langu
 * Terminal window in NPidE
 
 # ➕ How to add new language?
-simple
+To fully implement the language, you need:
+- everything that is for a specific language (debugger, compiler ..)
+- the principal way to let the IDE know about the compiler/debugger/.. is to inherit from the interface and specify it in the language config. But there is also an existing implementation that delegates to another program (for example, a Python script or any other language), passing all information about the project to it.
+- language grammar file (g4)
+- language syntax highlighting file (json)
+- configuration file - LanguageDistributionInfo.yaml (you can find example of config file [here](https://github.com/nsu-null/npide-langs/blob/main/clojure/LanguageDistributionInfo.yaml))
+
+And then you can create PR to this [repo](https://github.com/nsu-null/npide-langs) :)
 
 # 🔧 Architecture
 
@@ -88,13 +106,13 @@ simple
 ### <a href="https://github.com/nsu-null/NPidE/tree/main/src/main/kotlin/ru/nsu_null/npide/ide/buttonsbar">🖱 ButtonsBar</a>
   - ButtonsBar - responsible for drawing bar for buttons 
   - ButtonActions - responsible for handling button clicks
+  - Calls NPidE's methodsto attach strategies (build/run/debug) to console
 ### <a href="https://github.com/nsu-null/NPidE/tree/main/src/main/kotlin/ru/nsu_null/npide/ide/menubar">🎛 MenuBar</a>
   - MenuBar - responsible for drawing bar for menu buttons(top panel) 
   - ConfigDialog - responsible for handling menu button clicks and open dialog for project configuration
 ### <a href="https://github.com/nsu-null/NPidE/tree/main/src/main/kotlin/ru/nsu_null/npide/ide/config">🔗 Config</a>
   responsible for storing and reading configuration from YAML-file
   - Config Manager -  manage project configuration file 
-  - Config Parser - parse config file with configuration about build/run/debug
   - LanguageProviders
 ### <a href="https://github.com/nsu-null/NPidE/tree/main/src/main/kotlin/ru/nsu_null/npide/ide/filetree">📁 FileTree</a>
   - FileDialog
@@ -107,6 +125,7 @@ simple
   - DiskHomeDirectoryRepositoryManager - manage project files on disk
 ### <a href="https://github.com/nsu-null/NPidE/tree/main/src/main/kotlin/ru/nsu_null/npide/ide/breakpoints">🔴 Breakpoints</a>
   - BreakpointStorage - responsible for adding/removing breakpoints
+
 
 ## Patterns
 - Singleton
